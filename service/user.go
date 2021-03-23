@@ -8,22 +8,22 @@ import (
 	"lens-locked-go/model"
 )
 
-type userService struct {
+type UserService struct {
 	db *gorm.DB
 }
 
-func New(dsn string) (*userService, error) {
+func New(dsn string) (*UserService, error) {
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
 	if err != nil {
 		return nil, err
 	}
-	return &userService{
+	return &UserService{
 		db: db,
 	}, nil
 }
 
-func (u *userService) CreateTable() error {
+func (u *UserService) CreateTable() error {
 	err := u.db.Migrator().CreateTable(&model.User{})
 
 	if err != nil {
@@ -32,7 +32,7 @@ func (u *userService) CreateTable() error {
 	return nil
 }
 
-func (u *userService) DropTable() error {
+func (u *UserService) DropTable() error {
 	err := u.db.Migrator().DropTable(&model.User{})
 
 	if err != nil {
@@ -41,11 +41,11 @@ func (u *userService) DropTable() error {
 	return nil
 }
 
-func (u *userService) Create(user *model.User) error {
+func (u *UserService) Create(user *model.User) error {
 	return u.db.Create(user).Error
 }
 
-func (u *userService) Read(field string, value interface{}) (*model.User, error) {
+func (u *UserService) Read(field string, value interface{}) (*model.User, error) {
 	var user model.User
 
 	cond := fmt.Sprintf("%s = ?", field)
@@ -55,10 +55,10 @@ func (u *userService) Read(field string, value interface{}) (*model.User, error)
 	return &user, err
 }
 
-func (u *userService) Update(user *model.User) error {
+func (u *UserService) Update(user *model.User) error {
 	return u.db.Save(user).Error
 }
 
-func (u *userService) Delete(id uuid.UUID) error {
+func (u *UserService) Delete(id uuid.UUID) error {
 	return u.db.Delete(&model.User{}, id).Error
 }
