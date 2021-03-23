@@ -23,27 +23,19 @@ func New(dsn string) (*userService, error) {
 }
 
 func (u *userService) CreateTable() error {
-	hasTable := u.db.Migrator().HasTable(&model.User{})
+	err := u.db.Migrator().CreateTable(&model.User{})
 
-	if !hasTable {
-		err := u.db.Migrator().CreateTable(&model.User{})
-
-		if err != nil {
-			return err
-		}
+	if err != nil {
+		return err
 	}
 	return nil
 }
 
 func (u *userService) DropTable() error {
-	hasTable := u.db.Migrator().HasTable(&model.User{})
+	err := u.db.Migrator().DropTable(&model.User{})
 
-	if hasTable {
-		err := u.db.Migrator().DropTable(&model.User{})
-
-		if err != nil {
-			return err
-		}
+	if err != nil {
+		return err
 	}
 	return nil
 }
