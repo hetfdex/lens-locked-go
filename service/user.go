@@ -46,13 +46,13 @@ func (u *UserService) Create(user *model.User) error {
 }
 
 func (u *UserService) Read(field string, value interface{}) (*model.User, error) {
-	var user model.User
+	user := &model.User{}
 
 	cond := fmt.Sprintf("%s = ?", field)
 
-	err := u.db.First(&user, cond, value).Error
+	err := u.db.First(user, cond, value).Error
 
-	return &user, err
+	return user, err
 }
 
 func (u *UserService) Update(user *model.User) error {
