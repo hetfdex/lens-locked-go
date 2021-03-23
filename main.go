@@ -37,7 +37,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	result, err := us.ById(u.ID)
+	result, err := us.Read("id", u.ID)
 
 	if err != nil {
 		panic(err)
@@ -48,7 +48,7 @@ func main() {
 
 	err = us.Update(u)
 
-	result, err = us.ByEmail(u.Email)
+	result, err = us.Read("email", u.Email)
 
 	if err != nil {
 		panic(err)
@@ -60,11 +60,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	_, err = us.ById(u.ID)
-
-	if err != nil {
-		fmt.Println(err.Error())
-	}
+	_, _ = us.Read("id", u.ID)
 
 	homeController := controller.NewHomeController()
 	registerController := controller.NewRegisterController()
