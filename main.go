@@ -55,6 +55,17 @@ func main() {
 	}
 	fmt.Println(result.ID, result.Name, result.Email)
 
+	err = us.Delete(u.ID)
+
+	if err != nil {
+		panic(err)
+	}
+	_, err = us.ById(u.ID)
+
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
 	homeController := controller.NewHomeController()
 	registerController := controller.NewRegisterController()
 
