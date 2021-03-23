@@ -1,7 +1,6 @@
 package service
 
 import (
-	"errors"
 	"github.com/gofrs/uuid"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -70,8 +69,5 @@ func (u *userService) ByEmail(email string) (*model.User, error) {
 
 	err := u.db.First(&user, "email = ?", email).Error
 
-	if err == gorm.ErrRecordNotFound {
-		err = errors.New("no user found")
-	}
 	return &user, err
 }
