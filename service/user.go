@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"github.com/gofrs/uuid"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -44,18 +45,12 @@ func (u *userService) Create(user *model.User) error {
 	return u.db.Create(user).Error
 }
 
-func (u *userService) ById(id uuid.UUID) (*model.User, error) {
+func (u *userService) Read(field string, value interface{}) (*model.User, error) {
 	var user model.User
 
-	err := u.db.First(&user, "id = ?", id).Error
+	cond := fmt.Sprintf("%s = ?", field)
 
-	return &user, err
-}
-
-func (u *userService) ByEmail(email string) (*model.User, error) {
-	var user model.User
-
-	err := u.db.First(&user, "email = ?", email).Error
+	err := u.db.First(&user, cond, value).Error
 
 	return &user, err
 }
