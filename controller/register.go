@@ -29,10 +29,7 @@ func (c *registerController) Register(w http.ResponseWriter, req *http.Request) 
 
 		return
 	}
-	user := &model.User{
-		Name:  registration.Name,
-		Email: registration.Email,
-	}
+	user := registration.User()
 
 	err = c.Create(user)
 
@@ -41,4 +38,5 @@ func (c *registerController) Register(w http.ResponseWriter, req *http.Request) 
 	}
 	_, _ = fmt.Fprintln(w, user.Name)
 	_, _ = fmt.Fprintln(w, user.Email)
+	_, _ = fmt.Fprintln(w, user.PasswordHash)
 }
