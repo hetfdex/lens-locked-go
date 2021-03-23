@@ -44,10 +44,6 @@ func (u *userService) Create(user *model.User) error {
 	return u.db.Create(user).Error
 }
 
-func (u *userService) Update(user *model.User) error {
-	return u.db.Save(user).Error
-}
-
 func (u *userService) ById(id uuid.UUID) (*model.User, error) {
 	var user model.User
 
@@ -62,4 +58,12 @@ func (u *userService) ByEmail(email string) (*model.User, error) {
 	err := u.db.First(&user, "email = ?", email).Error
 
 	return &user, err
+}
+
+func (u *userService) Update(user *model.User) error {
+	return u.db.Save(user).Error
+}
+
+func (u *userService) Delete(id uuid.UUID) error {
+	return u.db.Delete(&model.User{}, id).Error
 }
