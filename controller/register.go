@@ -17,12 +17,12 @@ func NewRegisterController() *registerController {
 }
 
 func (c *registerController) Register(w http.ResponseWriter, req *http.Request) {
-	form := &model.Register{}
+	registration := &model.Register{}
 
-	err := parseForm(req, form)
+	err := parseForm(req, registration)
 
 	if err != nil {
 		panic(err)
 	}
-	_, _ = fmt.Fprintln(w, *form)
+	_, _ = fmt.Fprintln(w, *registration)
 }
