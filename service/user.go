@@ -53,17 +53,18 @@ func (us *UserService) RegisterUser(user *model.User) *model.ApiError {
 	if err != nil {
 		return err
 	}
-	err = generateToken(user)
+	token, err := generateToken()
 
 	if err != nil {
 		return err
 	}
-	h, apiErr := generateTokenHash(us.hasher, user.Token)
+	user.Token = token
+	tokenHash, err := generateTokenHash(us.hasher, user.Token)
 
-	if apiErr != nil {
-		return apiErr
+	if err != nil {
+		return err
 	}
-	user.TokenHash = h
+	user.TokenHash = tokenHash
 
 	err = us.userRepository.Create(user)
 
@@ -98,11 +99,13 @@ func (us *UserService) GetUserByTokenHash(tokenHash string) (*model.User, *model
 }
 
 func (us *UserService) UpdateUserToken(user *model.User) *model.ApiError {
-	err := generateToken(user)
+	token, err := generateToken()
 
 	if err != nil {
 		return err
 	}
+	user.Token = token
+
 	tokenHash, err := generateTokenHash(us.hasher, user.Token)
 
 	if err != nil {

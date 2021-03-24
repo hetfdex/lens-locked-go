@@ -2,6 +2,8 @@ package main
 
 import (
 	"github.com/gorilla/mux"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 	"lens-locked-go/config"
 	"lens-locked-go/controller"
 	"lens-locked-go/hash"
@@ -11,7 +13,12 @@ import (
 )
 
 func main() {
-	ur, apiErr := repository.NewUserRepository(config.Dsn)
+	db, err := gorm.Open(postgres.Open(config.Dsn), &gorm.Config{})
+
+	if err != nil {
+		panic(err)
+	}
+	ur, apiErr := repository.NewUserRepository(db)
 
 	resetDatabase(ur)
 
@@ -27,7 +34,7 @@ func main() {
 
 	configureRouter(us, r)
 
-	err := http.ListenAndServe("localhost:8080", r)
+	err = http.ListenAndServe("localhost:8080", r)
 
 	if err != nil {
 		panic(err)

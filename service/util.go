@@ -11,22 +11,22 @@ import (
 func generateFromPassword(user *model.User) *model.ApiError {
 	pw := []byte(user.Password + config.Pepper)
 
-	h, err := bcrypt.GenerateFromPassword(pw, bcrypt.DefaultCost)
+	pwHash, err := bcrypt.GenerateFromPassword(pw, bcrypt.DefaultCost)
 
 	if err != nil {
 		return model.NewInternalServerApiError(err.Error())
 	}
 	user.Password = ""
-	user.PasswordHash = string(h)
+	user.PasswordHash = string(pwHash)
 
 	return nil
 }
 
 func compareHashAndPassword(user *model.User, password string) *model.ApiError {
-	h := []byte(user.PasswordHash)
+	pwHash := []byte(user.PasswordHash)
 	pw := []byte(password + config.Pepper)
 
-	err := bcrypt.CompareHashAndPassword(h, pw)
+	err := bcrypt.CompareHashAndPassword(pwHash, pw)
 
 	if err != nil {
 		if err == bcrypt.ErrMismatchedHashAndPassword {
@@ -37,22 +37,20 @@ func compareHashAndPassword(user *model.User, password string) *model.ApiError {
 	return nil
 }
 
-func generateToken(user *model.User) *model.ApiError {
-	t, err := rand.GenerateTokenString()
-
-	if err != nil {
-		return err
-	}
-	user.Token = t
-
-	return nil
-}
-
-func generateTokenHash(hs *hash.Hasher, token string) (string, *model.ApiError) {
-	h, err := hs.GenerateHash(token)
+func generateToken() (string, *model.ApiError) {
+	token, err := rand.GenerateTokenString()
 
 	if err != nil {
 		return "", err
 	}
-	return h, nil
+	return token, nil
+}
+
+func generateTokenHash(hs *hash.Hasher, token string) (string, *model.ApiError) {
+	tokenHash, err := hs.GenerateHash(token)
+
+	if err != nil {
+		return "", err
+	}
+	return tokenHash, nil
 }
