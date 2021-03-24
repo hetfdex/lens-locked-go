@@ -9,6 +9,8 @@ import (
 	"lens-locked-go/model"
 )
 
+const pepper = "6Sk65RHhGW7S4qnVPV7m"
+
 type UserService struct {
 	db *gorm.DB
 }
@@ -43,7 +45,9 @@ func (u *UserService) DropTable() error {
 }
 
 func (u *UserService) Create(user *model.User) error {
-	hash, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	bytes := []byte(user.Password + pepper)
+
+	hash, err := bcrypt.GenerateFromPassword(bytes, bcrypt.DefaultCost)
 
 	if err != nil {
 		return err
