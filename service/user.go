@@ -82,6 +82,13 @@ func (u *UserService) AuthenticateWithToken(token string) (*model.User, *model.A
 func (u *UserService) Create(user *model.User) *model.ApiError {
 	apiErr := generateFromPassword(user)
 
+	if user.Token == "" {
+		apiErr = generateToken(user)
+
+		if apiErr != nil {
+			return apiErr
+		}
+	}
 	apiErr = generateTokenHash(u.hasher, user)
 
 	if apiErr != nil {
@@ -113,13 +120,6 @@ func (u *UserService) Read(field string, value interface{}) (*model.User, *model
 }
 
 func (u *UserService) Update(user *model.User) *model.ApiError {
-	//TODO: apiErr := generateFromPassword(user)
-
-	apiErr := generateTokenHash(u.hasher, user)
-
-	if apiErr != nil {
-		return apiErr
-	}
 	err := u.db.Save(user).Error
 
 	if err != nil {
