@@ -8,19 +8,19 @@ import (
 	"lens-locked-go/model"
 )
 
-type hasher struct {
+type Hasher struct {
 	hash.Hash
 }
 
-func New(key string) *hasher {
+func New(key string) *Hasher {
 	h := hmac.New(sha256.New, []byte(key))
 
-	return &hasher{
+	return &Hasher{
 		h,
 	}
 }
 
-func (h *hasher) GenerateHash(input string) (string, *model.ApiError) {
+func (h *Hasher) GenerateHash(input string) (string, *model.ApiError) {
 	h.Reset()
 
 	_, err := h.Write([]byte(input))
