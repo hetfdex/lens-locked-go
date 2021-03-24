@@ -15,11 +15,11 @@ type UserService struct {
 	hasher *hash.Hasher
 }
 
-func New(dsn string) (*UserService, error) {
+func New(dsn string) (*UserService, *model.ApiError) {
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
 	if err != nil {
-		return nil, err
+		return nil, model.NewInternalServerApiError(err.Error())
 	}
 	hasher := hash.New(config.HasherKey)
 
@@ -64,6 +64,8 @@ func (u *UserService) Authenticate(login *model.LoginForm) (*model.User, *model.
 func (u *UserService) Create(user *model.User) *model.ApiError {
 	apiErr := generateFromPassword(user)
 
+	apiErr = generateRememberHash(u.hasher, user)
+
 	if apiErr != nil {
 		return apiErr
 	}
@@ -76,6 +78,9 @@ func (u *UserService) Create(user *model.User) *model.ApiError {
 }
 
 func (u *UserService) Read(field string, value interface{}) (*model.User, *model.ApiError) {
+	if field == "" {
+		return nil, model.NewInternalServerApiError("string must not be empty")
+	}
 	user := &model.User{}
 
 	cond := fmt.Sprintf("%s = ?", field)
@@ -90,6 +95,13 @@ func (u *UserService) Read(field string, value interface{}) (*model.User, *model
 }
 
 func (u *UserService) Update(user *model.User) *model.ApiError {
+	//TODO: apiErr := generateFromPassword(user)
+
+	apiErr := generateRememberHash(u.hasher, user)
+
+	if apiErr != nil {
+		return apiErr
+	}
 	err := u.db.Save(user).Error
 
 	if err != nil {
