@@ -7,11 +7,8 @@ import (
 	"lens-locked-go/model"
 )
 
-func GenerateString(size uint) (string, *model.ApiError) {
-	if size == 0 {
-		size = config.ByteSliceSize
-	}
-	return generateString(size)
+func GenerateString() (string, *model.ApiError) {
+	return generateString(config.ByteSliceSize)
 }
 
 func generateString(size uint) (string, *model.ApiError) {

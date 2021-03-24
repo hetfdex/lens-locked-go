@@ -38,7 +38,7 @@ func compareHashAndPassword(user *model.User, password string) *model.ApiError {
 }
 
 func generateToken(user *model.User) *model.ApiError {
-	t, err := rand.GenerateString(0)
+	t, err := rand.GenerateString()
 
 	if err != nil {
 		return err
