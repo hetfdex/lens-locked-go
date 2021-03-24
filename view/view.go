@@ -1,6 +1,7 @@
 package view
 
 import (
+	"errors"
 	"html/template"
 	"lens-locked-go/model"
 	"net/http"
@@ -11,6 +12,9 @@ type View struct {
 }
 
 func New(filename string) *View {
+	if filename == "" {
+		panic(errors.New("string must not be empty"))
+	}
 	t, err := template.ParseFiles("view/base.gohtml", filename)
 
 	if err != nil {
