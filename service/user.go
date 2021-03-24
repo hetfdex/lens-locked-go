@@ -5,11 +5,14 @@ import (
 	"github.com/gofrs/uuid"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"lens-locked-go/config"
+	"lens-locked-go/hash"
 	"lens-locked-go/model"
 )
 
 type UserService struct {
-	db *gorm.DB
+	db     *gorm.DB
+	hasher *hash.Hasher
 }
 
 func New(dsn string) (*UserService, error) {
@@ -18,8 +21,11 @@ func New(dsn string) (*UserService, error) {
 	if err != nil {
 		return nil, err
 	}
+	hasher := hash.New(config.HasherKey)
+
 	return &UserService{
-		db: db,
+		db:     db,
+		hasher: hasher,
 	}, nil
 }
 
