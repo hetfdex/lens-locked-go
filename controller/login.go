@@ -8,17 +8,15 @@ import (
 
 type loginController struct {
 	*controller
-	*service.UserService
 }
 
 func NewLoginController(us *service.UserService) *loginController {
 	return &loginController{
-		newController("/login", "view/login.gohtml"),
-		us,
+		newController("/login", "view/login.gohtml", us),
 	}
 }
 
-func (c *loginController) Login(w http.ResponseWriter, req *http.Request) {
+func (c *loginController) Post(w http.ResponseWriter, req *http.Request) {
 	login := &model.LoginForm{}
 
 	err := parseForm(req, login)
@@ -35,14 +33,14 @@ func (c *loginController) Login(w http.ResponseWriter, req *http.Request) {
 
 		return
 	}
-	user, err := c.AuthenticateWithPassword(login)
+	user, err := c.userService.AuthenticateWithPassword(login)
 
 	if err != nil {
 		http.Error(w, err.Message, err.StatusCode)
 
 		return
 	}
-	err = c.UpdateToken(user)
+	err = c.userService.UpdateToken(user)
 
 	if err != nil {
 		http.Error(w, err.Message, err.StatusCode)

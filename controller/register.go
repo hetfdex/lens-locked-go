@@ -8,17 +8,15 @@ import (
 
 type registerController struct {
 	*controller
-	*service.UserService
 }
 
 func NewRegisterController(us *service.UserService) *registerController {
 	return &registerController{
-		newController("/register", "view/register.gohtml"),
-		us,
+		newController("/register", "view/register.gohtml", us),
 	}
 }
 
-func (c *registerController) Register(w http.ResponseWriter, req *http.Request) {
+func (c *registerController) Post(w http.ResponseWriter, req *http.Request) {
 	register := &model.RegisterForm{}
 
 	err := parseForm(req, register)
@@ -37,7 +35,7 @@ func (c *registerController) Register(w http.ResponseWriter, req *http.Request) 
 	}
 	user := register.User()
 
-	err = c.Create(user)
+	err = c.userService.Create(user)
 
 	if err != nil {
 		http.Error(w, err.Message, err.StatusCode)
