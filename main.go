@@ -9,10 +9,10 @@ import (
 )
 
 func main() {
-	us, err := service.New(config.Dsn)
+	us, apiErr := service.New(config.Dsn)
 
-	if err != nil {
-		panic(err)
+	if apiErr != nil {
+		panic(apiErr)
 	}
 	cleanDatabase(us)
 
@@ -20,7 +20,7 @@ func main() {
 
 	configureRouter(us, r)
 
-	err = http.ListenAndServe("localhost:8080", r)
+	err := http.ListenAndServe("localhost:8080", r)
 
 	if err != nil {
 		panic(err)
