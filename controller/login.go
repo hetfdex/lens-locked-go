@@ -33,14 +33,14 @@ func (c *loginController) Post(w http.ResponseWriter, req *http.Request) {
 
 		return
 	}
-	user, err := c.userService.AuthenticateWithPassword(login)
+	user, err := c.userService.LoginWithPassword(login)
 
 	if err != nil {
 		http.Error(w, err.Message, err.StatusCode)
 
 		return
 	}
-	err = c.userService.UpdateToken(user)
+	err = c.userService.UpdateUserToken(user)
 
 	if err != nil {
 		http.Error(w, err.Message, err.StatusCode)

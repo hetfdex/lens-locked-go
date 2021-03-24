@@ -3,7 +3,6 @@ package controller
 import (
 	"fmt"
 	"lens-locked-go/config"
-	"lens-locked-go/model"
 	"lens-locked-go/service"
 	"lens-locked-go/view"
 	"net/http"
@@ -28,12 +27,7 @@ func (c *controller) Get(w http.ResponseWriter, req *http.Request) {
 
 		return
 	}
-
-	user := &model.User{
-		Token: cookie.Value,
-	}
-
-	user, apiErr = c.userService.AuthenticateWithToken(user)
+	user, apiErr := c.userService.LoginWithToken(cookie.Value)
 
 	if apiErr != nil {
 		http.Error(w, apiErr.Message, apiErr.StatusCode)

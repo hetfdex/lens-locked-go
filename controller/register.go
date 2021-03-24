@@ -35,7 +35,7 @@ func (c *registerController) Post(w http.ResponseWriter, req *http.Request) {
 	}
 	user := register.User()
 
-	err = c.userService.Create(user)
+	err = c.userService.RegisterUser(user)
 
 	if err != nil {
 		http.Error(w, err.Message, err.StatusCode)
