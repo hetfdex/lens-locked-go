@@ -9,7 +9,7 @@ import (
 )
 
 type Hasher struct {
-	hash.Hash
+	h hash.Hash
 }
 
 func New(key string) *Hasher {
@@ -21,14 +21,17 @@ func New(key string) *Hasher {
 }
 
 func (h *Hasher) GenerateHash(input string) (string, *model.ApiError) {
-	h.Reset()
+	if input == "" {
+		return "", model.NewInternalServerApiError("string must not be empty")
+	}
+	h.h.Reset()
 
-	_, err := h.Write([]byte(input))
+	_, err := h.h.Write([]byte(input))
 
 	if err != nil {
 		return "", model.NewInternalServerApiError(err.Error())
 	}
-	b := h.Sum(nil)
+	b := h.h.Sum(nil)
 
 	return base64.URLEncoding.EncodeToString(b), nil
 }
