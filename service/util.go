@@ -36,14 +36,14 @@ func compareHashAndPassword(user *model.User, password string) *model.ApiError {
 	return nil
 }
 
-func generateRememberHash(hasher *hash.Hasher, user *model.User) *model.ApiError {
-	h, err := hasher.GenerateHash(user.Remember)
+func generateTokenHash(hasher *hash.Hasher, user *model.User) *model.ApiError {
+	h, err := hasher.GenerateHash(user.Token)
 
 	if err != nil {
 		return err
 	}
-	user.Remember = ""
-	user.RememberHash = h
+	user.Token = ""
+	user.TokenHash = h
 
 	return nil
 }
