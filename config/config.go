@@ -15,3 +15,5 @@ const Pepper = "6Sk65RHhGW7S4qnVPV7m"
 const ByteSliceSize = 32
 
 const HasherKey = "yzzmGPkAA9FTmbtzz9jB"
+
+const CookieName = "login_token"
