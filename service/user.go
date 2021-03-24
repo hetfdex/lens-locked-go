@@ -3,7 +3,6 @@ package service
 import (
 	"fmt"
 	"github.com/gofrs/uuid"
-	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"lens-locked-go/model"
@@ -45,16 +44,11 @@ func (u *UserService) DropTable() error {
 }
 
 func (u *UserService) Create(user *model.User) error {
-	bytes := []byte(user.Password + pepper)
-
-	hash, err := bcrypt.GenerateFromPassword(bytes, bcrypt.DefaultCost)
+	err := generatePasswordHash(user)
 
 	if err != nil {
 		return err
 	}
-	user.Password = ""
-	user.PasswordHash = string(hash)
-
 	return u.db.Create(user).Error
 }
 
