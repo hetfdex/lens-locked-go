@@ -4,17 +4,24 @@ import (
 	"github.com/gorilla/mux"
 	"lens-locked-go/config"
 	"lens-locked-go/controller"
+	"lens-locked-go/hash"
+	"lens-locked-go/repository"
 	"lens-locked-go/service"
 	"net/http"
 )
 
 func main() {
-	us, apiErr := service.New(config.Dsn)
+	ur, apiErr := repository.NewUserRepository(config.Dsn)
+
+	resetDatabase(ur)
+
+	hs := hash.New(config.HasherKey)
+
+	us, apiErr := service.NewUserService(ur, hs)
 
 	if apiErr != nil {
 		panic(apiErr)
 	}
-	cleanDatabase(us)
 
 	r := mux.NewRouter()
 
@@ -39,7 +46,7 @@ func configureRouter(us *service.UserService, r *mux.Router) {
 	r.HandleFunc(loginController.Route, loginController.Post).Methods(http.MethodPost)
 }
 
-func cleanDatabase(us *service.UserService) {
-	_ = us.DropTable()
-	_ = us.CreateTable()
+func resetDatabase(ur *repository.UserRepository) {
+	_ = ur.DropTable()
+	_ = ur.CreateTable()
 }
