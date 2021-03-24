@@ -47,7 +47,7 @@ func (u *UserService) DropTable() *model.ApiError {
 	return nil
 }
 
-func (u *UserService) Authenticate(login *model.LoginForm) (*model.User, *model.ApiError) {
+func (u *UserService) AuthenticateWithPassword(login *model.LoginForm) (*model.User, *model.ApiError) {
 	user, err := u.Read("email", login.Email)
 
 	if err != nil {
@@ -61,10 +61,28 @@ func (u *UserService) Authenticate(login *model.LoginForm) (*model.User, *model.
 	return user, nil
 }
 
+func (u *UserService) AuthenticateWithToken(token string) (*model.User, *model.ApiError) {
+	user := &model.User{}
+
+	user.Token = token
+
+	err := generateTokenHash(u.hasher, user)
+
+	if err != nil {
+		return nil, err
+	}
+	user, err = u.Read("token_hash", user.TokenHash)
+
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
 func (u *UserService) Create(user *model.User) *model.ApiError {
 	apiErr := generateFromPassword(user)
 
-	apiErr = generateRememberHash(u.hasher, user)
+	apiErr = generateTokenHash(u.hasher, user)
 
 	if apiErr != nil {
 		return apiErr
@@ -97,7 +115,7 @@ func (u *UserService) Read(field string, value interface{}) (*model.User, *model
 func (u *UserService) Update(user *model.User) *model.ApiError {
 	//TODO: apiErr := generateFromPassword(user)
 
-	apiErr := generateRememberHash(u.hasher, user)
+	apiErr := generateTokenHash(u.hasher, user)
 
 	if apiErr != nil {
 		return apiErr
