@@ -44,7 +44,7 @@ func (c *registerController) Register(w http.ResponseWriter, req *http.Request) 
 
 		return
 	}
-	cookie := makeCookie(user.Email)
+	cookie := makeCookie(user.Token)
 
 	http.SetCookie(w, cookie)
 
