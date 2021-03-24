@@ -3,14 +3,13 @@ package rand
 import (
 	"crypto/rand"
 	"encoding/base64"
+	"lens-locked-go/config"
 	"lens-locked-go/model"
 )
 
-const byteSliceSize = 32
-
 func GenerateString(size uint) (string, *model.ApiError) {
 	if size == 0 {
-		size = byteSliceSize
+		size = config.ByteSliceSize
 	}
 	return generateString(size)
 }
