@@ -3,6 +3,7 @@ package service
 import (
 	"golang.org/x/crypto/bcrypt"
 	"lens-locked-go/config"
+	"lens-locked-go/hash"
 	"lens-locked-go/model"
 	"lens-locked-go/rand"
 )
@@ -47,13 +48,11 @@ func generateToken(user *model.User) *model.ApiError {
 	return nil
 }
 
-func generateTokenHash(us *UserService, user *model.User) *model.ApiError {
-	h, err := us.hasher.GenerateHash(user.Token)
+func generateTokenHash(hs *hash.Hasher, token string) (string, *model.ApiError) {
+	h, err := hs.GenerateHash(token)
 
 	if err != nil {
-		return err
+		return "", err
 	}
-	user.TokenHash = h
-
-	return nil
+	return h, nil
 }
