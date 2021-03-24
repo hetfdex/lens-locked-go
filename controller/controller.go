@@ -21,6 +21,6 @@ func (c *controller) Handle(w http.ResponseWriter, _ *http.Request) {
 	err := c.view.Render(w, nil)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Message, err.StatusCode)
 	}
 }

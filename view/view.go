@@ -2,6 +2,7 @@ package view
 
 import (
 	"html/template"
+	"lens-locked-go/model"
 	"net/http"
 )
 
@@ -20,8 +21,13 @@ func New(filename string) *View {
 	}
 }
 
-func (v *View) Render(w http.ResponseWriter, data interface{}) error {
+func (v *View) Render(w http.ResponseWriter, data interface{}) *model.ApiError {
 	w.Header().Set("Content-Type", "text/html")
 
-	return v.ExecuteTemplate(w, "base", data)
+	err := v.ExecuteTemplate(w, "base", data)
+
+	if err != nil {
+		return model.NewInternalServerApiError(err.Error())
+	}
+	return nil
 }

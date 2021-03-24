@@ -25,7 +25,14 @@ func (c *registerController) Register(w http.ResponseWriter, req *http.Request) 
 	err := parseForm(req, register)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Message, err.StatusCode)
+
+		return
+	}
+	if register.Name == "" || register.Email == "" || register.Password == "" {
+		err = model.NewBadRequestApiError("invalid fields")
+
+		http.Error(w, err.Message, err.StatusCode)
 
 		return
 	}
@@ -34,7 +41,9 @@ func (c *registerController) Register(w http.ResponseWriter, req *http.Request) 
 	err = c.Create(user)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Message, err.StatusCode)
+
+		return
 	}
 	_, _ = fmt.Fprintln(w, user)
 }

@@ -25,14 +25,23 @@ func (c *loginController) Login(w http.ResponseWriter, req *http.Request) {
 	err := parseForm(req, login)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Message, err.StatusCode)
+
+		return
+	}
+	if login.Email == "" || login.Password == "" {
+		err = model.NewBadRequestApiError("invalid fields")
+
+		http.Error(w, err.Message, err.StatusCode)
 
 		return
 	}
 	user, err := c.Authenticate(login)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Message, err.StatusCode)
+
+		return
 	}
 	_, _ = fmt.Fprintln(w, user)
 }
