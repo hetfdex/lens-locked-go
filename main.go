@@ -14,21 +14,32 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	_ = us.DropTable()
-	_ = us.CreateTable()
-
-	homeController := controller.NewHomeController()
-	registerController := controller.NewRegisterController(us)
+	cleanDatabase(us)
 
 	r := mux.NewRouter()
 
-	r.HandleFunc(homeController.Route, homeController.Handle)
-	r.HandleFunc(registerController.Route, registerController.Handle).Methods(http.MethodGet)
-	r.HandleFunc(registerController.Route, registerController.Register).Methods(http.MethodPost)
+	configureRoutes(us, r)
 
 	err = http.ListenAndServe("localhost:8080", r)
 
 	if err != nil {
 		panic(err)
 	}
+}
+
+func configureRoutes(us *service.UserService, r *mux.Router) {
+	homeController := controller.NewHomeController()
+	registerController := controller.NewRegisterController(us)
+	loginController := controller.NewLoginController(us)
+
+	r.HandleFunc(homeController.Route, homeController.Handle).Methods(http.MethodGet)
+	r.HandleFunc(registerController.Route, registerController.Handle).Methods(http.MethodGet)
+	r.HandleFunc(registerController.Route, registerController.Register).Methods(http.MethodPost)
+	r.HandleFunc(loginController.Route, loginController.Handle).Methods(http.MethodGet)
+	r.HandleFunc(loginController.Route, loginController.Login).Methods(http.MethodPost)
+}
+
+func cleanDatabase(us *service.UserService) {
+	_ = us.DropTable()
+	_ = us.CreateTable()
 }
