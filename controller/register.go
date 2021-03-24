@@ -20,16 +20,16 @@ func NewRegisterController(us *service.UserService) *registerController {
 }
 
 func (c *registerController) Register(w http.ResponseWriter, req *http.Request) {
-	registration := &model.Register{}
+	register := &model.RegisterForm{}
 
-	err := parseForm(req, registration)
+	err := parseForm(req, register)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 
 		return
 	}
-	user := registration.User()
+	user := register.User()
 
 	err = c.Create(user)
 
