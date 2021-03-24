@@ -1,54 +1,26 @@
 package service
 
 import (
-	"fmt"
 	"github.com/gofrs/uuid"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
-	"lens-locked-go/config"
 	"lens-locked-go/hash"
 	"lens-locked-go/model"
+	"lens-locked-go/repository"
 )
 
 type UserService struct {
-	db     *gorm.DB
-	hasher *hash.Hasher
+	userRepository *repository.UserRepository
+	hasher         *hash.Hasher
 }
 
-func New(dsn string) (*UserService, *model.ApiError) {
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-
-	if err != nil {
-		return nil, model.NewInternalServerApiError(err.Error())
-	}
-	hasher := hash.New(config.HasherKey)
-
+func NewUserService(ur *repository.UserRepository, hs *hash.Hasher) (*UserService, *model.ApiError) {
 	return &UserService{
-		db:     db,
-		hasher: hasher,
+		userRepository: ur,
+		hasher:         hs,
 	}, nil
 }
 
-func (us *UserService) CreateTable() *model.ApiError {
-	err := us.db.Migrator().CreateTable(&model.User{})
-
-	if err != nil {
-		return model.NewInternalServerApiError(err.Error())
-	}
-	return nil
-}
-
-func (us *UserService) DropTable() *model.ApiError {
-	err := us.db.Migrator().DropTable(&model.User{})
-
-	if err != nil {
-		return model.NewInternalServerApiError(err.Error())
-	}
-	return nil
-}
-
-func (us *UserService) AuthenticateWithPassword(login *model.LoginForm) (*model.User, *model.ApiError) {
-	user, err := us.Read("email", login.Email)
+func (us *UserService) LoginWithPassword(login *model.LoginForm) (*model.User, *model.ApiError) {
+	user, err := us.GetUserByEmail(login.Email)
 
 	if err != nil {
 		return nil, err
@@ -61,13 +33,13 @@ func (us *UserService) AuthenticateWithPassword(login *model.LoginForm) (*model.
 	return user, nil
 }
 
-func (us *UserService) AuthenticateWithToken(user *model.User) (*model.User, *model.ApiError) {
-	err := generateTokenHash(us, user)
+func (us *UserService) LoginWithToken(token string) (*model.User, *model.ApiError) {
+	tokenHash, err := generateTokenHash(us.hasher, token)
 
 	if err != nil {
 		return nil, err
 	}
-	user, err = us.Read("token_hash", user.TokenHash)
+	user, err := us.GetUserByTokenHash(tokenHash)
 
 	if err != nil {
 		return nil, err
@@ -75,18 +47,70 @@ func (us *UserService) AuthenticateWithToken(user *model.User) (*model.User, *mo
 	return user, nil
 }
 
-func (us *UserService) UpdateToken(user *model.User) *model.ApiError {
+func (us *UserService) RegisterUser(user *model.User) *model.ApiError {
+	err := generateFromPassword(user)
+
+	if err != nil {
+		return err
+	}
+	err = generateToken(user)
+
+	if err != nil {
+		return err
+	}
+	h, apiErr := generateTokenHash(us.hasher, user.Token)
+
+	if apiErr != nil {
+		return apiErr
+	}
+	user.TokenHash = h
+
+	err = us.userRepository.Create(user)
+
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (us *UserService) GetUserByEmail(email string) (*model.User, *model.ApiError) {
+	if email == "" {
+		return nil, model.NewInternalServerApiError("string must not be empty")
+	}
+	user, err := us.userRepository.Read("email", email)
+
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
+func (us *UserService) GetUserByTokenHash(tokenHash string) (*model.User, *model.ApiError) {
+	if tokenHash == "" {
+		return nil, model.NewInternalServerApiError("string must not be empty")
+	}
+	user, err := us.userRepository.Read("token_hash", tokenHash)
+
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
+func (us *UserService) UpdateUserToken(user *model.User) *model.ApiError {
 	err := generateToken(user)
 
 	if err != nil {
 		return err
 	}
-	err = generateTokenHash(us, user)
+	tokenHash, err := generateTokenHash(us.hasher, user.Token)
 
 	if err != nil {
 		return err
 	}
-	err = us.Update(user)
+	user.TokenHash = tokenHash
+
+	err = us.UpdateUser(user)
 
 	if err != nil {
 		return err
@@ -94,61 +118,20 @@ func (us *UserService) UpdateToken(user *model.User) *model.ApiError {
 	return nil
 }
 
-func (us *UserService) Create(user *model.User) *model.ApiError {
-	apiErr := generateFromPassword(user)
-
-	if apiErr != nil {
-		return apiErr
-	}
-	apiErr = generateToken(user)
-
-	if apiErr != nil {
-		return apiErr
-	}
-	apiErr = generateTokenHash(us, user)
-
-	if apiErr != nil {
-		return apiErr
-	}
-	err := us.db.Create(user).Error
+func (us *UserService) UpdateUser(user *model.User) *model.ApiError {
+	err := us.userRepository.Update(user)
 
 	if err != nil {
-		return model.NewInternalServerApiError(err.Error())
-	}
-	return nil
-}
-
-func (us *UserService) Read(field string, value interface{}) (*model.User, *model.ApiError) {
-	if field == "" {
-		return nil, model.NewInternalServerApiError("string must not be empty")
-	}
-	user := &model.User{}
-
-	cond := fmt.Sprintf("%s = ?", field)
-
-	err := us.db.First(user, cond, value).Error
-
-	if err != nil {
-		return nil, model.NewNotFoundApiError(err.Error())
-	}
-
-	return user, nil
-}
-
-func (us *UserService) Update(user *model.User) *model.ApiError {
-	err := us.db.Save(user).Error
-
-	if err != nil {
-		return model.NewInternalServerApiError(err.Error())
+		return err
 	}
 	return nil
 }
 
 func (us *UserService) Delete(id uuid.UUID) *model.ApiError {
-	err := us.db.Delete(&model.User{}, id).Error
+	err := us.userRepository.Delete(id)
 
 	if err != nil {
-		return model.NewInternalServerApiError(err.Error())
+		return err
 	}
 	return nil
 }
