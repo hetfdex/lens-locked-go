@@ -9,14 +9,14 @@ import (
 )
 
 type Hasher struct {
-	h hash.Hash
+	hash hash.Hash
 }
 
 func New(key string) *Hasher {
 	h := hmac.New(sha256.New, []byte(key))
 
 	return &Hasher{
-		h,
+		hash: h,
 	}
 }
 
@@ -24,14 +24,14 @@ func (h *Hasher) GenerateHash(input string) (string, *model.ApiError) {
 	if input == "" {
 		return "", model.NewInternalServerApiError("string must not be empty")
 	}
-	h.h.Reset()
+	h.hash.Reset()
 
-	_, err := h.h.Write([]byte(input))
+	_, err := h.hash.Write([]byte(input))
 
 	if err != nil {
 		return "", model.NewInternalServerApiError(err.Error())
 	}
-	b := h.h.Sum(nil)
+	b := h.hash.Sum(nil)
 
 	return base64.URLEncoding.EncodeToString(b), nil
 }

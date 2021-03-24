@@ -8,7 +8,7 @@ import (
 )
 
 type View struct {
-	*template.Template
+	template *template.Template
 }
 
 func New(filename string) *View {
@@ -21,14 +21,14 @@ func New(filename string) *View {
 		panic(err)
 	}
 	return &View{
-		t,
+		template: t,
 	}
 }
 
 func (v *View) Render(w http.ResponseWriter, data interface{}) *model.ApiError {
 	w.Header().Set("Content-Type", "text/html")
 
-	err := v.ExecuteTemplate(w, "base", data)
+	err := v.template.ExecuteTemplate(w, "base", data)
 
 	if err != nil {
 		return model.NewInternalServerApiError(err.Error())

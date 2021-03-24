@@ -7,7 +7,7 @@ import (
 	"lens-locked-go/model"
 )
 
-func GenerateString() (string, *model.ApiError) {
+func GenerateTokenString() (string, *model.ApiError) {
 	return generateString(config.ByteSliceSize)
 }
 
