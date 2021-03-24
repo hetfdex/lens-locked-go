@@ -18,7 +18,7 @@ func main() {
 
 	r := mux.NewRouter()
 
-	configureRoutes(us, r)
+	configureRouter(us, r)
 
 	err = http.ListenAndServe("localhost:8080", r)
 
@@ -27,7 +27,7 @@ func main() {
 	}
 }
 
-func configureRoutes(us *service.UserService, r *mux.Router) {
+func configureRouter(us *service.UserService, r *mux.Router) {
 	homeController := controller.NewHomeController()
 	registerController := controller.NewRegisterController(us)
 	loginController := controller.NewLoginController(us)

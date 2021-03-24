@@ -22,7 +22,7 @@ func parseForm(req *http.Request, result interface{}) *model.ApiError {
 	return nil
 }
 
-func createEmailCookie(value string) *http.Cookie {
+func makeCookie(value string) *http.Cookie {
 	return &http.Cookie{
 		Name:  "email",
 		Value: value,

@@ -42,7 +42,7 @@ func (c *loginController) Login(w http.ResponseWriter, req *http.Request) {
 
 		return
 	}
-	cookie := createEmailCookie(user.Email)
+	cookie := makeCookie(user.Email)
 
 	http.SetCookie(w, cookie)
 
