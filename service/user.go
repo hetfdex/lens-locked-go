@@ -75,6 +75,25 @@ func (us *UserService) AuthenticateWithToken(user *model.User) (*model.User, *mo
 	return user, nil
 }
 
+func (us *UserService) UpdateToken(user *model.User) *model.ApiError {
+	err := generateToken(user)
+
+	if err != nil {
+		return err
+	}
+	err = generateTokenHash(us, user)
+
+	if err != nil {
+		return err
+	}
+	err = us.Update(user)
+
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (us *UserService) Create(user *model.User) *model.ApiError {
 	apiErr := generateFromPassword(user)
 
