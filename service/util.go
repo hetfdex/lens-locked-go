@@ -5,6 +5,7 @@ import (
 	"lens-locked-go/config"
 	"lens-locked-go/hash"
 	"lens-locked-go/model"
+	"lens-locked-go/rand"
 )
 
 func generateFromPassword(user *model.User) *model.ApiError {
@@ -33,6 +34,17 @@ func compareHashAndPassword(user *model.User, password string) *model.ApiError {
 		}
 		return model.NewInternalServerApiError(err.Error())
 	}
+	return nil
+}
+
+func generateToken(user *model.User) *model.ApiError {
+	t, err := rand.GenerateString(0)
+
+	if err != nil {
+		return err
+	}
+	user.Token = t
+
 	return nil
 }
 
