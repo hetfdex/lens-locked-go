@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/gorilla/schema"
+	"lens-locked-go/config"
 	"lens-locked-go/model"
 	"net/http"
 )
@@ -24,7 +25,7 @@ func parseForm(req *http.Request, result interface{}) *model.ApiError {
 
 func makeCookie(value string) *http.Cookie {
 	return &http.Cookie{
-		Name:  "token",
+		Name:  config.CookieName,
 		Value: value,
 	}
 }
