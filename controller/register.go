@@ -28,8 +28,8 @@ func (c *registerController) Register(w http.ResponseWriter, req *http.Request) 
 
 		return
 	}
-	if register.Name == "" || register.Email == "" || register.Password == "" {
-		err = model.NewBadRequestApiError("invalid fields")
+	if !validRegisterForm(register) {
+		err = model.NewBadRequestApiError("invalid form")
 
 		http.Error(w, err.Message, err.StatusCode)
 

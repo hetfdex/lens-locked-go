@@ -28,8 +28,8 @@ func (c *loginController) Login(w http.ResponseWriter, req *http.Request) {
 
 		return
 	}
-	if login.Email == "" || login.Password == "" {
-		err = model.NewBadRequestApiError("invalid fields")
+	if !validLoginForm(login) {
+		err = model.NewBadRequestApiError("invalid form")
 
 		http.Error(w, err.Message, err.StatusCode)
 
