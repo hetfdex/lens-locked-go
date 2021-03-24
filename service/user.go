@@ -29,8 +29,8 @@ func New(dsn string) (*UserService, *model.ApiError) {
 	}, nil
 }
 
-func (u *UserService) CreateTable() *model.ApiError {
-	err := u.db.Migrator().CreateTable(&model.User{})
+func (us *UserService) CreateTable() *model.ApiError {
+	err := us.db.Migrator().CreateTable(&model.User{})
 
 	if err != nil {
 		return model.NewInternalServerApiError(err.Error())
@@ -38,8 +38,8 @@ func (u *UserService) CreateTable() *model.ApiError {
 	return nil
 }
 
-func (u *UserService) DropTable() *model.ApiError {
-	err := u.db.Migrator().DropTable(&model.User{})
+func (us *UserService) DropTable() *model.ApiError {
+	err := us.db.Migrator().DropTable(&model.User{})
 
 	if err != nil {
 		return model.NewInternalServerApiError(err.Error())
@@ -47,8 +47,8 @@ func (u *UserService) DropTable() *model.ApiError {
 	return nil
 }
 
-func (u *UserService) AuthenticateWithPassword(login *model.LoginForm) (*model.User, *model.ApiError) {
-	user, err := u.Read("email", login.Email)
+func (us *UserService) AuthenticateWithPassword(login *model.LoginForm) (*model.User, *model.ApiError) {
+	user, err := us.Read("email", login.Email)
 
 	if err != nil {
 		return nil, err
@@ -61,17 +61,13 @@ func (u *UserService) AuthenticateWithPassword(login *model.LoginForm) (*model.U
 	return user, nil
 }
 
-func (u *UserService) AuthenticateWithToken(token string) (*model.User, *model.ApiError) {
-	user := &model.User{}
-
-	user.Token = token
-
-	err := generateTokenHash(u.hasher, user)
+func (us *UserService) AuthenticateWithToken(user *model.User) (*model.User, *model.ApiError) {
+	err := generateTokenHash(us, user)
 
 	if err != nil {
 		return nil, err
 	}
-	user, err = u.Read("token_hash", user.TokenHash)
+	user, err = us.Read("token_hash", user.TokenHash)
 
 	if err != nil {
 		return nil, err
@@ -79,22 +75,23 @@ func (u *UserService) AuthenticateWithToken(token string) (*model.User, *model.A
 	return user, nil
 }
 
-func (u *UserService) Create(user *model.User) *model.ApiError {
+func (us *UserService) Create(user *model.User) *model.ApiError {
 	apiErr := generateFromPassword(user)
-
-	if user.Token == "" {
-		apiErr = generateToken(user)
-
-		if apiErr != nil {
-			return apiErr
-		}
-	}
-	apiErr = generateTokenHash(u.hasher, user)
 
 	if apiErr != nil {
 		return apiErr
 	}
-	err := u.db.Create(user).Error
+	apiErr = generateToken(user)
+
+	if apiErr != nil {
+		return apiErr
+	}
+	apiErr = generateTokenHash(us, user)
+
+	if apiErr != nil {
+		return apiErr
+	}
+	err := us.db.Create(user).Error
 
 	if err != nil {
 		return model.NewInternalServerApiError(err.Error())
@@ -102,7 +99,7 @@ func (u *UserService) Create(user *model.User) *model.ApiError {
 	return nil
 }
 
-func (u *UserService) Read(field string, value interface{}) (*model.User, *model.ApiError) {
+func (us *UserService) Read(field string, value interface{}) (*model.User, *model.ApiError) {
 	if field == "" {
 		return nil, model.NewInternalServerApiError("string must not be empty")
 	}
@@ -110,7 +107,7 @@ func (u *UserService) Read(field string, value interface{}) (*model.User, *model
 
 	cond := fmt.Sprintf("%s = ?", field)
 
-	err := u.db.First(user, cond, value).Error
+	err := us.db.First(user, cond, value).Error
 
 	if err != nil {
 		return nil, model.NewNotFoundApiError(err.Error())
@@ -119,8 +116,8 @@ func (u *UserService) Read(field string, value interface{}) (*model.User, *model
 	return user, nil
 }
 
-func (u *UserService) Update(user *model.User) *model.ApiError {
-	err := u.db.Save(user).Error
+func (us *UserService) Update(user *model.User) *model.ApiError {
+	err := us.db.Save(user).Error
 
 	if err != nil {
 		return model.NewInternalServerApiError(err.Error())
@@ -128,8 +125,8 @@ func (u *UserService) Update(user *model.User) *model.ApiError {
 	return nil
 }
 
-func (u *UserService) Delete(id uuid.UUID) *model.ApiError {
-	err := u.db.Delete(&model.User{}, id).Error
+func (us *UserService) Delete(id uuid.UUID) *model.ApiError {
+	err := us.db.Delete(&model.User{}, id).Error
 
 	if err != nil {
 		return model.NewInternalServerApiError(err.Error())
