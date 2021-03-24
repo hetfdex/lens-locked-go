@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"lens-locked-go/model"
 	"lens-locked-go/service"
 	"net/http"
@@ -43,5 +42,9 @@ func (c *loginController) Login(w http.ResponseWriter, req *http.Request) {
 
 		return
 	}
-	_, _ = fmt.Fprintln(w, user)
+	cookie := createEmailCookie(user.Email)
+
+	http.SetCookie(w, cookie)
+
+	redirect(w, req, "/")
 }
