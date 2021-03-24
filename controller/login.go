@@ -35,7 +35,7 @@ func (c *loginController) Login(w http.ResponseWriter, req *http.Request) {
 
 		return
 	}
-	user, err := c.Authenticate(login)
+	user, err := c.AuthenticateWithPassword(login)
 
 	if err != nil {
 		http.Error(w, err.Message, err.StatusCode)
