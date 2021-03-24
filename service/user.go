@@ -41,8 +41,22 @@ func (u *UserService) DropTable() error {
 	return nil
 }
 
+func (u *UserService) Authenticate(login *model.LoginForm) (*model.User, error) {
+	user, err := u.Read("email", login.Email)
+
+	if err != nil {
+		return nil, err
+	}
+	err = compareHashAndPassword(user, login.Password)
+
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
 func (u *UserService) Create(user *model.User) error {
-	err := generatePasswordHash(user)
+	err := generateFromPassword(user)
 
 	if err != nil {
 		return err
