@@ -5,6 +5,8 @@ import (
 	"lens-locked-go/model"
 )
 
+const pepper = "6Sk65RHhGW7S4qnVPV7m"
+
 func generatePasswordHash(user *model.User) error {
 	bytes := []byte(user.Password + pepper)
 

@@ -8,8 +8,6 @@ import (
 	"lens-locked-go/model"
 )
 
-const pepper = "6Sk65RHhGW7S4qnVPV7m"
-
 type UserService struct {
 	db *gorm.DB
 }
