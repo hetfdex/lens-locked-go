@@ -7,10 +7,10 @@ import (
 
 const pepper = "6Sk65RHhGW7S4qnVPV7m"
 
-func generatePasswordHash(user *model.User) error {
-	bytes := []byte(user.Password + pepper)
+func generateFromPassword(user *model.User) error {
+	pw := []byte(user.Password + pepper)
 
-	hash, err := bcrypt.GenerateFromPassword(bytes, bcrypt.DefaultCost)
+	hash, err := bcrypt.GenerateFromPassword(pw, bcrypt.DefaultCost)
 
 	if err != nil {
 		return err
@@ -19,4 +19,11 @@ func generatePasswordHash(user *model.User) error {
 	user.PasswordHash = string(hash)
 
 	return nil
+}
+
+func compareHashAndPassword(user *model.User, password string) error {
+	hash := []byte(user.PasswordHash)
+	pw := []byte(password + pepper)
+
+	return bcrypt.CompareHashAndPassword(hash, pw)
 }
