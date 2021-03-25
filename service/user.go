@@ -122,6 +122,8 @@ func (us *userService) LoginWithToken(token string) (*model.User, *model.ApiErro
 }
 
 func (us *userService) GetByEmail(email string) (*model.User, *model.ApiError) {
+	email = normalizeEmail(email)
+
 	if email == "" {
 		return nil, model.NewInternalServerApiError("email must not be empty")
 	}

@@ -5,6 +5,7 @@ import (
 	"lens-locked-go/config"
 	"lens-locked-go/model"
 	"lens-locked-go/rand"
+	"strings"
 )
 
 func generateFromPassword(password string) (string, *model.ApiError) {
@@ -51,4 +52,8 @@ func generateToken() (string, *model.ApiError) {
 		return "", err
 	}
 	return token, nil
+}
+
+func normalizeEmail(email string) string {
+	return strings.ToLower(email)
 }
