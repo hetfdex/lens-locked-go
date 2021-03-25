@@ -23,6 +23,10 @@ func NewBadRequestApiError(message string) *ApiError {
 	return newApiError(http.StatusBadRequest, message)
 }
 
+func NewConflictApiError(message string) *ApiError {
+	return newApiError(http.StatusConflict, message)
+}
+
 func newApiError(statusCode int, message string) *ApiError {
 	return &ApiError{
 		StatusCode: statusCode,
