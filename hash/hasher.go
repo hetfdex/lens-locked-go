@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"hash"
 	"lens-locked-go/model"
+	"lens-locked-go/validator"
 )
 
 type Hasher struct {
@@ -21,8 +22,10 @@ func New(key string) *Hasher {
 }
 
 func (h *Hasher) GenerateHash(input string) (string, *model.ApiError) {
-	if input == "" {
-		return "", model.NewInternalServerApiError("string must not be empty")
+	apiErr := validator.StringNotEmpty("input", input)
+
+	if apiErr != nil {
+		return "", apiErr
 	}
 	h.hash.Reset()
 

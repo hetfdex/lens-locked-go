@@ -26,9 +26,9 @@ func (c *registerController) Post(w http.ResponseWriter, req *http.Request) {
 
 		return
 	}
-	if !register.Valid() {
-		err = model.NewBadRequestApiError("invalid form")
+	err = validRegisterForm(register)
 
+	if err != nil {
 		http.Error(w, err.Message, err.StatusCode)
 
 		return

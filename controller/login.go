@@ -26,9 +26,9 @@ func (c *loginController) Post(w http.ResponseWriter, req *http.Request) {
 
 		return
 	}
-	if !login.Valid() {
-		err = model.NewBadRequestApiError("invalid form")
+	err = validLoginForm(login)
 
+	if err != nil {
 		http.Error(w, err.Message, err.StatusCode)
 
 		return

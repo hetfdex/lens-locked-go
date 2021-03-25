@@ -21,9 +21,14 @@ func (c *controller) Get(w http.ResponseWriter, _ *http.Request) {
 }
 
 func newController(route string, filename string, us service.IUserService) *controller {
+	v, err := view.New(filename)
+
+	if err != nil {
+		panic(err)
+	}
 	return &controller{
 		Route:       route,
-		view:        view.New(filename),
+		view:        v,
 		userService: us,
 	}
 }
