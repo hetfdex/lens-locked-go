@@ -8,7 +8,7 @@ type homeController struct {
 	*controller
 }
 
-func NewHomeController(us *service.UserService) *homeController {
+func NewHomeController(us service.IUserService) *homeController {
 	return &homeController{
 		newController("/", "view/home.gohtml", us),
 	}

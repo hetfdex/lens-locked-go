@@ -16,21 +16,21 @@ type IUserService interface {
 	UpdateToken(user *model.User) *model.ApiError
 }
 
-type UserService struct {
+type userService struct {
 	repository.IUserRepository
 	*hash.Hasher
 }
 
-func NewUserService(ur repository.IUserRepository) *UserService {
+func NewUserService(ur repository.IUserRepository) *userService {
 	hs := hash.New(config.HasherKey)
 
-	return &UserService{
+	return &userService{
 		ur,
 		hs,
 	}
 }
 
-func (us *UserService) LoginWithPassword(login *model.LoginForm) (*model.User, *model.ApiError) {
+func (us *userService) LoginWithPassword(login *model.LoginForm) (*model.User, *model.ApiError) {
 	user, err := us.GetByEmail(login.Email)
 
 	if err != nil {
@@ -44,7 +44,7 @@ func (us *UserService) LoginWithPassword(login *model.LoginForm) (*model.User, *
 	return user, nil
 }
 
-func (us *UserService) LoginWithToken(token string) (*model.User, *model.ApiError) {
+func (us *userService) LoginWithToken(token string) (*model.User, *model.ApiError) {
 	tokenHash, err := generateTokenHash(us.Hasher, token)
 
 	if err != nil {
@@ -58,7 +58,7 @@ func (us *UserService) LoginWithToken(token string) (*model.User, *model.ApiErro
 	return user, nil
 }
 
-func (us *UserService) Register(user *model.User) *model.ApiError {
+func (us *userService) Register(user *model.User) *model.ApiError {
 	existingUser, _ := us.GetByEmail(user.Email)
 
 	if existingUser != nil {
@@ -90,7 +90,7 @@ func (us *UserService) Register(user *model.User) *model.ApiError {
 	return nil
 }
 
-func (us *UserService) GetByEmail(email string) (*model.User, *model.ApiError) {
+func (us *userService) GetByEmail(email string) (*model.User, *model.ApiError) {
 	if email == "" {
 		return nil, model.NewInternalServerApiError("string must not be empty")
 	}
@@ -102,7 +102,7 @@ func (us *UserService) GetByEmail(email string) (*model.User, *model.ApiError) {
 	return user, nil
 }
 
-func (us *UserService) GetByTokenHash(tokenHash string) (*model.User, *model.ApiError) {
+func (us *userService) GetByTokenHash(tokenHash string) (*model.User, *model.ApiError) {
 	if tokenHash == "" {
 		return nil, model.NewInternalServerApiError("string must not be empty")
 	}
@@ -114,7 +114,7 @@ func (us *UserService) GetByTokenHash(tokenHash string) (*model.User, *model.Api
 	return user, nil
 }
 
-func (us *UserService) UpdateToken(user *model.User) *model.ApiError {
+func (us *userService) UpdateToken(user *model.User) *model.ApiError {
 	token, err := generateToken()
 
 	if err != nil {

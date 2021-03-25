@@ -25,7 +25,7 @@ func resetDatabase(db *gorm.DB) {
 	_ = db.Migrator().CreateTable(&model.User{})
 }
 
-func configureRouter(us *service.UserService, r *mux.Router) {
+func configureRouter(us service.IUserService, r *mux.Router) {
 	homeController := controller.NewHomeController(us)
 	registerController := controller.NewRegisterController(us)
 	loginController := controller.NewLoginController(us)

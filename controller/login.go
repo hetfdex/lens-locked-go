@@ -10,7 +10,7 @@ type loginController struct {
 	*controller
 }
 
-func NewLoginController(us *service.UserService) *loginController {
+func NewLoginController(us service.IUserService) *loginController {
 	return &loginController{
 		newController("/login", "view/login.gohtml", us),
 	}

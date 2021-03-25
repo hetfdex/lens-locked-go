@@ -10,7 +10,7 @@ type registerController struct {
 	*controller
 }
 
-func NewRegisterController(us *service.UserService) *registerController {
+func NewRegisterController(us service.IUserService) *registerController {
 	return &registerController{
 		newController("/register", "view/register.gohtml", us),
 	}

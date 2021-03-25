@@ -9,7 +9,7 @@ import (
 type controller struct {
 	Route       string
 	view        *view.View
-	userService *service.UserService
+	userService service.IUserService
 }
 
 func (c *controller) Get(w http.ResponseWriter, _ *http.Request) {
@@ -20,7 +20,7 @@ func (c *controller) Get(w http.ResponseWriter, _ *http.Request) {
 	}
 }
 
-func newController(route string, filename string, us *service.UserService) *controller {
+func newController(route string, filename string, us service.IUserService) *controller {
 	return &controller{
 		Route:       route,
 		view:        view.New(filename),
