@@ -7,17 +7,24 @@ import (
 	"lens-locked-go/model"
 )
 
-type UserRepository struct {
+type IUserRepository interface {
+	Create(user *model.User) *model.ApiError
+	Read(field string, value interface{}) (*model.User, *model.ApiError)
+	Update(user *model.User) *model.ApiError
+	Delete(id uuid.UUID) *model.ApiError
+}
+
+type userRepository struct {
 	database *gorm.DB
 }
 
-func NewUserRepository(db *gorm.DB) (*UserRepository, *model.ApiError) {
-	return &UserRepository{
+func NewUserRepository(db *gorm.DB) *userRepository {
+	return &userRepository{
 		database: db,
-	}, nil
+	}
 }
 
-func (ur *UserRepository) Create(user *model.User) *model.ApiError {
+func (ur *userRepository) Create(user *model.User) *model.ApiError {
 	err := ur.database.Create(user).Error
 
 	if err != nil {
@@ -26,7 +33,7 @@ func (ur *UserRepository) Create(user *model.User) *model.ApiError {
 	return nil
 }
 
-func (ur *UserRepository) Read(field string, value interface{}) (*model.User, *model.ApiError) {
+func (ur *userRepository) Read(field string, value interface{}) (*model.User, *model.ApiError) {
 	user := &model.User{}
 
 	query := fmt.Sprintf("%s = ?", field)
@@ -39,7 +46,7 @@ func (ur *UserRepository) Read(field string, value interface{}) (*model.User, *m
 	return user, nil
 }
 
-func (ur *UserRepository) Update(user *model.User) *model.ApiError {
+func (ur *userRepository) Update(user *model.User) *model.ApiError {
 	err := ur.database.Save(user).Error
 
 	if err != nil {
@@ -48,7 +55,7 @@ func (ur *UserRepository) Update(user *model.User) *model.ApiError {
 	return nil
 }
 
-func (ur *UserRepository) Delete(id uuid.UUID) *model.ApiError {
+func (ur *userRepository) Delete(id uuid.UUID) *model.ApiError {
 	err := ur.database.Delete(&model.User{}, id).Error
 
 	if err != nil {
