@@ -11,8 +11,6 @@ type IUserService interface {
 	Register(register *model.RegisterForm) (*model.User, *model.ApiError)
 	LoginWithPassword(login *model.LoginForm) (*model.User, *model.ApiError)
 	LoginWithToken(token string) (*model.User, *model.ApiError)
-	GetByEmail(email string) (*model.User, *model.ApiError)
-	GetByTokenHash(tokenHash string) (*model.User, *model.ApiError)
 }
 
 type userService struct {
@@ -33,7 +31,9 @@ func NewUserService(ur repository.IUserRepository) *userService {
 }
 
 func (us *userService) Register(register *model.RegisterForm) (*model.User, *model.ApiError) {
-	user, _ := us.GetByEmail(register.Email)
+	register.Email = normalizeEmail(register.Email)
+
+	user, _ := us.getByEmail(register.Email)
 
 	if user != nil {
 		return nil, model.NewConflictApiError("user already exists")
@@ -67,7 +67,9 @@ func (us *userService) Register(register *model.RegisterForm) (*model.User, *mod
 }
 
 func (us *userService) LoginWithPassword(login *model.LoginForm) (*model.User, *model.ApiError) {
-	user, err := us.GetByEmail(login.Email)
+	login.Email = normalizeEmail(login.Email)
+
+	user, err := us.getByEmail(login.Email)
 
 	if err != nil {
 		return nil, err
@@ -105,7 +107,7 @@ func (us *userService) LoginWithToken(token string) (*model.User, *model.ApiErro
 	if err != nil {
 		return nil, err
 	}
-	user, err := us.GetByTokenHash(tokenHash)
+	user, err := us.getByTokenHash(tokenHash)
 
 	if err != nil {
 		return nil, err
@@ -113,9 +115,7 @@ func (us *userService) LoginWithToken(token string) (*model.User, *model.ApiErro
 	return user, nil
 }
 
-func (us *userService) GetByEmail(email string) (*model.User, *model.ApiError) {
-	email = normalizeEmail(email)
-
+func (us *userService) getByEmail(email string) (*model.User, *model.ApiError) {
 	if email == "" {
 		return nil, model.NewInternalServerApiError("email must not be empty")
 	}
@@ -127,7 +127,7 @@ func (us *userService) GetByEmail(email string) (*model.User, *model.ApiError) {
 	return user, nil
 }
 
-func (us *userService) GetByTokenHash(tokenHash string) (*model.User, *model.ApiError) {
+func (us *userService) getByTokenHash(tokenHash string) (*model.User, *model.ApiError) {
 	if tokenHash == "" {
 		return nil, model.NewInternalServerApiError("tokenHash must not be empty")
 	}
