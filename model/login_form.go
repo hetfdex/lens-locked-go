@@ -11,10 +11,3 @@ func (l *LoginForm) User() *User {
 		Password: l.Password,
 	}
 }
-
-func (l *LoginForm) Valid() bool {
-	if l.Email == "" || l.Password == "" {
-		return false
-	}
-	return true
-}

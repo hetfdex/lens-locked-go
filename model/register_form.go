@@ -13,10 +13,3 @@ func (r *RegisterForm) User() *User {
 		Password: r.Password,
 	}
 }
-
-func (r *RegisterForm) Valid() bool {
-	if r.Name == "" || r.Email == "" || r.Password == "" {
-		return false
-	}
-	return true
-}
