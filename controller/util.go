@@ -34,17 +34,3 @@ func makeCookie(value string) *http.Cookie {
 func redirect(w http.ResponseWriter, req *http.Request, route string) {
 	http.Redirect(w, req, route, http.StatusFound)
 }
-
-func validLoginForm(login *model.LoginForm) bool {
-	if login.Email == "" || login.Password == "" {
-		return false
-	}
-	return true
-}
-
-func validRegisterForm(register *model.RegisterForm) bool {
-	if register.Name == "" || register.Email == "" || register.Password == "" {
-		return false
-	}
-	return true
-}
