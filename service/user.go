@@ -48,6 +48,11 @@ func (us *UserService) LoginWithToken(token string) (*model.User, *model.ApiErro
 }
 
 func (us *UserService) RegisterUser(user *model.User) *model.ApiError {
+	existingUser, _ := us.GetUserByEmail(user.Email)
+
+	if existingUser != nil {
+		return model.NewConflictApiError("user already exists")
+	}
 	err := generateFromPassword(user)
 
 	if err != nil {
