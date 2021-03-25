@@ -20,3 +20,12 @@ func (r *RegisterForm) Validate() *ApiError {
 	}
 	return nil
 }
+
+func (r *RegisterForm) User(passwordHash string, tokenHash string) *User {
+	return &User{
+		Name:         r.Name,
+		Email:        r.Email,
+		PasswordHash: passwordHash,
+		TokenHash:    tokenHash,
+	}
+}

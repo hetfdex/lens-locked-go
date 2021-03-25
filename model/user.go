@@ -8,30 +8,6 @@ type User struct {
 	TokenHash    string `gorm:"not null;unique_index"`
 }
 
-func NewUserFromRegister(register *RegisterForm, passwordHash string, tokenHash string) *User {
-	return &User{
-		Name:         register.Name,
-		Email:        register.Email,
-		PasswordHash: passwordHash,
-		TokenHash:    tokenHash,
-	}
-}
-
-func NewUserFromUpdate(update *UpdateForm, oldUser *User, passwordHash string, tokenHash string) *User {
-	return &User{
-		Base: Base{
-			ID:        oldUser.ID,
-			CreatedAt: oldUser.CreatedAt,
-			UpdatedAt: oldUser.UpdatedAt,
-			DeletedAt: nil,
-		},
-		Name:         update.Name,
-		Email:        update.Email,
-		PasswordHash: passwordHash,
-		TokenHash:    tokenHash,
-	}
-}
-
 func (u *User) Equals(other *User) bool {
 	if u.ID != other.ID {
 		return false
@@ -57,4 +33,11 @@ func (u *User) Equals(other *User) bool {
 		return false
 	}
 	return true
+}
+
+func (u *User) Update(update *UpdateForm, passwordHash string, tokenHash string) {
+	u.Name = update.Name
+	u.Email = update.Email
+	u.PasswordHash = passwordHash
+	u.TokenHash = tokenHash
 }
