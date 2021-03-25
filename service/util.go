@@ -10,7 +10,6 @@ import (
 )
 
 var emailRegex = regexp.MustCompile(`^[a-z0-9_.+-]+@[a-z0-9-]+\.[a-z0-9-.]+$`)
-var passwordRegex = regexp.MustCompile(`^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,}$`)
 
 func generateFromPassword(password string) (string, *model.ApiError) {
 	if password == "" {
@@ -74,7 +73,7 @@ func validEmail(email string) bool {
 }
 
 func validPassword(password string) bool {
-	if !passwordRegex.MatchString(password) {
+	if len(password) < 8 {
 		return false
 	}
 	return true
