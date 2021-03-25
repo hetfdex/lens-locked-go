@@ -1,5 +1,7 @@
 package model
 
+import "lens-locked-go/util"
+
 type LoginForm struct {
 	Email    string `schema:"email"`
 	Password string `schema:"password"`
@@ -7,11 +9,11 @@ type LoginForm struct {
 
 func (l *LoginForm) Validate() *ApiError {
 	if l.Email == "" {
-		return NewInternalServerApiError(MustNotBeEmptyErrorMessage("email"))
+		return NewInternalServerApiError(util.MustNotBeEmptyErrorMessage("email"))
 	}
 
 	if l.Password == "" {
-		return NewInternalServerApiError(MustNotBeEmptyErrorMessage("password"))
+		return NewInternalServerApiError(util.MustNotBeEmptyErrorMessage("password"))
 	}
 	return nil
 }

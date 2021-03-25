@@ -13,7 +13,7 @@ var emailRegex = regexp.MustCompile(`^[a-z0-9_.+-]+@[a-z0-9-]+\.[a-z0-9-.]+$`)
 
 func generateFromPassword(password string) (string, *model.ApiError) {
 	if password == "" {
-		return "", model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("password"))
+		return "", model.NewInternalServerApiError(util.MustNotBeEmptyErrorMessage("password"))
 	}
 	pw := []byte(password + util.Pepper)
 
@@ -28,11 +28,11 @@ func generateFromPassword(password string) (string, *model.ApiError) {
 func compareHashAndPassword(passwordHash string, password string) *model.ApiError {
 
 	if passwordHash == "" {
-		return model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("passwordHash"))
+		return model.NewInternalServerApiError(util.MustNotBeEmptyErrorMessage("passwordHash"))
 	}
 
 	if password == "" {
-		return model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("password"))
+		return model.NewInternalServerApiError(util.MustNotBeEmptyErrorMessage("password"))
 	}
 	pwHash := []byte(passwordHash)
 	pw := []byte(password + util.Pepper)

@@ -25,7 +25,7 @@ func parseForm(req *http.Request, result interface{}) *model.ApiError {
 
 func makeCookie(cookieValue string) (*http.Cookie, *model.ApiError) {
 	if cookieValue == "" {
-		return nil, model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("cookieValue"))
+		return nil, model.NewInternalServerApiError(util.MustNotBeEmptyErrorMessage("cookieValue"))
 	}
 	return &http.Cookie{
 		Name:     util.CookieName,

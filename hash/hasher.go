@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"hash"
 	"lens-locked-go/model"
+	"lens-locked-go/util"
 )
 
 type Hasher struct {
@@ -14,7 +15,7 @@ type Hasher struct {
 
 func New(hasherKey string) (*Hasher, *model.ApiError) {
 	if hasherKey == "" {
-		return nil, model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("hasherKey"))
+		return nil, model.NewInternalServerApiError(util.MustNotBeEmptyErrorMessage("hasherKey"))
 	}
 	h := hmac.New(sha256.New, []byte(hasherKey))
 
@@ -25,7 +26,7 @@ func New(hasherKey string) (*Hasher, *model.ApiError) {
 
 func (h *Hasher) GenerateTokenHash(token string) (string, *model.ApiError) {
 	if token == "" {
-		return "", model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("token"))
+		return "", model.NewInternalServerApiError(util.MustNotBeEmptyErrorMessage("token"))
 	}
 	h.hash.Reset()
 

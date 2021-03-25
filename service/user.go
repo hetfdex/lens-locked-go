@@ -175,7 +175,7 @@ func (us *userService) LoginWithToken(token string) (*model.User, *model.ApiErro
 
 func (us *userService) getByEmail(email string) (*model.User, *model.ApiError) {
 	if email == "" {
-		return nil, model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("email"))
+		return nil, model.NewInternalServerApiError(util.MustNotBeEmptyErrorMessage("email"))
 	}
 	user, err := us.Read("email", email)
 
@@ -187,7 +187,7 @@ func (us *userService) getByEmail(email string) (*model.User, *model.ApiError) {
 
 func (us *userService) getByTokenHash(tokenHash string) (*model.User, *model.ApiError) {
 	if tokenHash == "" {
-		return nil, model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("tokenHash"))
+		return nil, model.NewInternalServerApiError(util.MustNotBeEmptyErrorMessage("tokenHash"))
 	}
 	user, err := us.Read("token_hash", tokenHash)
 

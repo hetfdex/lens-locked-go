@@ -55,7 +55,7 @@ func configureRouter(us service.IUserService, r *mux.Router) {
 }
 
 func listenAndServe(r *mux.Router) {
-	err := http.ListenAndServe("localhost:8080", r)
+	err := http.ListenAndServe(util.Address, r)
 
 	if err != nil {
 		panic(err)
