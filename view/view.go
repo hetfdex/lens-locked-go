@@ -16,7 +16,7 @@ func New(filename string) *View {
 	if filename == "" {
 		panic(errors.New(util.MustNotBeEmptyErrorMessage("filename")))
 	}
-	t, err := template.ParseFiles("view/base.gohtml", filename)
+	t, err := template.ParseFiles(util.BaseFilename, filename)
 
 	if err != nil {
 		panic(err)
@@ -27,9 +27,9 @@ func New(filename string) *View {
 }
 
 func (v *View) Render(w http.ResponseWriter, data interface{}) *model.ApiError {
-	w.Header().Set("Content-Type", "text/html")
+	w.Header().Set(util.ContentTypeKey, util.ContentTypeValue)
 
-	err := v.template.ExecuteTemplate(w, "base", data)
+	err := v.template.ExecuteTemplate(w, util.BaseTag, data)
 
 	if err != nil {
 		return model.NewInternalServerApiError(err.Error())

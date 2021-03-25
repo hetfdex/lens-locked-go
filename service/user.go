@@ -35,16 +35,16 @@ func (us *userService) Register(register *model.RegisterForm) (*model.User, stri
 	register.Email = normalizeEmail(register.Email)
 
 	if !validEmail(register.Email) {
-		return nil, "", model.NewBadRequestApiError("invalid email")
+		return nil, "", model.NewBadRequestApiError(util.InvalidEmailErrorMessage)
 	}
 	user, _ := us.getByEmail(register.Email)
 
 	if user != nil {
-		return nil, "", model.NewConflictApiError("email is already registered")
+		return nil, "", model.NewConflictApiError(util.EmailInUseErrorMessage)
 	}
 
 	if !validPassword(register.Password) {
-		return nil, "", model.NewBadRequestApiError("invalid password")
+		return nil, "", model.NewBadRequestApiError(util.InvalidPasswordErrorMessage)
 	}
 	pwHash, err := generateFromPassword(register.Password)
 
@@ -75,11 +75,11 @@ func (us *userService) Edit(update *model.UpdateForm, token string) (*model.User
 	update.Email = normalizeEmail(update.Email)
 
 	if !validEmail(update.Email) {
-		return nil, "", model.NewBadRequestApiError("invalid email")
+		return nil, "", model.NewBadRequestApiError(util.InvalidEmailErrorMessage)
 	}
 
 	if !validPassword(update.Password) {
-		return nil, "", model.NewBadRequestApiError("invalid password")
+		return nil, "", model.NewBadRequestApiError(util.InvalidPasswordErrorMessage)
 	}
 	user, err := us.LoginWithToken(token)
 
@@ -90,9 +90,9 @@ func (us *userService) Edit(update *model.UpdateForm, token string) (*model.User
 
 	if userFromEmail != nil {
 		if user.Equals(userFromEmail) {
-			return nil, "", model.NewBadRequestApiError("no user data changed")
+			return nil, "", model.NewBadRequestApiError(util.NoUserUpdateNeededErrorMessage)
 		}
-		return nil, "", model.NewConflictApiError("email is already registered")
+		return nil, "", model.NewConflictApiError(util.EmailInUseErrorMessage)
 	}
 	newPwHash, err := generateFromPassword(update.Password)
 
@@ -123,7 +123,7 @@ func (us *userService) LoginWithPassword(login *model.LoginForm) (*model.User, s
 	login.Email = normalizeEmail(login.Email)
 
 	if !validEmail(login.Email) {
-		return nil, "", model.NewBadRequestApiError("invalid email")
+		return nil, "", model.NewBadRequestApiError(util.InvalidEmailErrorMessage)
 	}
 	user, err := us.getByEmail(login.Email)
 
@@ -132,7 +132,7 @@ func (us *userService) LoginWithPassword(login *model.LoginForm) (*model.User, s
 	}
 
 	if !validPassword(login.Password) {
-		return nil, "", model.NewBadRequestApiError("invalid password")
+		return nil, "", model.NewBadRequestApiError(util.InvalidPasswordErrorMessage)
 	}
 	err = compareHashAndPassword(user.PasswordHash, login.Password)
 

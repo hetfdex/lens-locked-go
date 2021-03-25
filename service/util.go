@@ -5,11 +5,8 @@ import (
 	"lens-locked-go/model"
 	"lens-locked-go/rand"
 	"lens-locked-go/util"
-	"regexp"
 	"strings"
 )
-
-var emailRegex = regexp.MustCompile(`^[a-z0-9_.+-]+@[a-z0-9-]+\.[a-z0-9-.]+$`)
 
 func generateFromPassword(password string) (string, *model.ApiError) {
 	if password == "" {
@@ -41,7 +38,7 @@ func compareHashAndPassword(passwordHash string, password string) *model.ApiErro
 
 	if err != nil {
 		if err == bcrypt.ErrMismatchedHashAndPassword {
-			return model.NewForbiddenApiError("invalid password")
+			return model.NewForbiddenApiError(util.InvalidPasswordErrorMessage)
 		}
 		return model.NewInternalServerApiError(err.Error())
 	}
@@ -66,7 +63,7 @@ func validEmail(email string) bool {
 		return false
 	}
 
-	if !emailRegex.MatchString(email) {
+	if !util.EmailRegex.MatchString(email) {
 		return false
 	}
 	return true
