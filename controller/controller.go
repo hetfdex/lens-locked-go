@@ -1,8 +1,6 @@
 package controller
 
 import (
-	"fmt"
-	"lens-locked-go/config"
 	"lens-locked-go/service"
 	"lens-locked-go/view"
 	"net/http"
@@ -14,27 +12,12 @@ type controller struct {
 	userService *service.UserService
 }
 
-func (c *controller) Get(w http.ResponseWriter, req *http.Request) {
+func (c *controller) Get(w http.ResponseWriter, _ *http.Request) {
 	apiErr := c.view.Render(w, nil)
 
 	if apiErr != nil {
 		http.Error(w, apiErr.Message, apiErr.StatusCode)
 	}
-	cookie, err := req.Cookie(config.CookieName)
-
-	if err != nil {
-		fmt.Println("no cookie available")
-
-		return
-	}
-	user, apiErr := c.userService.LoginWithToken(cookie.Value)
-
-	if apiErr != nil {
-		http.Error(w, apiErr.Message, apiErr.StatusCode)
-
-		return
-	}
-	fmt.Println(user.Email, "logged in")
 }
 
 func newController(route string, filename string, us *service.UserService) *controller {
