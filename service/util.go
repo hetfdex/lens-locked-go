@@ -55,5 +55,5 @@ func generateToken() (string, *model.ApiError) {
 }
 
 func normalizeEmail(email string) string {
-	return strings.ToLower(email)
+	return strings.ToLower(strings.TrimSpace(email))
 }
