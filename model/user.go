@@ -32,7 +32,7 @@ func NewUserFromUpdate(update *UpdateForm, oldUser *User, passwordHash string, t
 	}
 }
 
-func (u *User) DeepEqual(other *User) bool {
+func (u *User) Equals(other *User) bool {
 	if u.ID != other.ID {
 		return false
 	}

@@ -89,7 +89,7 @@ func (us *userService) Edit(update *model.UpdateForm, token string) (*model.User
 	userFromEmail, _ := us.getByEmail(update.Email)
 
 	if userFromEmail != nil {
-		if loggedInUser.DeepEqual(userFromEmail) {
+		if loggedInUser.Equals(userFromEmail) {
 			return nil, "", model.NewBadRequestApiError("no user data changed")
 		}
 		return nil, "", model.NewConflictApiError("email is already registered")
