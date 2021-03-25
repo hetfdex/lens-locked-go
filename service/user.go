@@ -41,6 +41,10 @@ func (us *userService) Register(register *model.RegisterForm) (*model.User, *mod
 	if user != nil {
 		return nil, model.NewConflictApiError("user already exists")
 	}
+
+	if !validPassword(register.Password) {
+		return nil, model.NewBadRequestApiError("invalid password")
+	}
 	pwHash, err := generateFromPassword(register.Password)
 
 	if err != nil {
@@ -79,6 +83,10 @@ func (us *userService) LoginWithPassword(login *model.LoginForm) (*model.User, *
 
 	if err != nil {
 		return nil, err
+	}
+
+	if !validPassword(login.Password) {
+		return nil, model.NewBadRequestApiError("invalid password")
 	}
 	err = compareHashAndPassword(user.PasswordHash, login.Password)
 
