@@ -26,7 +26,7 @@ func (c *registerController) Post(w http.ResponseWriter, req *http.Request) {
 
 		return
 	}
-	if !validRegisterForm(register) {
+	if !register.Valid() {
 		err = model.NewBadRequestApiError("invalid form")
 
 		http.Error(w, err.Message, err.StatusCode)
@@ -35,7 +35,7 @@ func (c *registerController) Post(w http.ResponseWriter, req *http.Request) {
 	}
 	user := register.User()
 
-	err = c.userService.RegisterUser(user)
+	err = c.userService.Register(user)
 
 	if err != nil {
 		http.Error(w, err.Message, err.StatusCode)
