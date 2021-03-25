@@ -1,26 +1,37 @@
 package service
 
 import (
-	"github.com/gofrs/uuid"
+	"lens-locked-go/config"
 	"lens-locked-go/hash"
 	"lens-locked-go/model"
 	"lens-locked-go/repository"
 )
 
-type UserService struct {
-	userRepository *repository.UserRepository
-	hasher         *hash.Hasher
+type IUserService interface {
+	LoginWithPassword(login *model.LoginForm) (*model.User, *model.ApiError)
+	LoginWithToken(token string) (*model.User, *model.ApiError)
+	Register(user *model.User) *model.ApiError
+	GetByEmail(email string) (*model.User, *model.ApiError)
+	GetByTokenHash(tokenHash string) (*model.User, *model.ApiError)
+	UpdateToken(user *model.User) *model.ApiError
 }
 
-func NewUserService(ur *repository.UserRepository, hs *hash.Hasher) (*UserService, *model.ApiError) {
+type UserService struct {
+	repository.IUserRepository
+	*hash.Hasher
+}
+
+func NewUserService(ur repository.IUserRepository) *UserService {
+	hs := hash.New(config.HasherKey)
+
 	return &UserService{
-		userRepository: ur,
-		hasher:         hs,
-	}, nil
+		ur,
+		hs,
+	}
 }
 
 func (us *UserService) LoginWithPassword(login *model.LoginForm) (*model.User, *model.ApiError) {
-	user, err := us.GetUserByEmail(login.Email)
+	user, err := us.GetByEmail(login.Email)
 
 	if err != nil {
 		return nil, err
@@ -34,12 +45,12 @@ func (us *UserService) LoginWithPassword(login *model.LoginForm) (*model.User, *
 }
 
 func (us *UserService) LoginWithToken(token string) (*model.User, *model.ApiError) {
-	tokenHash, err := generateTokenHash(us.hasher, token)
+	tokenHash, err := generateTokenHash(us.Hasher, token)
 
 	if err != nil {
 		return nil, err
 	}
-	user, err := us.GetUserByTokenHash(tokenHash)
+	user, err := us.GetByTokenHash(tokenHash)
 
 	if err != nil {
 		return nil, err
@@ -47,8 +58,8 @@ func (us *UserService) LoginWithToken(token string) (*model.User, *model.ApiErro
 	return user, nil
 }
 
-func (us *UserService) RegisterUser(user *model.User) *model.ApiError {
-	existingUser, _ := us.GetUserByEmail(user.Email)
+func (us *UserService) Register(user *model.User) *model.ApiError {
+	existingUser, _ := us.GetByEmail(user.Email)
 
 	if existingUser != nil {
 		return model.NewConflictApiError("user already exists")
@@ -64,14 +75,14 @@ func (us *UserService) RegisterUser(user *model.User) *model.ApiError {
 		return err
 	}
 	user.Token = token
-	tokenHash, err := generateTokenHash(us.hasher, user.Token)
+	tokenHash, err := generateTokenHash(us.Hasher, user.Token)
 
 	if err != nil {
 		return err
 	}
 	user.TokenHash = tokenHash
 
-	err = us.userRepository.Create(user)
+	err = us.Create(user)
 
 	if err != nil {
 		return err
@@ -79,11 +90,11 @@ func (us *UserService) RegisterUser(user *model.User) *model.ApiError {
 	return nil
 }
 
-func (us *UserService) GetUserByEmail(email string) (*model.User, *model.ApiError) {
+func (us *UserService) GetByEmail(email string) (*model.User, *model.ApiError) {
 	if email == "" {
 		return nil, model.NewInternalServerApiError("string must not be empty")
 	}
-	user, err := us.userRepository.Read("email", email)
+	user, err := us.Read("email", email)
 
 	if err != nil {
 		return nil, err
@@ -91,11 +102,11 @@ func (us *UserService) GetUserByEmail(email string) (*model.User, *model.ApiErro
 	return user, nil
 }
 
-func (us *UserService) GetUserByTokenHash(tokenHash string) (*model.User, *model.ApiError) {
+func (us *UserService) GetByTokenHash(tokenHash string) (*model.User, *model.ApiError) {
 	if tokenHash == "" {
 		return nil, model.NewInternalServerApiError("string must not be empty")
 	}
-	user, err := us.userRepository.Read("token_hash", tokenHash)
+	user, err := us.Read("token_hash", tokenHash)
 
 	if err != nil {
 		return nil, err
@@ -103,7 +114,7 @@ func (us *UserService) GetUserByTokenHash(tokenHash string) (*model.User, *model
 	return user, nil
 }
 
-func (us *UserService) UpdateUserToken(user *model.User) *model.ApiError {
+func (us *UserService) UpdateToken(user *model.User) *model.ApiError {
 	token, err := generateToken()
 
 	if err != nil {
@@ -111,32 +122,14 @@ func (us *UserService) UpdateUserToken(user *model.User) *model.ApiError {
 	}
 	user.Token = token
 
-	tokenHash, err := generateTokenHash(us.hasher, user.Token)
+	tokenHash, err := generateTokenHash(us.Hasher, user.Token)
 
 	if err != nil {
 		return err
 	}
 	user.TokenHash = tokenHash
 
-	err = us.UpdateUser(user)
-
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (us *UserService) UpdateUser(user *model.User) *model.ApiError {
-	err := us.userRepository.Update(user)
-
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (us *UserService) Delete(id uuid.UUID) *model.ApiError {
-	err := us.userRepository.Delete(id)
+	err = us.Update(user)
 
 	if err != nil {
 		return err
