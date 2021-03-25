@@ -4,7 +4,6 @@ import (
 	"github.com/gorilla/schema"
 	"lens-locked-go/config"
 	"lens-locked-go/model"
-	"lens-locked-go/validator"
 	"net/http"
 )
 
@@ -25,7 +24,7 @@ func parseForm(req *http.Request, result interface{}) *model.ApiError {
 }
 
 func makeCookie(cookieValue string) (*http.Cookie, *model.ApiError) {
-	if validator.EmptyString(cookieValue) {
+	if cookieValue == "" {
 		return nil, model.NewInternalServerApiError("cookieValue must not be empty")
 	}
 	return &http.Cookie{
@@ -36,7 +35,7 @@ func makeCookie(cookieValue string) (*http.Cookie, *model.ApiError) {
 }
 
 func redirect(w http.ResponseWriter, req *http.Request, route string) {
-	if validator.EmptyString(route) {
+	if route == "" {
 		return
 	}
 	http.Redirect(w, req, route, http.StatusFound)

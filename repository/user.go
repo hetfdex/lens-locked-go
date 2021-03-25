@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"gorm.io/gorm"
 	"lens-locked-go/model"
-	"lens-locked-go/validator"
 )
 
 type IUserRepository interface {
@@ -35,7 +34,7 @@ func (ur *userRepository) Create(user *model.User) *model.ApiError {
 
 func (ur *userRepository) Read(field string, value interface{}) (*model.User, *model.ApiError) {
 
-	if validator.EmptyString(field) {
+	if field == "" {
 		return nil, model.NewInternalServerApiError("field must not be emtpy")
 	}
 	user := &model.User{}

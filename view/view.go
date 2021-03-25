@@ -4,7 +4,6 @@ import (
 	"errors"
 	"html/template"
 	"lens-locked-go/model"
-	"lens-locked-go/validator"
 	"net/http"
 )
 
@@ -13,7 +12,7 @@ type View struct {
 }
 
 func New(filename string) *View {
-	if validator.EmptyString(filename) {
+	if filename == "" {
 		panic(errors.New("filename must not be empty"))
 	}
 	t, err := template.ParseFiles("view/base.gohtml", filename)

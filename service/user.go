@@ -5,7 +5,6 @@ import (
 	"lens-locked-go/hash"
 	"lens-locked-go/model"
 	"lens-locked-go/repository"
-	"lens-locked-go/validator"
 )
 
 type IUserService interface {
@@ -123,7 +122,7 @@ func (us *userService) LoginWithToken(token string) (*model.User, *model.ApiErro
 }
 
 func (us *userService) GetByEmail(email string) (*model.User, *model.ApiError) {
-	if validator.EmptyString(email) {
+	if email == "" {
 		return nil, model.NewInternalServerApiError("email must not be empty")
 	}
 	user, err := us.Read("email", email)
@@ -135,7 +134,7 @@ func (us *userService) GetByEmail(email string) (*model.User, *model.ApiError) {
 }
 
 func (us *userService) GetByTokenHash(tokenHash string) (*model.User, *model.ApiError) {
-	if validator.EmptyString(tokenHash) {
+	if tokenHash == "" {
 		return nil, model.NewInternalServerApiError("tokenHash must not be empty")
 	}
 	user, err := us.Read("token_hash", tokenHash)

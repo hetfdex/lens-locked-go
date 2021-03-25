@@ -5,11 +5,10 @@ import (
 	"lens-locked-go/config"
 	"lens-locked-go/model"
 	"lens-locked-go/rand"
-	"lens-locked-go/validator"
 )
 
 func generateFromPassword(password string) (string, *model.ApiError) {
-	if validator.EmptyString(password) {
+	if password == "" {
 		return "", model.NewInternalServerApiError("password must not be empty")
 	}
 	pw := []byte(password + config.Pepper)
@@ -24,11 +23,11 @@ func generateFromPassword(password string) (string, *model.ApiError) {
 
 func compareHashAndPassword(passwordHash string, password string) *model.ApiError {
 
-	if validator.EmptyString(passwordHash) {
+	if passwordHash == "" {
 		return model.NewInternalServerApiError("passwordHash must not be empty")
 	}
 
-	if validator.EmptyString(password) {
+	if password == "" {
 		return model.NewInternalServerApiError("password must not be empty")
 	}
 	pwHash := []byte(passwordHash)

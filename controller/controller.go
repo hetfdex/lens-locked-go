@@ -3,7 +3,6 @@ package controller
 import (
 	"errors"
 	"lens-locked-go/service"
-	"lens-locked-go/validator"
 	"lens-locked-go/view"
 	"net/http"
 )
@@ -23,7 +22,7 @@ func (c *controller) Get(w http.ResponseWriter, _ *http.Request) {
 }
 
 func newController(route string, filename string, us service.IUserService) *controller {
-	if validator.EmptyString(route) {
+	if route == "" {
 		panic(errors.New("route must not be empty"))
 	}
 	return &controller{
