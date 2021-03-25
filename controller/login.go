@@ -33,14 +33,14 @@ func (c *loginController) Post(w http.ResponseWriter, req *http.Request) {
 
 		return
 	}
-	user, err := c.userService.LoginWithPassword(login)
+	_, token, err := c.userService.LoginWithPassword(login)
 
 	if err != nil {
 		http.Error(w, err.Message, err.StatusCode)
 
 		return
 	}
-	cookie, err := makeCookie(user.Token)
+	cookie, err := makeCookie(token)
 
 	if err != nil {
 		http.Error(w, err.Message, err.StatusCode)

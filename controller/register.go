@@ -33,14 +33,14 @@ func (c *registerController) Post(w http.ResponseWriter, req *http.Request) {
 
 		return
 	}
-	user, err := c.userService.Register(register)
+	_, token, err := c.userService.Register(register)
 
 	if err != nil {
 		http.Error(w, err.Message, err.StatusCode)
 
 		return
 	}
-	cookie, err := makeCookie(user.Token)
+	cookie, err := makeCookie(token)
 
 	if err != nil {
 		http.Error(w, err.Message, err.StatusCode)
