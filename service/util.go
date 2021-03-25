@@ -9,10 +9,8 @@ import (
 )
 
 func generateFromPassword(password string) (string, *model.ApiError) {
-	apiErr := validator.StringNotEmpty("password", password)
-
-	if apiErr != nil {
-		return "", apiErr
+	if validator.EmptyString(password) {
+		return "", model.NewInternalServerApiError("password must not be empty")
 	}
 	pw := []byte(password + config.Pepper)
 
@@ -25,15 +23,13 @@ func generateFromPassword(password string) (string, *model.ApiError) {
 }
 
 func compareHashAndPassword(passwordHash string, password string) *model.ApiError {
-	apiErr := validator.StringNotEmpty("passwordHash", passwordHash)
 
-	if apiErr != nil {
-		return apiErr
+	if validator.EmptyString(passwordHash) {
+		return model.NewInternalServerApiError("passwordHash must not be empty")
 	}
-	apiErr = validator.StringNotEmpty("password", password)
 
-	if apiErr != nil {
-		return apiErr
+	if validator.EmptyString(password) {
+		return model.NewInternalServerApiError("password must not be empty")
 	}
 	pwHash := []byte(passwordHash)
 	pw := []byte(password + config.Pepper)
@@ -42,7 +38,7 @@ func compareHashAndPassword(passwordHash string, password string) *model.ApiErro
 
 	if err != nil {
 		if err == bcrypt.ErrMismatchedHashAndPassword {
-			return model.NewForbiddenApiError(err.Error())
+			return model.NewForbiddenApiError("invalid password")
 		}
 		return model.NewInternalServerApiError(err.Error())
 	}

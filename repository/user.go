@@ -2,16 +2,16 @@ package repository
 
 import (
 	"fmt"
-	"github.com/gofrs/uuid"
 	"gorm.io/gorm"
 	"lens-locked-go/model"
+	"lens-locked-go/validator"
 )
 
 type IUserRepository interface {
 	Create(user *model.User) *model.ApiError
 	Read(field string, value interface{}) (*model.User, *model.ApiError)
 	Update(user *model.User) *model.ApiError
-	Delete(id uuid.UUID) *model.ApiError
+	Delete(user *model.User) *model.ApiError
 }
 
 type userRepository struct {
@@ -34,6 +34,10 @@ func (ur *userRepository) Create(user *model.User) *model.ApiError {
 }
 
 func (ur *userRepository) Read(field string, value interface{}) (*model.User, *model.ApiError) {
+
+	if validator.EmptyString(field) {
+		return nil, model.NewInternalServerApiError("field must not be emtpy")
+	}
 	user := &model.User{}
 
 	query := fmt.Sprintf("%s = ?", field)
@@ -55,8 +59,8 @@ func (ur *userRepository) Update(user *model.User) *model.ApiError {
 	return nil
 }
 
-func (ur *userRepository) Delete(id uuid.UUID) *model.ApiError {
-	err := ur.database.Delete(&model.User{}, id).Error
+func (ur *userRepository) Delete(user *model.User) *model.ApiError {
+	err := ur.database.Delete(user).Error
 
 	if err != nil {
 		return model.NewInternalServerApiError(err.Error())

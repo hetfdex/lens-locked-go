@@ -9,12 +9,11 @@ import (
 )
 
 type IUserService interface {
+	Register(register *model.RegisterForm) (*model.User, *model.ApiError)
 	LoginWithPassword(login *model.LoginForm) (*model.User, *model.ApiError)
 	LoginWithToken(token string) (*model.User, *model.ApiError)
-	Register(user *model.User) *model.ApiError
 	GetByEmail(email string) (*model.User, *model.ApiError)
 	GetByTokenHash(tokenHash string) (*model.User, *model.ApiError)
-	UpdateToken(user *model.User) *model.ApiError
 }
 
 type userService struct {
@@ -23,12 +22,57 @@ type userService struct {
 }
 
 func NewUserService(ur repository.IUserRepository) *userService {
-	hs := hash.New(config.HasherKey)
+	hs, err := hash.New(config.HasherKey)
 
+	if err != nil {
+		panic(err)
+	}
 	return &userService{
 		ur,
 		hs,
 	}
+}
+
+func (us *userService) Register(register *model.RegisterForm) (*model.User, *model.ApiError) {
+	user, _ := us.GetByEmail(register.Email)
+
+	if user != nil {
+		return nil, model.NewConflictApiError("user already exists")
+	}
+	pwHash, err := generateFromPassword(register.Password)
+
+	if err != nil {
+		return nil, err
+	}
+	user = &model.User{
+		Name:         register.Name,
+		Email:        register.Email,
+		Password:     "",
+		PasswordHash: pwHash,
+		Token:        "",
+		TokenHash:    "",
+	}
+
+	token, err := generateToken()
+
+	if err != nil {
+		return nil, err
+	}
+	user.Token = token
+
+	tokenHash, err := us.Hasher.GenerateTokenHash(token)
+
+	if err != nil {
+		return nil, err
+	}
+	user.TokenHash = tokenHash
+
+	err = us.Create(user)
+
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
 }
 
 func (us *userService) LoginWithPassword(login *model.LoginForm) (*model.User, *model.ApiError) {
@@ -38,6 +82,25 @@ func (us *userService) LoginWithPassword(login *model.LoginForm) (*model.User, *
 		return nil, err
 	}
 	err = compareHashAndPassword(user.PasswordHash, login.Password)
+
+	if err != nil {
+		return nil, err
+	}
+	token, err := generateToken()
+
+	if err != nil {
+		return nil, err
+	}
+	user.Token = token
+
+	tokenHash, err := us.Hasher.GenerateTokenHash(token)
+
+	if err != nil {
+		return nil, err
+	}
+	user.TokenHash = tokenHash
+
+	err = us.Update(user)
 
 	if err != nil {
 		return nil, err
@@ -59,46 +122,9 @@ func (us *userService) LoginWithToken(token string) (*model.User, *model.ApiErro
 	return user, nil
 }
 
-func (us *userService) Register(user *model.User) *model.ApiError {
-	existingUser, _ := us.GetByEmail(user.Email)
-
-	if existingUser != nil {
-		return model.NewConflictApiError("user already exists")
-	}
-	pwHash, err := generateFromPassword(user.Password)
-
-	if err != nil {
-		return err
-	}
-	user.Password = ""
-	user.PasswordHash = pwHash
-
-	token, err := generateToken()
-
-	if err != nil {
-		return err
-	}
-	user.Token = token
-	tokenHash, err := us.Hasher.GenerateTokenHash(token)
-
-	if err != nil {
-		return err
-	}
-	user.TokenHash = tokenHash
-
-	err = us.Create(user)
-
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 func (us *userService) GetByEmail(email string) (*model.User, *model.ApiError) {
-	err := validator.StringNotEmpty("email", email)
-
-	if err != nil {
-		return nil, err
+	if validator.EmptyString(email) {
+		return nil, model.NewInternalServerApiError("email must not be empty")
 	}
 	user, err := us.Read("email", email)
 
@@ -109,10 +135,8 @@ func (us *userService) GetByEmail(email string) (*model.User, *model.ApiError) {
 }
 
 func (us *userService) GetByTokenHash(tokenHash string) (*model.User, *model.ApiError) {
-	err := validator.StringNotEmpty("tokenHash", tokenHash)
-
-	if err != nil {
-		return nil, err
+	if validator.EmptyString(tokenHash) {
+		return nil, model.NewInternalServerApiError("tokenHash must not be empty")
 	}
 	user, err := us.Read("token_hash", tokenHash)
 
@@ -120,27 +144,4 @@ func (us *userService) GetByTokenHash(tokenHash string) (*model.User, *model.Api
 		return nil, err
 	}
 	return user, nil
-}
-
-func (us *userService) UpdateToken(user *model.User) *model.ApiError {
-	token, err := generateToken()
-
-	if err != nil {
-		return err
-	}
-	user.Token = token
-
-	tokenHash, err := us.Hasher.GenerateTokenHash(token)
-
-	if err != nil {
-		return err
-	}
-	user.TokenHash = tokenHash
-
-	err = us.Update(user)
-
-	if err != nil {
-		return err
-	}
-	return nil
 }

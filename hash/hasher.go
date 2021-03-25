@@ -13,19 +13,20 @@ type Hasher struct {
 	hash hash.Hash
 }
 
-func New(key string) *Hasher {
-	h := hmac.New(sha256.New, []byte(key))
+func New(hasherKey string) (*Hasher, *model.ApiError) {
+	if validator.EmptyString(hasherKey) {
+		return nil, model.NewInternalServerApiError("hasherKey must not be empty")
+	}
+	h := hmac.New(sha256.New, []byte(hasherKey))
 
 	return &Hasher{
 		hash: h,
-	}
+	}, nil
 }
 
 func (h *Hasher) GenerateTokenHash(token string) (string, *model.ApiError) {
-	apiErr := validator.StringNotEmpty("token", token)
-
-	if apiErr != nil {
-		return "", apiErr
+	if validator.EmptyString(token) {
+		return "", model.NewInternalServerApiError("token must not be empty")
 	}
 	h.hash.Reset()
 

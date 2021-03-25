@@ -21,6 +21,9 @@ func generateString(size uint) (string, *model.ApiError) {
 }
 
 func generateBytes(size uint) ([]byte, *model.ApiError) {
+	if size < 16 {
+		return nil, model.NewInternalServerApiError("byte slice size must be at least 16")
+	}
 	b := make([]byte, size)
 
 	_, err := rand.Read(b)

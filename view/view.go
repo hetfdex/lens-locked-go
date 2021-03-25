@@ -1,6 +1,7 @@
 package view
 
 import (
+	"errors"
 	"html/template"
 	"lens-locked-go/model"
 	"lens-locked-go/validator"
@@ -11,11 +12,9 @@ type View struct {
 	template *template.Template
 }
 
-func New(filename string) (*View, *model.ApiError) {
-	apiErr := validator.StringNotEmpty("filename", filename)
-
-	if apiErr != nil {
-		return nil, apiErr
+func New(filename string) *View {
+	if validator.EmptyString(filename) {
+		panic(errors.New("filename must not be empty"))
 	}
 	t, err := template.ParseFiles("view/base.gohtml", filename)
 
@@ -24,7 +23,7 @@ func New(filename string) (*View, *model.ApiError) {
 	}
 	return &View{
 		template: t,
-	}, nil
+	}
 }
 
 func (v *View) Render(w http.ResponseWriter, data interface{}) *model.ApiError {

@@ -26,7 +26,7 @@ func (c *loginController) Post(w http.ResponseWriter, req *http.Request) {
 
 		return
 	}
-	err = validLoginForm(login)
+	err = login.Validate()
 
 	if err != nil {
 		http.Error(w, err.Message, err.StatusCode)
@@ -40,15 +40,13 @@ func (c *loginController) Post(w http.ResponseWriter, req *http.Request) {
 
 		return
 	}
-	err = c.userService.UpdateToken(user)
+	cookie, err := makeCookie(user.Token)
 
 	if err != nil {
 		http.Error(w, err.Message, err.StatusCode)
 
 		return
 	}
-	cookie := makeCookie(user.Token)
-
 	http.SetCookie(w, cookie)
 
 	redirect(w, req, "/")

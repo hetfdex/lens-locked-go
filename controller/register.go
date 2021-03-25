@@ -26,24 +26,27 @@ func (c *registerController) Post(w http.ResponseWriter, req *http.Request) {
 
 		return
 	}
-	err = validRegisterForm(register)
+	err = register.Validate()
 
 	if err != nil {
 		http.Error(w, err.Message, err.StatusCode)
 
 		return
 	}
-	user := register.User()
-
-	err = c.userService.Register(user)
+	user, err := c.userService.Register(register)
 
 	if err != nil {
 		http.Error(w, err.Message, err.StatusCode)
 
 		return
 	}
-	cookie := makeCookie(user.Token)
+	cookie, err := makeCookie(user.Token)
 
+	if err != nil {
+		http.Error(w, err.Message, err.StatusCode)
+
+		return
+	}
 	http.SetCookie(w, cookie)
 
 	redirect(w, req, "/")
