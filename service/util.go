@@ -9,6 +9,9 @@ import (
 )
 
 func generateFromPassword(user *model.User) *model.ApiError {
+	if user.Password == "" {
+		return model.NewInternalServerApiError("string must not be empty")
+	}
 	pw := []byte(user.Password + config.Pepper)
 
 	pwHash, err := bcrypt.GenerateFromPassword(pw, bcrypt.DefaultCost)
