@@ -17,24 +17,6 @@ func NewUserRepository(db *gorm.DB) (*UserRepository, *model.ApiError) {
 	}, nil
 }
 
-func (ur *UserRepository) CreateTable() *model.ApiError {
-	err := ur.database.Migrator().CreateTable(&model.User{})
-
-	if err != nil {
-		return model.NewInternalServerApiError(err.Error())
-	}
-	return nil
-}
-
-func (ur *UserRepository) DropTable() *model.ApiError {
-	err := ur.database.Migrator().DropTable(&model.User{})
-
-	if err != nil {
-		return model.NewInternalServerApiError(err.Error())
-	}
-	return nil
-}
-
 func (ur *UserRepository) Create(user *model.User) *model.ApiError {
 	err := ur.database.Create(user).Error
 

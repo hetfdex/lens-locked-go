@@ -7,6 +7,7 @@ import (
 	"lens-locked-go/config"
 	"lens-locked-go/controller"
 	"lens-locked-go/hash"
+	"lens-locked-go/model"
 	"lens-locked-go/repository"
 	"lens-locked-go/service"
 	"net/http"
@@ -15,12 +16,12 @@ import (
 func main() {
 	db, err := gorm.Open(postgres.Open(config.Dsn), &gorm.Config{})
 
+	resetDatabase(db)
+
 	if err != nil {
 		panic(err)
 	}
 	ur, apiErr := repository.NewUserRepository(db)
-
-	resetDatabase(ur)
 
 	hs := hash.New(config.HasherKey)
 
@@ -53,7 +54,15 @@ func configureRouter(us *service.UserService, r *mux.Router) {
 	r.HandleFunc(loginController.Route, loginController.Post).Methods(http.MethodPost)
 }
 
-func resetDatabase(ur *repository.UserRepository) {
-	_ = ur.DropTable()
-	_ = ur.CreateTable()
+func resetDatabase(db *gorm.DB) {
+	dropUserTable(db)
+	createUserTable(db)
+}
+
+func dropUserTable(db *gorm.DB) {
+	_ = db.Migrator().DropTable(&model.User{})
+}
+
+func createUserTable(db *gorm.DB) {
+	_ = db.Migrator().CreateTable(&model.User{})
 }
