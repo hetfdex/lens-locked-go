@@ -43,28 +43,20 @@ func (us *userService) Register(register *model.RegisterForm) (*model.User, *mod
 	if err != nil {
 		return nil, err
 	}
-	user = &model.User{
-		Name:         register.Name,
-		Email:        register.Email,
-		Password:     "",
-		PasswordHash: pwHash,
-		Token:        "",
-		TokenHash:    "",
-	}
 
 	token, err := generateToken()
 
 	if err != nil {
 		return nil, err
 	}
-	user.Token = token
 
 	tokenHash, err := us.Hasher.GenerateTokenHash(token)
 
 	if err != nil {
 		return nil, err
 	}
-	user.TokenHash = tokenHash
+
+	user = model.NewUserFromRegister(register, pwHash, token, tokenHash)
 
 	err = us.Create(user)
 
