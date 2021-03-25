@@ -5,8 +5,11 @@ import (
 	"lens-locked-go/config"
 	"lens-locked-go/model"
 	"lens-locked-go/rand"
+	"regexp"
 	"strings"
 )
+
+var emailRegex = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 
 func generateFromPassword(password string) (string, *model.ApiError) {
 	if password == "" {
@@ -56,4 +59,15 @@ func generateToken() (string, *model.ApiError) {
 
 func normalizeEmail(email string) string {
 	return strings.ToLower(strings.TrimSpace(email))
+}
+
+func validEmail(email string) bool {
+	if len(email) < 3 && len(email) > 254 {
+		return false
+	}
+
+	if !emailRegex.MatchString(email) {
+		return false
+	}
+	return true
 }

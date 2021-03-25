@@ -33,6 +33,9 @@ func NewUserService(ur repository.IUserRepository) *userService {
 func (us *userService) Register(register *model.RegisterForm) (*model.User, *model.ApiError) {
 	register.Email = normalizeEmail(register.Email)
 
+	if !validEmail(register.Email) {
+		return nil, model.NewBadRequestApiError("invalid email")
+	}
 	user, _ := us.getByEmail(register.Email)
 
 	if user != nil {
@@ -69,6 +72,9 @@ func (us *userService) Register(register *model.RegisterForm) (*model.User, *mod
 func (us *userService) LoginWithPassword(login *model.LoginForm) (*model.User, *model.ApiError) {
 	login.Email = normalizeEmail(login.Email)
 
+	if !validEmail(login.Email) {
+		return nil, model.NewBadRequestApiError("invalid email")
+	}
 	user, err := us.getByEmail(login.Email)
 
 	if err != nil {
