@@ -1,12 +1,19 @@
 package model
 
 import (
+	"fmt"
 	"net/http"
 )
 
 type ApiError struct {
 	StatusCode int
 	Message    string
+}
+
+func MustNotBeEmptyErrorMessage(value string) string {
+	message := fmt.Sprintf("%s must not be empty", value)
+
+	return message
 }
 
 func NewInternalServerApiError(message string) *ApiError {

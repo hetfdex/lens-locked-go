@@ -2,6 +2,7 @@ package controller
 
 import (
 	"errors"
+	"lens-locked-go/model"
 	"lens-locked-go/service"
 	"lens-locked-go/view"
 	"net/http"
@@ -23,7 +24,7 @@ func (c *controller) Get(w http.ResponseWriter, _ *http.Request) {
 
 func newController(route string, filename string, us service.IUserService) *controller {
 	if route == "" {
-		panic(errors.New("route must not be empty"))
+		panic(errors.New(model.MustNotBeEmptyErrorMessage("route")))
 	}
 	return &controller{
 		Route:       route,

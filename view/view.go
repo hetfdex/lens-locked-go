@@ -13,7 +13,7 @@ type View struct {
 
 func New(filename string) *View {
 	if filename == "" {
-		panic(errors.New("filename must not be empty"))
+		panic(errors.New(model.MustNotBeEmptyErrorMessage("filename")))
 	}
 	t, err := template.ParseFiles("view/base.gohtml", filename)
 

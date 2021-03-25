@@ -10,7 +10,7 @@ import (
 
 func generateFromPassword(password string) (string, *model.ApiError) {
 	if password == "" {
-		return "", model.NewInternalServerApiError("password must not be empty")
+		return "", model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("password"))
 	}
 	pw := []byte(password + config.Pepper)
 
@@ -25,11 +25,11 @@ func generateFromPassword(password string) (string, *model.ApiError) {
 func compareHashAndPassword(passwordHash string, password string) *model.ApiError {
 
 	if passwordHash == "" {
-		return model.NewInternalServerApiError("passwordHash must not be empty")
+		return model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("passwordHash"))
 	}
 
 	if password == "" {
-		return model.NewInternalServerApiError("password must not be empty")
+		return model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("password"))
 	}
 	pwHash := []byte(passwordHash)
 	pw := []byte(password + config.Pepper)

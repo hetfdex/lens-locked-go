@@ -7,11 +7,11 @@ type LoginForm struct {
 
 func (l *LoginForm) Validate() *ApiError {
 	if l.Email == "" {
-		return NewInternalServerApiError("email must not be empty")
+		return NewInternalServerApiError(MustNotBeEmptyErrorMessage("email"))
 	}
 
 	if l.Password == "" {
-		return NewInternalServerApiError("password must not be empty")
+		return NewInternalServerApiError(MustNotBeEmptyErrorMessage("password"))
 	}
 	return nil
 }

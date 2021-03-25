@@ -8,15 +8,15 @@ type RegisterForm struct {
 
 func (r *RegisterForm) Validate() *ApiError {
 	if r.Name == "" {
-		return NewInternalServerApiError("name must not be empty")
+		return NewInternalServerApiError(MustNotBeEmptyErrorMessage("name"))
 	}
 
 	if r.Email == "" {
-		return NewInternalServerApiError("email must not be empty")
+		return NewInternalServerApiError(MustNotBeEmptyErrorMessage("email"))
 	}
 
 	if r.Password == "" {
-		return NewInternalServerApiError("password must not be empty")
+		return NewInternalServerApiError(MustNotBeEmptyErrorMessage("password"))
 	}
 	return nil
 }
