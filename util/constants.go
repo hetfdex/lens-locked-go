@@ -1,8 +1,6 @@
-package config
+package util
 
-import (
-	"fmt"
-)
+import "fmt"
 
 const host = "localhost"
 const port = 5432
