@@ -2,8 +2,8 @@ package controller
 
 import (
 	"github.com/gorilla/schema"
-	"lens-locked-go/config"
 	"lens-locked-go/model"
+	"lens-locked-go/util"
 	"net/http"
 )
 
@@ -28,7 +28,7 @@ func makeCookie(cookieValue string) (*http.Cookie, *model.ApiError) {
 		return nil, model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("cookieValue"))
 	}
 	return &http.Cookie{
-		Name:     config.CookieName,
+		Name:     util.CookieName,
 		Value:    cookieValue,
 		HttpOnly: true,
 	}, nil

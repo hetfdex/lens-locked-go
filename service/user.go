@@ -1,10 +1,10 @@
 package service
 
 import (
-	"lens-locked-go/config"
 	"lens-locked-go/hash"
 	"lens-locked-go/model"
 	"lens-locked-go/repository"
+	"lens-locked-go/util"
 )
 
 type IUserService interface {
@@ -20,7 +20,7 @@ type userService struct {
 }
 
 func NewUserService(ur repository.IUserRepository) *userService {
-	hs, err := hash.New(config.HasherKey)
+	hs, err := hash.New(util.HasherKey)
 
 	if err != nil {
 		panic(err)
@@ -61,7 +61,7 @@ func (us *userService) Register(register *model.RegisterForm) (*model.User, stri
 	if err != nil {
 		return nil, "", err
 	}
-	user = model.NewUserFromRegister(register, pwHash, tokenHash)
+	user = register.User(pwHash, tokenHash)
 
 	err = us.Create(user)
 
@@ -81,7 +81,7 @@ func (us *userService) Edit(update *model.UpdateForm, token string) (*model.User
 	if !validPassword(update.Password) {
 		return nil, "", model.NewBadRequestApiError("invalid password")
 	}
-	loggedInUser, err := us.LoginWithToken(token)
+	user, err := us.LoginWithToken(token)
 
 	if err != nil {
 		return nil, "", err
@@ -89,7 +89,7 @@ func (us *userService) Edit(update *model.UpdateForm, token string) (*model.User
 	userFromEmail, _ := us.getByEmail(update.Email)
 
 	if userFromEmail != nil {
-		if loggedInUser.Equals(userFromEmail) {
+		if user.Equals(userFromEmail) {
 			return nil, "", model.NewBadRequestApiError("no user data changed")
 		}
 		return nil, "", model.NewConflictApiError("email is already registered")
@@ -109,14 +109,14 @@ func (us *userService) Edit(update *model.UpdateForm, token string) (*model.User
 	if err != nil {
 		return nil, "", err
 	}
-	updatedUser := model.NewUserFromUpdate(update, loggedInUser, newPwHash, newTokenHash)
+	user.Update(update, newPwHash, newTokenHash)
 
-	err = us.Update(updatedUser)
+	err = us.Update(user)
 
 	if err != nil {
 		return nil, "", err
 	}
-	return updatedUser, newToken, nil
+	return user, newToken, nil
 }
 
 func (us *userService) LoginWithPassword(login *model.LoginForm) (*model.User, string, *model.ApiError) {

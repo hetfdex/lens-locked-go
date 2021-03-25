@@ -3,12 +3,12 @@ package rand
 import (
 	"crypto/rand"
 	"encoding/base64"
-	"lens-locked-go/config"
 	"lens-locked-go/model"
+	"lens-locked-go/util"
 )
 
 func GenerateTokenString() (string, *model.ApiError) {
-	return generateString(config.ByteSliceSize)
+	return generateString(util.ByteSliceSize)
 }
 
 func generateString(size uint) (string, *model.ApiError) {
