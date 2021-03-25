@@ -2,7 +2,7 @@ package model
 
 type User struct {
 	Base
-	Name         string
+	Name         string `gorm:"not null"`
 	Email        string `gorm:"not null;unique_index"`
 	PasswordHash string `gorm:"not null"`
 	TokenHash    string `gorm:"not null;unique_index"`
@@ -17,8 +17,14 @@ func NewUserFromRegister(register *RegisterForm, passwordHash string, tokenHash 
 	}
 }
 
-func NewUserFromUpdate(update *UpdateForm, passwordHash string, tokenHash string) *User {
+func NewUserFromUpdate(update *UpdateForm, oldUser *User, passwordHash string, tokenHash string) *User {
 	return &User{
+		Base: Base{
+			ID:        oldUser.ID,
+			CreatedAt: oldUser.CreatedAt,
+			UpdatedAt: oldUser.UpdatedAt,
+			DeletedAt: nil,
+		},
 		Name:         update.Name,
 		Email:        update.Email,
 		PasswordHash: passwordHash,

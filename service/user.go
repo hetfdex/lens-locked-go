@@ -40,7 +40,7 @@ func (us *userService) Register(register *model.RegisterForm) (*model.User, stri
 	user, _ := us.getByEmail(register.Email)
 
 	if user != nil {
-		return nil, "", model.NewConflictApiError("user already exists")
+		return nil, "", model.NewConflictApiError("email is already registered")
 	}
 
 	if !validPassword(register.Password) {
@@ -90,11 +90,11 @@ func (us *userService) Edit(update *model.UpdateForm, token string) (*model.User
 
 	if userFromEmail != nil {
 		if loggedInUser.DeepEqual(userFromEmail) {
-			return nil, "", model.NewBadRequestApiError("users are the same")
+			return nil, "", model.NewBadRequestApiError("no user data changed")
 		}
-		return nil, "", model.NewConflictApiError("user already exists")
+		return nil, "", model.NewConflictApiError("email is already registered")
 	}
-	pwHash, err := generateFromPassword(update.Password)
+	newPwHash, err := generateFromPassword(update.Password)
 
 	if err != nil {
 		return nil, "", err
@@ -109,7 +109,7 @@ func (us *userService) Edit(update *model.UpdateForm, token string) (*model.User
 	if err != nil {
 		return nil, "", err
 	}
-	updatedUser := model.NewUserFromUpdate(update, pwHash, newTokenHash)
+	updatedUser := model.NewUserFromUpdate(update, loggedInUser, newPwHash, newTokenHash)
 
 	err = us.Update(updatedUser)
 
