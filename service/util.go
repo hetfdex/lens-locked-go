@@ -3,33 +3,39 @@ package service
 import (
 	"golang.org/x/crypto/bcrypt"
 	"lens-locked-go/config"
-	"lens-locked-go/hash"
 	"lens-locked-go/model"
 	"lens-locked-go/rand"
 	"lens-locked-go/validator"
 )
 
-func generateFromPassword(user *model.User) *model.ApiError {
-	apiErr := validator.StringNotEmpty("password", user.Password)
+func generateFromPassword(password string) (string, *model.ApiError) {
+	apiErr := validator.StringNotEmpty("password", password)
 
 	if apiErr != nil {
-		return apiErr
+		return "", apiErr
 	}
-	pw := []byte(user.Password + config.Pepper)
+	pw := []byte(password + config.Pepper)
 
 	pwHash, err := bcrypt.GenerateFromPassword(pw, bcrypt.DefaultCost)
 
 	if err != nil {
-		return model.NewInternalServerApiError(err.Error())
+		return "", model.NewInternalServerApiError(err.Error())
 	}
-	user.Password = ""
-	user.PasswordHash = string(pwHash)
-
-	return nil
+	return string(pwHash), nil
 }
 
-func compareHashAndPassword(user *model.User, password string) *model.ApiError {
-	pwHash := []byte(user.PasswordHash)
+func compareHashAndPassword(passwordHash string, password string) *model.ApiError {
+	apiErr := validator.StringNotEmpty("passwordHash", passwordHash)
+
+	if apiErr != nil {
+		return apiErr
+	}
+	apiErr = validator.StringNotEmpty("password", password)
+
+	if apiErr != nil {
+		return apiErr
+	}
+	pwHash := []byte(passwordHash)
 	pw := []byte(password + config.Pepper)
 
 	err := bcrypt.CompareHashAndPassword(pwHash, pw)
@@ -50,13 +56,4 @@ func generateToken() (string, *model.ApiError) {
 		return "", err
 	}
 	return token, nil
-}
-
-func generateTokenHash(hs *hash.Hasher, token string) (string, *model.ApiError) {
-	tokenHash, err := hs.GenerateHash(token)
-
-	if err != nil {
-		return "", err
-	}
-	return tokenHash, nil
 }

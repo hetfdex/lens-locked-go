@@ -21,15 +21,15 @@ func New(key string) *Hasher {
 	}
 }
 
-func (h *Hasher) GenerateHash(input string) (string, *model.ApiError) {
-	apiErr := validator.StringNotEmpty("input", input)
+func (h *Hasher) GenerateTokenHash(token string) (string, *model.ApiError) {
+	apiErr := validator.StringNotEmpty("token", token)
 
 	if apiErr != nil {
 		return "", apiErr
 	}
 	h.hash.Reset()
 
-	_, err := h.hash.Write([]byte(input))
+	_, err := h.hash.Write([]byte(token))
 
 	if err != nil {
 		return "", model.NewInternalServerApiError(err.Error())

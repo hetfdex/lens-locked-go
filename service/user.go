@@ -37,7 +37,7 @@ func (us *userService) LoginWithPassword(login *model.LoginForm) (*model.User, *
 	if err != nil {
 		return nil, err
 	}
-	err = compareHashAndPassword(user, login.Password)
+	err = compareHashAndPassword(user.PasswordHash, login.Password)
 
 	if err != nil {
 		return nil, err
@@ -46,7 +46,7 @@ func (us *userService) LoginWithPassword(login *model.LoginForm) (*model.User, *
 }
 
 func (us *userService) LoginWithToken(token string) (*model.User, *model.ApiError) {
-	tokenHash, err := generateTokenHash(us.Hasher, token)
+	tokenHash, err := us.Hasher.GenerateTokenHash(token)
 
 	if err != nil {
 		return nil, err
@@ -65,18 +65,21 @@ func (us *userService) Register(user *model.User) *model.ApiError {
 	if existingUser != nil {
 		return model.NewConflictApiError("user already exists")
 	}
-	err := generateFromPassword(user)
+	pwHash, err := generateFromPassword(user.Password)
 
 	if err != nil {
 		return err
 	}
+	user.Password = ""
+	user.PasswordHash = pwHash
+
 	token, err := generateToken()
 
 	if err != nil {
 		return err
 	}
 	user.Token = token
-	tokenHash, err := generateTokenHash(us.Hasher, user.Token)
+	tokenHash, err := us.Hasher.GenerateTokenHash(token)
 
 	if err != nil {
 		return err
@@ -127,7 +130,7 @@ func (us *userService) UpdateToken(user *model.User) *model.ApiError {
 	}
 	user.Token = token
 
-	tokenHash, err := generateTokenHash(us.Hasher, user.Token)
+	tokenHash, err := us.Hasher.GenerateTokenHash(token)
 
 	if err != nil {
 		return err
