@@ -8,15 +8,15 @@ type Register struct {
 
 func (r *Register) Validate() *ApiError {
 	if r.Name == "" {
-		return NewInternalServerApiError(MustNotBeEmptyErrorMessage("name"))
+		return NewBadRequestApiError(MustNotBeEmptyErrorMessage("name"))
 	}
 
 	if r.Email == "" {
-		return NewInternalServerApiError(MustNotBeEmptyErrorMessage("email"))
+		return NewBadRequestApiError(MustNotBeEmptyErrorMessage("email"))
 	}
 
 	if r.Password == "" {
-		return NewInternalServerApiError(MustNotBeEmptyErrorMessage("password"))
+		return NewBadRequestApiError(MustNotBeEmptyErrorMessage("password"))
 	}
 	return nil
 }

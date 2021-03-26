@@ -7,11 +7,11 @@ type Login struct {
 
 func (l *Login) Validate() *ApiError {
 	if l.Email == "" {
-		return NewInternalServerApiError(MustNotBeEmptyErrorMessage("email"))
+		return NewBadRequestApiError(MustNotBeEmptyErrorMessage("email"))
 	}
 
 	if l.Password == "" {
-		return NewInternalServerApiError(MustNotBeEmptyErrorMessage("password"))
+		return NewBadRequestApiError(MustNotBeEmptyErrorMessage("password"))
 	}
 	return nil
 }

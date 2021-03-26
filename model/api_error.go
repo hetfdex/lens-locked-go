@@ -24,13 +24,13 @@ func (e *ApiError) Alert() *Alert {
 		alertLevel = AlertLevelError
 		message = internalServerErrorMessage
 	} else if e.StatusCode == http.StatusNotFound {
-		alertLevel = AlertLevelInfo
+		alertLevel = AlertLevelWarning
 		message = notFoundErrorMessage
 	} else if e.StatusCode == http.StatusForbidden {
 		alertLevel = AlertLevelError
 		message = forbiddenErrorMessage
 	} else if e.StatusCode == http.StatusBadRequest {
-		alertLevel = AlertLevelWarning
+		alertLevel = AlertLevelInfo
 		message = badRequestErrorMessage
 	} else if e.StatusCode == http.StatusConflict {
 		alertLevel = AlertLevelWarning

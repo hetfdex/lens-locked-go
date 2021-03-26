@@ -8,15 +8,15 @@ type Update struct {
 
 func (u *Update) Validate() *ApiError {
 	if u.Name == "" {
-		return NewInternalServerApiError(MustNotBeEmptyErrorMessage("name"))
+		return NewBadRequestApiError(MustNotBeEmptyErrorMessage("name"))
 	}
 
 	if u.Email == "" {
-		return NewInternalServerApiError(MustNotBeEmptyErrorMessage("email"))
+		return NewBadRequestApiError(MustNotBeEmptyErrorMessage("email"))
 	}
 
 	if u.Password == "" {
-		return NewInternalServerApiError(MustNotBeEmptyErrorMessage("password"))
+		return NewBadRequestApiError(MustNotBeEmptyErrorMessage("password"))
 	}
 	return nil
 }
