@@ -5,9 +5,38 @@ import (
 	"net/http"
 )
 
+const internalServerErrorMessage = "Something went wrong"
+const notFoundErrorMessage = "Resource not found"
+const forbiddenErrorMessage = "Access forbidden"
+const badRequestErrorMessage = "Invalid data provided"
+const conflictErrorMessage = "Resource already exists"
+
 type ApiError struct {
 	StatusCode int
 	Message    string
+}
+
+func (e *ApiError) Alert() *Alert {
+	var alertLevel string
+	var message string
+
+	if e.StatusCode == http.StatusInternalServerError {
+		alertLevel = AlertLevelError
+		message = internalServerErrorMessage
+	} else if e.StatusCode == http.StatusNotFound {
+		alertLevel = AlertLevelInfo
+		message = notFoundErrorMessage
+	} else if e.StatusCode == http.StatusForbidden {
+		alertLevel = AlertLevelError
+		message = forbiddenErrorMessage
+	} else if e.StatusCode == http.StatusBadRequest {
+		alertLevel = AlertLevelWarning
+		message = badRequestErrorMessage
+	} else if e.StatusCode == http.StatusConflict {
+		alertLevel = AlertLevelWarning
+		message = conflictErrorMessage
+	}
+	return newAlert(alertLevel, message)
 }
 
 func NewInternalServerApiError(message string) *ApiError {
