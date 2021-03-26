@@ -17,11 +17,7 @@ type controller struct {
 func (c *controller) Get(w http.ResponseWriter, _ *http.Request) {
 	data := &model.Data{}
 
-	err := c.view.Render(w, data)
-
-	if err != nil {
-		c.handleError(w, err, data)
-	}
+	c.view.Render(w, data)
 }
 
 func (c *controller) handleError(w http.ResponseWriter, err *model.ApiError, data *model.Data) {

@@ -32,7 +32,7 @@ func New(filename string) *View {
 	}
 }
 
-func (v *View) Render(w http.ResponseWriter, data *model.Data) *model.ApiError {
+func (v *View) Render(w http.ResponseWriter, data *model.Data) {
 	w.Header().Set(contentTypeKey, contentTypeValue)
 
 	err := v.template.ExecuteTemplate(w, baseTag, data)
@@ -44,5 +44,4 @@ func (v *View) Render(w http.ResponseWriter, data *model.Data) *model.ApiError {
 
 		http.Error(w, alert.Message, apiErr.StatusCode)
 	}
-	return nil
 }
