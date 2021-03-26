@@ -32,7 +32,7 @@ func New(filename string) *View {
 	}
 }
 
-func (v *View) Render(w http.ResponseWriter, data *model.Data) {
+func (v *View) Render(w http.ResponseWriter, data *model.DataView) {
 	w.Header().Set(contentTypeKey, contentTypeValue)
 
 	err := v.template.ExecuteTemplate(w, baseTag, data)
