@@ -1,8 +1,9 @@
-package model
+package view
 
 import (
 	"errors"
 	"html/template"
+	"lens-locked-go/model"
 	"net/http"
 )
 
@@ -19,7 +20,7 @@ type View struct {
 
 func NewView(filename string) *View {
 	if filename == "" {
-		panic(errors.New(MustNotBeEmptyErrorMessage("filename")))
+		panic(errors.New(model.MustNotBeEmptyErrorMessage("filename")))
 	}
 	t, err := template.ParseFiles(baseFilename, alertFilename, filename)
 
@@ -31,13 +32,13 @@ func NewView(filename string) *View {
 	}
 }
 
-func (v *View) Render(w http.ResponseWriter, data *Data) *ApiError {
+func (v *View) Render(w http.ResponseWriter, data *model.Data) *model.ApiError {
 	w.Header().Set(contentTypeKey, contentTypeValue)
 
 	err := v.template.ExecuteTemplate(w, baseTag, data)
 
 	if err != nil {
-		return NewInternalServerApiError(err.Error())
+		return model.NewInternalServerApiError(err.Error())
 	}
 	return nil
 }
