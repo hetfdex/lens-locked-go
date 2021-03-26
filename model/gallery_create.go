@@ -1,11 +1,11 @@
 package model
 
 type CreateGallery struct {
-	Title string `schema:"title"`
+	Name string `schema:"name"`
 }
 
 func (c *CreateGallery) Validate() *Error {
-	if c.Title == "" {
+	if c.Name == "" {
 		return NewBadRequestApiError(MustNotBeEmptyErrorMessage("title"))
 	}
 	return nil
@@ -13,6 +13,6 @@ func (c *CreateGallery) Validate() *Error {
 
 func (c *CreateGallery) Gallery() *Gallery {
 	return &Gallery{
-		Title: c.Title,
+		Title: c.Name,
 	}
 }

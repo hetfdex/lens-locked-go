@@ -22,9 +22,9 @@ func NewGalleryService(ur repository.IGalleryRepository) *galleryService {
 }
 
 func (s *galleryService) Create(create *model.CreateGallery) (*model.Gallery, *model.Error) {
-	create.Title = normalizeEmail(create.Title)
+	create.Name = normalizeEmail(create.Name)
 
-	gallery, _ := s.getByTitle(create.Title)
+	gallery, _ := s.getByTitle(create.Name)
 
 	if gallery != nil && gallery.UserId.String() == "TODO" {
 		return nil, model.NewConflictApiError(titleInUseErrorMessage)

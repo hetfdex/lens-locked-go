@@ -1,15 +1,15 @@
 {{define "view"}}
     <div class="row mt-3">
-        <div class="col-md-6 offset-md-3">
+        <div class="col-md-4 offset-md-4">
             <div class="card">
                 <h5 class="card-header text-white bg-primary">Create Gallery</h5>
                 <div class="card-body">
                     <form action="/gallery/create" method="post">
                         <div class="mb-3">
-                            <label for="title" class="form-label">Title</label>
-                            <input type="text" title="title" class="form-control" id="title"
-                                   aria-describedby="titleHelp"
-                                   placeholder="Enter title">
+                            <label for="name" class="form-label">Name</label>
+                            <input type="text" name="name" class="form-control" id="name"
+                                   aria-describedby="nameHelp"
+                                   placeholder="Enter name">
                         </div>
                         <button type="submit" class="btn btn-primary">Create</button>
                     </form>

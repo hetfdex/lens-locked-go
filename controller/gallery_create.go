@@ -2,6 +2,7 @@ package controller
 
 import (
 	"errors"
+	"fmt"
 	"lens-locked-go/model"
 	"lens-locked-go/service"
 	"lens-locked-go/view"
@@ -42,14 +43,15 @@ func (c *newGalleryController) Post(w http.ResponseWriter, req *http.Request) {
 
 		return
 	}
-	_, err = c.galleryService.Create(create)
+	gallery, err := c.galleryService.Create(create)
 
 	if err != nil {
 		handleError(c.view, w, err, data)
 
 		return
 	}
-	redirect(w, req, "/gallery")
+	_, _ = fmt.Fprintln(w, gallery)
+	//redirect(w, req, "/gallery")
 }
 
 func newCreateGalleryController(route string, filename string, gs service.IGalleryService) *newGalleryController {
