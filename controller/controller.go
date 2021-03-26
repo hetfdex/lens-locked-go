@@ -15,12 +15,12 @@ type controller struct {
 }
 
 func (c *controller) Get(w http.ResponseWriter, _ *http.Request) {
-	data := &model.Data{}
+	data := &model.DataView{}
 
 	c.view.Render(w, data)
 }
 
-func (c *controller) handleError(w http.ResponseWriter, err *model.ApiError, data *model.Data) {
+func (c *controller) handleError(w http.ResponseWriter, err *model.Error, data *model.DataView) {
 	data.Alert = err.Alert()
 
 	w.WriteHeader(err.StatusCode)

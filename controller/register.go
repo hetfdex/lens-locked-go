@@ -17,8 +17,8 @@ func NewRegisterController(us service.IUserService) *registerController {
 }
 
 func (c *registerController) Post(w http.ResponseWriter, req *http.Request) {
-	data := &model.Data{}
-	register := &model.Register{}
+	data := &model.DataView{}
+	register := &model.RegisterView{}
 
 	err := parseForm(req, register)
 

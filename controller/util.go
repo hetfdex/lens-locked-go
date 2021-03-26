@@ -8,7 +8,7 @@ import (
 
 const name = "login_token"
 
-func parseForm(req *http.Request, result interface{}) *model.ApiError {
+func parseForm(req *http.Request, result interface{}) *model.Error {
 	err := req.ParseForm()
 
 	if err != nil {
@@ -24,7 +24,7 @@ func parseForm(req *http.Request, result interface{}) *model.ApiError {
 	return nil
 }
 
-func makeCookie(value string) (*http.Cookie, *model.ApiError) {
+func makeCookie(value string) (*http.Cookie, *model.Error) {
 	if value == "" {
 		return nil, model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("value"))
 	}

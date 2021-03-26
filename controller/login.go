@@ -17,8 +17,8 @@ func NewLoginController(us service.IUserService) *loginController {
 }
 
 func (c *loginController) Post(w http.ResponseWriter, req *http.Request) {
-	data := &model.Data{}
-	login := &model.Login{}
+	data := &model.DataView{}
+	login := &model.LoginView{}
 
 	err := parseForm(req, login)
 
