@@ -49,7 +49,9 @@ func openDb() *gorm.DB {
 
 func resetDatabase(db *gorm.DB) {
 	_ = db.Migrator().DropTable(&model.User{})
+	_ = db.Migrator().DropTable(&model.Gallery{})
 	_ = db.Migrator().CreateTable(&model.User{})
+	_ = db.Migrator().CreateTable(&model.Gallery{})
 }
 
 func configureRouter(us service.IUserService, r *mux.Router) {
