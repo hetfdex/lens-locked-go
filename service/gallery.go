@@ -8,11 +8,11 @@ import (
 const titleInUseErrorMessage = "title is already in use"
 
 type IGalleryService interface {
-	New(*model.NewGallery) (*model.Gallery, *model.Error)
+	Create(gallery *model.CreateGallery) (*model.Gallery, *model.Error)
 }
 
 type galleryService struct {
-	repository.IGalleryRepository
+	repository repository.IGalleryRepository
 }
 
 func NewGalleryService(ur repository.IGalleryRepository) *galleryService {
@@ -21,7 +21,7 @@ func NewGalleryService(ur repository.IGalleryRepository) *galleryService {
 	}
 }
 
-func (s *galleryService) New(create *model.NewGallery) (*model.Gallery, *model.Error) {
+func (s *galleryService) Create(create *model.CreateGallery) (*model.Gallery, *model.Error) {
 	create.Title = normalizeEmail(create.Title)
 
 	gallery, _ := s.getByTitle(create.Title)
@@ -31,7 +31,7 @@ func (s *galleryService) New(create *model.NewGallery) (*model.Gallery, *model.E
 	}
 	gallery = create.Gallery()
 
-	err := s.Create(gallery)
+	err := s.repository.Create(gallery)
 
 	if err != nil {
 		return nil, err
@@ -43,7 +43,7 @@ func (s *galleryService) getByTitle(title string) (*model.Gallery, *model.Error)
 	if title == "" {
 		return nil, model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("title"))
 	}
-	gallery, err := s.Read("title", title)
+	gallery, err := s.repository.Read("title", title)
 
 	if err != nil {
 		return nil, err

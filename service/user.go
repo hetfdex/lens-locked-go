@@ -18,7 +18,7 @@ type IUserService interface {
 }
 
 type userService struct {
-	repository.IUserRepository
+	repository repository.IUserRepository
 	*hash.Hasher
 }
 
@@ -66,7 +66,7 @@ func (s *userService) Register(register *model.UserRegister) (*model.User, strin
 	}
 	user = register.User(pwHash, tokenHash)
 
-	err = s.Create(user)
+	err = s.repository.Create(user)
 
 	if err != nil {
 		return nil, "", err
@@ -106,7 +106,7 @@ func (s *userService) LoginWithPassword(login *model.UserLogin) (*model.User, st
 	}
 	user.TokenHash = tokenHash
 
-	err = s.Update(user)
+	err = s.repository.Update(user)
 
 	if err != nil {
 		return nil, "", err
@@ -132,7 +132,7 @@ func (s *userService) getByEmail(email string) (*model.User, *model.Error) {
 	if email == "" {
 		return nil, model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("email"))
 	}
-	user, err := s.Read("email", email)
+	user, err := s.repository.Read("email", email)
 
 	if err != nil {
 		return nil, err
@@ -144,7 +144,7 @@ func (s *userService) getByTokenHash(hash string) (*model.User, *model.Error) {
 	if hash == "" {
 		return nil, model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("tokenHash"))
 	}
-	user, err := s.Read("token_hash", hash)
+	user, err := s.repository.Read("token_hash", hash)
 
 	if err != nil {
 		return nil, err

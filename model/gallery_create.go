@@ -1,18 +1,18 @@
 package model
 
-type NewGallery struct {
+type CreateGallery struct {
 	Title string `schema:"title"`
 }
 
-func (g *NewGallery) Validate() *Error {
-	if g.Title == "" {
+func (c *CreateGallery) Validate() *Error {
+	if c.Title == "" {
 		return NewBadRequestApiError(MustNotBeEmptyErrorMessage("title"))
 	}
 	return nil
 }
 
-func (g *NewGallery) Gallery() *Gallery {
+func (c *CreateGallery) Gallery() *Gallery {
 	return &Gallery{
-		Title: g.Title,
+		Title: c.Title,
 	}
 }

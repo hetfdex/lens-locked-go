@@ -14,8 +14,8 @@ type newGalleryController struct {
 	galleryService service.IGalleryService
 }
 
-func NewNewGalleryController(gs service.IGalleryService) *newGalleryController {
-	return newNewGalleryController("/gallery/new", "view/gallery_new.gohtml", gs)
+func NewCreateGalleryController(gs service.IGalleryService) *newGalleryController {
+	return newCreateGalleryController("/gallery/create", "view/gallery_create.gohtml", gs)
 }
 
 func (c *newGalleryController) Get(w http.ResponseWriter, _ *http.Request) {
@@ -26,23 +26,23 @@ func (c *newGalleryController) Get(w http.ResponseWriter, _ *http.Request) {
 
 func (c *newGalleryController) Post(w http.ResponseWriter, req *http.Request) {
 	data := &model.DataView{}
-	newG := &model.NewGallery{}
+	create := &model.CreateGallery{}
 
-	err := parseForm(req, newG)
-
-	if err != nil {
-		handleError(c.view, w, err, data)
-
-		return
-	}
-	err = newG.Validate()
+	err := parseForm(req, create)
 
 	if err != nil {
 		handleError(c.view, w, err, data)
 
 		return
 	}
-	_, err = c.galleryService.New(newG)
+	err = create.Validate()
+
+	if err != nil {
+		handleError(c.view, w, err, data)
+
+		return
+	}
+	_, err = c.galleryService.Create(create)
 
 	if err != nil {
 		handleError(c.view, w, err, data)
@@ -52,7 +52,7 @@ func (c *newGalleryController) Post(w http.ResponseWriter, req *http.Request) {
 	redirect(w, req, "/gallery")
 }
 
-func newNewGalleryController(route string, filename string, gs service.IGalleryService) *newGalleryController {
+func newCreateGalleryController(route string, filename string, gs service.IGalleryService) *newGalleryController {
 	if route == "" {
 		panic(errors.New(model.MustNotBeEmptyErrorMessage("route")))
 	}
