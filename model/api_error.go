@@ -3,13 +3,8 @@ package model
 import (
 	"fmt"
 	"net/http"
+	"strings"
 )
-
-const internalServerErrorMessage = "Something went wrong"
-const notFoundErrorMessage = "Resource not found"
-const forbiddenErrorMessage = "Access forbidden"
-const badRequestErrorMessage = "Invalid data provided"
-const conflictErrorMessage = "Resource already exists"
 
 type ApiError struct {
 	StatusCode int
@@ -18,26 +13,20 @@ type ApiError struct {
 
 func (e *ApiError) Alert() *Alert {
 	var alertLevel string
-	var message string
 
 	switch e.StatusCode {
 	case http.StatusInternalServerError:
 		alertLevel = alertLevelError
-		message = internalServerErrorMessage
 	case http.StatusNotFound:
 		alertLevel = alertLevelWarning
-		message = notFoundErrorMessage
 	case http.StatusForbidden:
 		alertLevel = alertLevelError
-		message = forbiddenErrorMessage
 	case http.StatusBadRequest:
 		alertLevel = alertLevelWarning
-		message = badRequestErrorMessage
 	case http.StatusConflict:
 		alertLevel = alertLevelWarning
-		message = conflictErrorMessage
 	}
-	return newAlert(alertLevel, message)
+	return newAlert(alertLevel, strings.Title(e.Message))
 }
 
 func NewInternalServerApiError(message string) *ApiError {
