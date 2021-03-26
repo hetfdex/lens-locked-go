@@ -7,9 +7,9 @@ import (
 )
 
 const hasherKey = "yzzmGPkAA9FTmbtzz9jB"
-const invalidPasswordErrorMessage = "invalid password"
 const invalidEmailErrorMessage = "invalid email address"
 const emailInUseErrorMessage = "email address is already in use"
+const invalidPasswordLengthErrorMessage = "password must be at least 8 characters"
 const noUserUpdateNeededErrorMessage = "no user update needed"
 
 type IUserService interface {
@@ -49,7 +49,7 @@ func (us *userService) Register(register *model.Register) (*model.User, string, 
 	}
 
 	if !validPassword(register.Password) {
-		return nil, "", model.NewBadRequestApiError(invalidPasswordErrorMessage)
+		return nil, "", model.NewBadRequestApiError(invalidPasswordLengthErrorMessage)
 	}
 	pwHash, err := generateFromPassword(register.Password)
 
@@ -84,7 +84,7 @@ func (us *userService) Edit(update *model.Update, token string) (*model.User, st
 	}
 
 	if !validPassword(update.Password) {
-		return nil, "", model.NewBadRequestApiError(invalidPasswordErrorMessage)
+		return nil, "", model.NewBadRequestApiError(invalidPasswordLengthErrorMessage)
 	}
 	user, err := us.LoginWithToken(token)
 
@@ -137,7 +137,7 @@ func (us *userService) LoginWithPassword(login *model.Login) (*model.User, strin
 	}
 
 	if !validPassword(login.Password) {
-		return nil, "", model.NewBadRequestApiError(invalidPasswordErrorMessage)
+		return nil, "", model.NewBadRequestApiError(invalidPasswordLengthErrorMessage)
 	}
 	err = compareHashAndPassword(user.PasswordHash, login.Password)
 

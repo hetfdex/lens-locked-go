@@ -9,6 +9,7 @@ import (
 )
 
 const pepper = "6Sk65RHhGW7S4qnVPV7m"
+const invalidPasswordErrorMessage = "invalid password"
 
 var emailRegex = regexp.MustCompile(`^[a-z0-9_.+-]+@[a-z0-9-]+\.[a-z0-9-.]+$`)
 
