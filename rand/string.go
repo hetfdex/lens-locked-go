@@ -8,11 +8,11 @@ import (
 
 const byteSliceSize = 32
 
-func GenerateTokenString() (string, *model.ApiError) {
+func GenerateTokenString() (string, *model.Error) {
 	return generateString(byteSliceSize)
 }
 
-func generateString(size uint) (string, *model.ApiError) {
+func generateString(size uint) (string, *model.Error) {
 	b, err := generateBytes(size)
 
 	if err != nil {
@@ -21,7 +21,7 @@ func generateString(size uint) (string, *model.ApiError) {
 	return base64.URLEncoding.EncodeToString(b), nil
 }
 
-func generateBytes(size uint) ([]byte, *model.ApiError) {
+func generateBytes(size uint) ([]byte, *model.Error) {
 	b := make([]byte, size)
 
 	_, err := rand.Read(b)

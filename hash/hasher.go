@@ -12,18 +12,18 @@ type Hasher struct {
 	hash hash.Hash
 }
 
-func New(hasherKey string) (*Hasher, *model.ApiError) {
-	if hasherKey == "" {
-		return nil, model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("hasherKey"))
+func New(key string) (*Hasher, *model.Error) {
+	if key == "" {
+		return nil, model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("key"))
 	}
-	h := hmac.New(sha256.New, []byte(hasherKey))
+	h := hmac.New(sha256.New, []byte(key))
 
 	return &Hasher{
 		hash: h,
 	}, nil
 }
 
-func (h *Hasher) GenerateTokenHash(token string) (string, *model.ApiError) {
+func (h *Hasher) GenerateTokenHash(token string) (string, *model.Error) {
 	if token == "" {
 		return "", model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("token"))
 	}
