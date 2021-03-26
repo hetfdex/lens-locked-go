@@ -4,14 +4,14 @@ import (
 	"errors"
 	"lens-locked-go/model"
 	"lens-locked-go/service"
-	view2 "lens-locked-go/view"
+	"lens-locked-go/view"
 	"log"
 	"net/http"
 )
 
 type controller struct {
 	Route       string
-	view        *view2.View
+	view        *view.View
 	userService service.IUserService
 }
 
@@ -39,7 +39,7 @@ func newController(route string, filename string, us service.IUserService) *cont
 	}
 	return &controller{
 		Route:       route,
-		view:        view2.New(filename),
+		view:        view.New(filename),
 		userService: us,
 	}
 }
