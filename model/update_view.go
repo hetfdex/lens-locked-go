@@ -1,12 +1,12 @@
 package model
 
-type Update struct {
+type UpdateView struct {
 	Name     string `schema:"name"`
 	Email    string `schema:"email"`
 	Password string `schema:"password"`
 }
 
-func (u *Update) Validate() *ApiError {
+func (u *UpdateView) Validate() *Error {
 	if u.Name == "" {
 		return NewBadRequestApiError(MustNotBeEmptyErrorMessage("name"))
 	}

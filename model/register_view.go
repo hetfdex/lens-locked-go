@@ -1,12 +1,12 @@
 package model
 
-type Register struct {
+type RegisterView struct {
 	Name     string `schema:"name"`
 	Email    string `schema:"email"`
 	Password string `schema:"password"`
 }
 
-func (r *Register) Validate() *ApiError {
+func (r *RegisterView) Validate() *Error {
 	if r.Name == "" {
 		return NewBadRequestApiError(MustNotBeEmptyErrorMessage("name"))
 	}
@@ -21,7 +21,7 @@ func (r *Register) Validate() *ApiError {
 	return nil
 }
 
-func (r *Register) User(passwordHash string, tokenHash string) *User {
+func (r *RegisterView) User(passwordHash string, tokenHash string) *User {
 	return &User{
 		Name:         r.Name,
 		Email:        r.Email,

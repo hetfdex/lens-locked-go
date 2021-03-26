@@ -1,6 +1,6 @@
 package model
 
-type Data struct {
-	Alert *Alert
+type DataView struct {
+	Alert *AlertView
 	Data  interface{}
 }

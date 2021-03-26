@@ -1,11 +1,11 @@
 package model
 
-type Login struct {
+type LoginView struct {
 	Email    string `schema:"email"`
 	Password string `schema:"password"`
 }
 
-func (l *Login) Validate() *ApiError {
+func (l *LoginView) Validate() *Error {
 	if l.Email == "" {
 		return NewBadRequestApiError(MustNotBeEmptyErrorMessage("email"))
 	}

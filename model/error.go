@@ -8,12 +8,12 @@ import (
 
 const genericErrorMessage = "something went wrong"
 
-type ApiError struct {
+type Error struct {
 	StatusCode int
 	Message    string
 }
 
-func (e *ApiError) Alert() *Alert {
+func (e *Error) Alert() *AlertView {
 	var alertLevel string
 
 	message := e.Message
@@ -31,38 +31,46 @@ func (e *ApiError) Alert() *Alert {
 	case http.StatusConflict:
 		alertLevel = alertLevelWarning
 	}
-	return newAlert(alertLevel, strings.Title(message))
+	return &AlertView{
+		Level:   alertLevel,
+		Message: strings.Title(message),
+	}
 }
 
-func NewInternalServerApiError(message string) *ApiError {
-	return newApiError(http.StatusInternalServerError, message)
+func NewInternalServerApiError(message string) *Error {
+	return &Error{
+		StatusCode: http.StatusInternalServerError,
+		Message:    message,
+	}}
+
+func NewNotFoundApiError(message string) *Error {
+	return &Error{
+		StatusCode: http.StatusNotFound,
+		Message:    message,
+	}}
+
+func NewForbiddenApiError(message string) *Error {
+	return &Error{
+		StatusCode: http.StatusForbidden,
+		Message:    message,
+	}}
+
+func NewBadRequestApiError(message string) *Error {
+	return &Error{
+		StatusCode: http.StatusBadRequest,
+		Message:    message,
+	}
 }
 
-func NewNotFoundApiError(message string) *ApiError {
-	return newApiError(http.StatusNotFound, message)
-}
-
-func NewForbiddenApiError(message string) *ApiError {
-	return newApiError(http.StatusForbidden, message)
-}
-
-func NewBadRequestApiError(message string) *ApiError {
-	return newApiError(http.StatusBadRequest, message)
-}
-
-func NewConflictApiError(message string) *ApiError {
-	return newApiError(http.StatusConflict, message)
+func NewConflictApiError(message string) *Error {
+	return &Error{
+		StatusCode: http.StatusConflict,
+		Message:    message,
+	}
 }
 
 func MustNotBeEmptyErrorMessage(value string) string {
 	message := fmt.Sprintf("%s must not be empty", value)
 
 	return message
-}
-
-func newApiError(statusCode int, message string) *ApiError {
-	return &ApiError{
-		StatusCode: statusCode,
-		Message:    message,
-	}
 }
