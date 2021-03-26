@@ -8,41 +8,41 @@ import (
 	"net/http"
 )
 
-type registerController struct {
+type loginController struct {
 	Route       string
 	view        *view.View
 	userService service.IUserService
 }
 
-func NewRegisterController(us service.IUserService) *registerController {
-	return newRegisterController("/register", "view/register.gohtml", us)
+func NewLoginUserController(us service.IUserService) *loginController {
+	return newLoginUserController("/login", "view/user_login.gohtml", us)
 }
 
-func (c *registerController) Get(w http.ResponseWriter, _ *http.Request) {
+func (c *loginController) Get(w http.ResponseWriter, _ *http.Request) {
 	data := &model.DataView{}
 
 	c.view.Render(w, data)
 }
 
-func (c *registerController) Post(w http.ResponseWriter, req *http.Request) {
+func (c *loginController) Post(w http.ResponseWriter, req *http.Request) {
 	data := &model.DataView{}
-	register := &model.RegisterView{}
+	login := &model.LoginView{}
 
-	err := parseForm(req, register)
-
-	if err != nil {
-		handleError(c.view, w, err, data)
-
-		return
-	}
-	err = register.Validate()
+	err := parseForm(req, login)
 
 	if err != nil {
 		handleError(c.view, w, err, data)
 
 		return
 	}
-	_, token, err := c.userService.Register(register)
+	err = login.Validate()
+
+	if err != nil {
+		handleError(c.view, w, err, data)
+
+		return
+	}
+	_, token, err := c.userService.LoginWithPassword(login)
 
 	if err != nil {
 		handleError(c.view, w, err, data)
@@ -61,11 +61,11 @@ func (c *registerController) Post(w http.ResponseWriter, req *http.Request) {
 	redirect(w, req, "/")
 }
 
-func newRegisterController(route string, filename string, us service.IUserService) *registerController {
+func newLoginUserController(route string, filename string, us service.IUserService) *loginController {
 	if route == "" {
 		panic(errors.New(model.MustNotBeEmptyErrorMessage("route")))
 	}
-	return &registerController{
+	return &loginController{
 		Route:       route,
 		view:        view.New(filename),
 		userService: us,

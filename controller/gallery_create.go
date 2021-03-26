@@ -8,27 +8,27 @@ import (
 	"net/http"
 )
 
-type galleryController struct {
+type createGalleryController struct {
 	Route          string
 	view           *view.View
 	galleryService service.IGalleryService
 }
 
-func NewGalleryController(gs service.IGalleryService) *galleryController {
-	return newGalleryController("/gallery", "view/gallery.gohtml", gs)
+func NewCreateGalleryController(gs service.IGalleryService) *createGalleryController {
+	return newCreateGalleryController("/gallery/create", "view/gallery_create.gohtml", gs)
 }
 
-func (c *galleryController) Get(w http.ResponseWriter, _ *http.Request) {
+func (c *createGalleryController) Get(w http.ResponseWriter, _ *http.Request) {
 	data := &model.DataView{}
 
 	c.view.Render(w, data)
 }
 
-func newGalleryController(route string, filename string, gs service.IGalleryService) *galleryController {
+func newCreateGalleryController(route string, filename string, gs service.IGalleryService) *createGalleryController {
 	if route == "" {
 		panic(errors.New(model.MustNotBeEmptyErrorMessage("route")))
 	}
-	return &galleryController{
+	return &createGalleryController{
 		Route:          route,
 		view:           view.New(filename),
 		galleryService: gs,
