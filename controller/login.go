@@ -17,33 +17,34 @@ func NewLoginController(us service.IUserService) *loginController {
 }
 
 func (c *loginController) Post(w http.ResponseWriter, req *http.Request) {
+	data := &model.Data{}
 	login := &model.Login{}
 
 	err := parseForm(req, login)
 
 	if err != nil {
-		http.Error(w, err.Message, err.StatusCode)
+		c.handleError(w, err, data)
 
 		return
 	}
 	err = login.Validate()
 
 	if err != nil {
-		http.Error(w, err.Message, err.StatusCode)
+		c.handleError(w, err, data)
 
 		return
 	}
 	_, token, err := c.userService.LoginWithPassword(login)
 
 	if err != nil {
-		http.Error(w, err.Message, err.StatusCode)
+		c.handleError(w, err, data)
 
 		return
 	}
 	cookie, err := makeCookie(token)
 
 	if err != nil {
-		http.Error(w, err.Message, err.StatusCode)
+		c.handleError(w, err, data)
 
 		return
 	}

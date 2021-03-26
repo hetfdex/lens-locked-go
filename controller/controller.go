@@ -4,6 +4,7 @@ import (
 	"errors"
 	"lens-locked-go/model"
 	"lens-locked-go/service"
+	"log"
 	"net/http"
 )
 
@@ -14,10 +15,12 @@ type controller struct {
 }
 
 func (c *controller) Get(w http.ResponseWriter, _ *http.Request) {
-	apiErr := c.view.Render(w, nil)
+	data := &model.Data{}
 
-	if apiErr != nil {
-		http.Error(w, apiErr.Message, apiErr.StatusCode)
+	err := c.view.Render(w, data)
+
+	if err != nil {
+		c.handleError(w, err, data)
 	}
 }
 
@@ -30,4 +33,12 @@ func newController(route string, filename string, us service.IUserService) *cont
 		view:        model.NewView(filename),
 		userService: us,
 	}
+}
+
+func (c *controller) handleError(w http.ResponseWriter, err *model.ApiError, data *model.Data) {
+	log.Println(err)
+
+	data.Alert = err.Alert()
+
+	c.view.Render(w, data)
 }

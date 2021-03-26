@@ -17,33 +17,34 @@ func NewRegisterController(us service.IUserService) *registerController {
 }
 
 func (c *registerController) Post(w http.ResponseWriter, req *http.Request) {
+	data := &model.Data{}
 	register := &model.Register{}
 
 	err := parseForm(req, register)
 
 	if err != nil {
-		http.Error(w, err.Message, err.StatusCode)
+		c.handleError(w, err, data)
 
 		return
 	}
 	err = register.Validate()
 
 	if err != nil {
-		http.Error(w, err.Message, err.StatusCode)
+		c.handleError(w, err, data)
 
 		return
 	}
 	_, token, err := c.userService.Register(register)
 
 	if err != nil {
-		http.Error(w, err.Message, err.StatusCode)
+		c.handleError(w, err, data)
 
 		return
 	}
 	cookie, err := makeCookie(token)
 
 	if err != nil {
-		http.Error(w, err.Message, err.StatusCode)
+		c.handleError(w, err, data)
 
 		return
 	}
