@@ -26,9 +26,10 @@ func (s *galleryService) Create(create *model.CreateGallery) (*model.Gallery, *m
 
 	gallery, _ := s.getByTitle(create.Name)
 
-	if gallery != nil && gallery.UserId.String() == "TODO" {
+	//TODO: Get & check userId
+	/*if gallery != nil && gallery.UserId == X {
 		return nil, model.NewConflictApiError(titleInUseErrorMessage)
-	}
+	}*/
 	gallery = create.Gallery()
 
 	err := s.repository.Create(gallery)
