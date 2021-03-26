@@ -21,19 +21,19 @@ func (e *ApiError) Alert() *Alert {
 	var message string
 
 	if e.StatusCode == http.StatusInternalServerError {
-		alertLevel = AlertLevelError
+		alertLevel = alertLevelError
 		message = internalServerErrorMessage
 	} else if e.StatusCode == http.StatusNotFound {
-		alertLevel = AlertLevelWarning
+		alertLevel = alertLevelWarning
 		message = notFoundErrorMessage
 	} else if e.StatusCode == http.StatusForbidden {
-		alertLevel = AlertLevelError
+		alertLevel = alertLevelError
 		message = forbiddenErrorMessage
 	} else if e.StatusCode == http.StatusBadRequest {
-		alertLevel = AlertLevelInfo
+		alertLevel = alertLevelInfo
 		message = badRequestErrorMessage
 	} else if e.StatusCode == http.StatusConflict {
-		alertLevel = AlertLevelWarning
+		alertLevel = alertLevelWarning
 		message = conflictErrorMessage
 	}
 	return newAlert(alertLevel, message)
