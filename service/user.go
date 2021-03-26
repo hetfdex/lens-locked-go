@@ -13,10 +13,10 @@ const invalidPasswordLengthErrorMessage = "password must be at least 8 character
 const noUserUpdateNeededErrorMessage = "no user update needed"
 
 type IUserService interface {
-	Register(*model.Register) (*model.User, string, *model.ApiError)
-	Edit(*model.Update, string) (*model.User, string, *model.ApiError)
-	LoginWithPassword(*model.Login) (*model.User, string, *model.ApiError)
-	LoginWithToken(string) (*model.User, *model.ApiError)
+	Register(*model.RegisterView) (*model.User, string, *model.Error)
+	Edit(*model.UpdateView, string) (*model.User, string, *model.Error)
+	LoginWithPassword(*model.LoginView) (*model.User, string, *model.Error)
+	LoginWithToken(string) (*model.User, *model.Error)
 }
 
 type userService struct {
@@ -36,13 +36,13 @@ func NewUserService(ur repository.IUserRepository) *userService {
 	}
 }
 
-func (us *userService) Register(register *model.Register) (*model.User, string, *model.ApiError) {
+func (s *userService) Register(register *model.RegisterView) (*model.User, string, *model.Error) {
 	register.Email = normalizeEmail(register.Email)
 
 	if !validEmail(register.Email) {
 		return nil, "", model.NewBadRequestApiError(invalidEmailErrorMessage)
 	}
-	user, _ := us.getByEmail(register.Email)
+	user, _ := s.getByEmail(register.Email)
 
 	if user != nil {
 		return nil, "", model.NewConflictApiError(emailInUseErrorMessage)
@@ -61,14 +61,14 @@ func (us *userService) Register(register *model.Register) (*model.User, string, 
 	if err != nil {
 		return nil, "", err
 	}
-	tokenHash, err := us.Hasher.GenerateTokenHash(token)
+	tokenHash, err := s.Hasher.GenerateTokenHash(token)
 
 	if err != nil {
 		return nil, "", err
 	}
 	user = register.User(pwHash, tokenHash)
 
-	err = us.Create(user)
+	err = s.Create(user)
 
 	if err != nil {
 		return nil, "", err
@@ -76,7 +76,7 @@ func (us *userService) Register(register *model.Register) (*model.User, string, 
 	return user, token, nil
 }
 
-func (us *userService) Edit(update *model.Update, token string) (*model.User, string, *model.ApiError) {
+func (s *userService) Edit(update *model.UpdateView, token string) (*model.User, string, *model.Error) {
 	update.Email = normalizeEmail(update.Email)
 
 	if !validEmail(update.Email) {
@@ -86,12 +86,12 @@ func (us *userService) Edit(update *model.Update, token string) (*model.User, st
 	if !validPassword(update.Password) {
 		return nil, "", model.NewBadRequestApiError(invalidPasswordLengthErrorMessage)
 	}
-	user, err := us.LoginWithToken(token)
+	user, err := s.LoginWithToken(token)
 
 	if err != nil {
 		return nil, "", err
 	}
-	userFromEmail, _ := us.getByEmail(update.Email)
+	userFromEmail, _ := s.getByEmail(update.Email)
 
 	if userFromEmail != nil {
 		if user.Equals(userFromEmail) {
@@ -109,14 +109,14 @@ func (us *userService) Edit(update *model.Update, token string) (*model.User, st
 	if err != nil {
 		return nil, "", err
 	}
-	newTokenHash, err := us.Hasher.GenerateTokenHash(newToken)
+	newTokenHash, err := s.Hasher.GenerateTokenHash(newToken)
 
 	if err != nil {
 		return nil, "", err
 	}
 	user.Update(update, newPwHash, newTokenHash)
 
-	err = us.Update(user)
+	err = s.Update(user)
 
 	if err != nil {
 		return nil, "", err
@@ -124,13 +124,13 @@ func (us *userService) Edit(update *model.Update, token string) (*model.User, st
 	return user, newToken, nil
 }
 
-func (us *userService) LoginWithPassword(login *model.Login) (*model.User, string, *model.ApiError) {
+func (s *userService) LoginWithPassword(login *model.LoginView) (*model.User, string, *model.Error) {
 	login.Email = normalizeEmail(login.Email)
 
 	if !validEmail(login.Email) {
 		return nil, "", model.NewBadRequestApiError(invalidEmailErrorMessage)
 	}
-	user, err := us.getByEmail(login.Email)
+	user, err := s.getByEmail(login.Email)
 
 	if err != nil {
 		return nil, "", err
@@ -149,14 +149,14 @@ func (us *userService) LoginWithPassword(login *model.Login) (*model.User, strin
 	if err != nil {
 		return nil, "", err
 	}
-	tokenHash, err := us.Hasher.GenerateTokenHash(token)
+	tokenHash, err := s.Hasher.GenerateTokenHash(token)
 
 	if err != nil {
 		return nil, "", err
 	}
 	user.TokenHash = tokenHash
 
-	err = us.Update(user)
+	err = s.Update(user)
 
 	if err != nil {
 		return nil, "", err
@@ -164,13 +164,13 @@ func (us *userService) LoginWithPassword(login *model.Login) (*model.User, strin
 	return user, token, nil
 }
 
-func (us *userService) LoginWithToken(token string) (*model.User, *model.ApiError) {
-	tokenHash, err := us.Hasher.GenerateTokenHash(token)
+func (s *userService) LoginWithToken(token string) (*model.User, *model.Error) {
+	tokenHash, err := s.Hasher.GenerateTokenHash(token)
 
 	if err != nil {
 		return nil, err
 	}
-	user, err := us.getByTokenHash(tokenHash)
+	user, err := s.getByTokenHash(tokenHash)
 
 	if err != nil {
 		return nil, err
@@ -178,11 +178,11 @@ func (us *userService) LoginWithToken(token string) (*model.User, *model.ApiErro
 	return user, nil
 }
 
-func (us *userService) getByEmail(email string) (*model.User, *model.ApiError) {
+func (s *userService) getByEmail(email string) (*model.User, *model.Error) {
 	if email == "" {
 		return nil, model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("email"))
 	}
-	user, err := us.Read("email", email)
+	user, err := s.Read("email", email)
 
 	if err != nil {
 		return nil, err
@@ -190,11 +190,11 @@ func (us *userService) getByEmail(email string) (*model.User, *model.ApiError) {
 	return user, nil
 }
 
-func (us *userService) getByTokenHash(tokenHash string) (*model.User, *model.ApiError) {
+func (s *userService) getByTokenHash(tokenHash string) (*model.User, *model.Error) {
 	if tokenHash == "" {
 		return nil, model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("tokenHash"))
 	}
-	user, err := us.Read("token_hash", tokenHash)
+	user, err := s.Read("token_hash", tokenHash)
 
 	if err != nil {
 		return nil, err

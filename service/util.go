@@ -13,13 +13,12 @@ const invalidPasswordErrorMessage = "invalid password"
 
 var emailRegex = regexp.MustCompile(`^[a-z0-9_.+-]+@[a-z0-9-]+\.[a-z0-9-.]+$`)
 
-func generateFromPassword(password string) (string, *model.ApiError) {
+func generateFromPassword(password string) (string, *model.Error) {
 	if password == "" {
 		return "", model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("password"))
 	}
-	pw := []byte(password + pepper)
 
-	pwHash, err := bcrypt.GenerateFromPassword(pw, bcrypt.DefaultCost)
+	pwHash, err := bcrypt.GenerateFromPassword([]byte(password+pepper), bcrypt.DefaultCost)
 
 	if err != nil {
 		return "", model.NewInternalServerApiError(err.Error())
@@ -27,19 +26,16 @@ func generateFromPassword(password string) (string, *model.ApiError) {
 	return string(pwHash), nil
 }
 
-func compareHashAndPassword(passwordHash string, password string) *model.ApiError {
+func compareHashAndPassword(hash string, password string) *model.Error {
 
-	if passwordHash == "" {
-		return model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("passwordHash"))
+	if hash == "" {
+		return model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("hash"))
 	}
 
 	if password == "" {
 		return model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("password"))
 	}
-	pwHash := []byte(passwordHash)
-	pw := []byte(password + pepper)
-
-	err := bcrypt.CompareHashAndPassword(pwHash, pw)
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password+pepper))
 
 	if err != nil {
 		if err == bcrypt.ErrMismatchedHashAndPassword {
@@ -50,7 +46,7 @@ func compareHashAndPassword(passwordHash string, password string) *model.ApiErro
 	return nil
 }
 
-func generateToken() (string, *model.ApiError) {
+func generateToken() (string, *model.Error) {
 	token, err := rand.GenerateTokenString()
 
 	if err != nil {
