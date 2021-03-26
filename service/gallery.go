@@ -22,7 +22,7 @@ func NewGalleryService(ur repository.IGalleryRepository) *galleryService {
 }
 
 func (s *galleryService) Create(create *model.CreateGallery) (*model.Gallery, *model.Error) {
-	create.Name = normalizeEmail(create.Name)
+	create.Name = trimSpace(create.Name)
 
 	gallery, _ := s.getByTitle(create.Name)
 

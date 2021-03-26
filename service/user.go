@@ -35,7 +35,7 @@ func NewUserService(ur repository.IUserRepository) *userService {
 }
 
 func (s *userService) Register(register *model.UserRegister) (*model.User, string, *model.Error) {
-	register.Email = normalizeEmail(register.Email)
+	register.Email = lower(trimSpace(register.Email))
 
 	if !validEmail(register.Email) {
 		return nil, "", model.NewBadRequestApiError(invalidEmailErrorMessage)
@@ -75,7 +75,7 @@ func (s *userService) Register(register *model.UserRegister) (*model.User, strin
 }
 
 func (s *userService) LoginWithPassword(login *model.UserLogin) (*model.User, string, *model.Error) {
-	login.Email = normalizeEmail(login.Email)
+	login.Email = lower(trimSpace(login.Email))
 
 	if !validEmail(login.Email) {
 		return nil, "", model.NewBadRequestApiError(invalidEmailErrorMessage)

@@ -55,12 +55,12 @@ func generateToken() (string, *model.Error) {
 	return token, nil
 }
 
-func normalizeEmail(email string) string {
-	return strings.ToLower(strings.TrimSpace(email))
+func lower(s string) string {
+	return strings.ToLower(s)
 }
 
-func normalizeTitle(title string) string {
-	return strings.TrimSpace(title)
+func trimSpace(s string) string {
+	return strings.TrimSpace(s)
 }
 
 func validEmail(email string) bool {
