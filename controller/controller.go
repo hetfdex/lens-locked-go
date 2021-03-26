@@ -2,6 +2,7 @@ package controller
 
 import (
 	"errors"
+	"lens-locked-go/model"
 	"lens-locked-go/service"
 	"lens-locked-go/util"
 	"lens-locked-go/view"
@@ -15,7 +16,12 @@ type controller struct {
 }
 
 func (c *controller) Get(w http.ResponseWriter, _ *http.Request) {
-	apiErr := c.view.Render(w, nil)
+	alert := &model.Alert{
+		Level:   "success",
+		Message: "yay",
+	}
+
+	apiErr := c.view.Render(w, alert)
 
 	if apiErr != nil {
 		http.Error(w, apiErr.Message, apiErr.StatusCode)
