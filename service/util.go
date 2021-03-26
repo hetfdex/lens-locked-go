@@ -13,17 +13,17 @@ const invalidPasswordErrorMessage = "invalid password"
 
 var emailRegex = regexp.MustCompile(`^[a-z0-9_.+-]+@[a-z0-9-]+\.[a-z0-9-.]+$`)
 
-func generateFromPassword(password string) (string, *model.Error) {
+func generateHashFromPassword(password string) (string, *model.Error) {
 	if password == "" {
 		return "", model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("password"))
 	}
 
-	pwHash, err := bcrypt.GenerateFromPassword([]byte(password+pepper), bcrypt.DefaultCost)
+	hash, err := bcrypt.GenerateFromPassword([]byte(password+pepper), bcrypt.DefaultCost)
 
 	if err != nil {
 		return "", model.NewInternalServerApiError(err.Error())
 	}
-	return string(pwHash), nil
+	return string(hash), nil
 }
 
 func compareHashAndPassword(hash string, password string) *model.Error {
