@@ -5,7 +5,6 @@ import (
 	"lens-locked-go/model"
 	"lens-locked-go/service"
 	"lens-locked-go/view"
-	"log"
 	"net/http"
 )
 
@@ -26,8 +25,6 @@ func (c *controller) Get(w http.ResponseWriter, _ *http.Request) {
 }
 
 func (c *controller) handleError(w http.ResponseWriter, err *model.ApiError, data *model.Data) {
-	log.Println(err)
-
 	data.Alert = err.Alert()
 
 	c.view.Render(w, data)

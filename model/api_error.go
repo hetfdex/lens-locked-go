@@ -6,6 +6,8 @@ import (
 	"strings"
 )
 
+const genericErrorMessage = "something went wrong"
+
 type ApiError struct {
 	StatusCode int
 	Message    string
@@ -14,9 +16,12 @@ type ApiError struct {
 func (e *ApiError) Alert() *Alert {
 	var alertLevel string
 
+	message := e.Message
+
 	switch e.StatusCode {
 	case http.StatusInternalServerError:
 		alertLevel = alertLevelError
+		message = genericErrorMessage
 	case http.StatusNotFound:
 		alertLevel = alertLevelWarning
 	case http.StatusForbidden:
@@ -26,7 +31,7 @@ func (e *ApiError) Alert() *Alert {
 	case http.StatusConflict:
 		alertLevel = alertLevelWarning
 	}
-	return newAlert(alertLevel, strings.Title(e.Message))
+	return newAlert(alertLevel, strings.Title(message))
 }
 
 func NewInternalServerApiError(message string) *ApiError {
