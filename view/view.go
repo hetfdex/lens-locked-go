@@ -38,10 +38,8 @@ func (v *View) Render(w http.ResponseWriter, data *model.DataView) {
 	err := v.template.ExecuteTemplate(w, baseTag, data)
 
 	if err != nil {
-		apiErr := model.NewInternalServerApiError(err.Error())
+		er := model.NewInternalServerApiError(err.Error())
 
-		alert := apiErr.Alert()
-
-		http.Error(w, alert.Message, apiErr.StatusCode)
+		http.Error(w, er.Message, er.StatusCode)
 	}
 }
