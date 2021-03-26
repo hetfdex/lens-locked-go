@@ -25,6 +25,7 @@ const CookieName = "login_token"
 
 const BaseTag = "base"
 const BaseFilename = "view/base.gohtml"
+const AlertFilename = "view/alert.gohtml"
 
 const ContentTypeKey = "Content-Type"
 const ContentTypeValue = "text/html"
