@@ -35,7 +35,7 @@ func NewView(filename string) *View {
 	}
 }
 
-func (v *View) Render(w http.ResponseWriter, data interface{}) *ApiError {
+func (v *View) Render(w http.ResponseWriter, data *Data) *ApiError {
 	w.Header().Set(util.ContentTypeKey, util.ContentTypeValue)
 
 	err := v.template.ExecuteTemplate(w, util.BaseTag, data)
