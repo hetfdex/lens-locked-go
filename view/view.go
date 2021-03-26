@@ -16,7 +16,7 @@ func New(filename string) *View {
 	if filename == "" {
 		panic(errors.New(util.MustNotBeEmptyErrorMessage("filename")))
 	}
-	t, err := template.ParseFiles(util.BaseFilename, filename)
+	t, err := template.ParseFiles(util.BaseFilename, util.AlertFilename, filename)
 
 	if err != nil {
 		panic(err)
