@@ -9,10 +9,10 @@ import (
 const galleryNotFoundError = "gallery not found"
 
 type IGalleryRepository interface {
-	Create(*model.Gallery) *model.ApiError
-	Read(string, interface{}) (*model.Gallery, *model.ApiError)
-	Update(*model.Gallery) *model.ApiError
-	Delete(*model.Gallery) *model.ApiError
+	Create(*model.Gallery) *model.Error
+	Read(string, interface{}) (*model.Gallery, *model.Error)
+	Update(*model.Gallery) *model.Error
+	Delete(*model.Gallery) *model.Error
 }
 
 type galleryRepository struct {
@@ -25,8 +25,8 @@ func NewGalleryRepository(db *gorm.DB) *galleryRepository {
 	}
 }
 
-func (gr *galleryRepository) Create(gallery *model.Gallery) *model.ApiError {
-	err := gr.database.Create(gallery).Error
+func (r *galleryRepository) Create(gallery *model.Gallery) *model.Error {
+	err := r.database.Create(gallery).Error
 
 	if err != nil {
 		return model.NewInternalServerApiError(err.Error())
@@ -34,7 +34,7 @@ func (gr *galleryRepository) Create(gallery *model.Gallery) *model.ApiError {
 	return nil
 }
 
-func (gr *galleryRepository) Read(field string, value interface{}) (*model.Gallery, *model.ApiError) {
+func (r *galleryRepository) Read(field string, value interface{}) (*model.Gallery, *model.Error) {
 
 	if field == "" {
 		return nil, model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("field"))
@@ -43,7 +43,7 @@ func (gr *galleryRepository) Read(field string, value interface{}) (*model.Galle
 
 	query := fmt.Sprintf("%s = ?", field)
 
-	err := gr.database.First(gallery, query, value).Error
+	err := r.database.First(gallery, query, value).Error
 
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -54,8 +54,8 @@ func (gr *galleryRepository) Read(field string, value interface{}) (*model.Galle
 	return gallery, nil
 }
 
-func (gr *galleryRepository) Update(gallery *model.Gallery) *model.ApiError {
-	err := gr.database.Save(gallery).Error
+func (r *galleryRepository) Update(gallery *model.Gallery) *model.Error {
+	err := r.database.Save(gallery).Error
 
 	if err != nil {
 		return model.NewInternalServerApiError(err.Error())
@@ -63,8 +63,8 @@ func (gr *galleryRepository) Update(gallery *model.Gallery) *model.ApiError {
 	return nil
 }
 
-func (gr *galleryRepository) Delete(gallery *model.Gallery) *model.ApiError {
-	err := gr.database.Delete(gallery).Error
+func (r *galleryRepository) Delete(gallery *model.Gallery) *model.Error {
+	err := r.database.Delete(gallery).Error
 
 	if err != nil {
 		return model.NewInternalServerApiError(err.Error())

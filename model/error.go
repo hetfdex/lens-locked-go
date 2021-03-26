@@ -41,19 +41,22 @@ func NewInternalServerApiError(message string) *Error {
 	return &Error{
 		StatusCode: http.StatusInternalServerError,
 		Message:    message,
-	}}
+	}
+}
 
 func NewNotFoundApiError(message string) *Error {
 	return &Error{
 		StatusCode: http.StatusNotFound,
 		Message:    message,
-	}}
+	}
+}
 
 func NewForbiddenApiError(message string) *Error {
 	return &Error{
 		StatusCode: http.StatusForbidden,
 		Message:    message,
-	}}
+	}
+}
 
 func NewBadRequestApiError(message string) *Error {
 	return &Error{

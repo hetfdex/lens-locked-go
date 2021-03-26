@@ -9,10 +9,10 @@ import (
 const userNotFoundError = "user not found"
 
 type IUserRepository interface {
-	Create(*model.User) *model.ApiError
-	Read(string, interface{}) (*model.User, *model.ApiError)
-	Update(*model.User) *model.ApiError
-	Delete(*model.User) *model.ApiError
+	Create(*model.User) *model.Error
+	Read(string, interface{}) (*model.User, *model.Error)
+	Update(*model.User) *model.Error
+	Delete(*model.User) *model.Error
 }
 
 type userRepository struct {
@@ -25,8 +25,8 @@ func NewUserRepository(db *gorm.DB) *userRepository {
 	}
 }
 
-func (ur *userRepository) Create(user *model.User) *model.ApiError {
-	err := ur.database.Create(user).Error
+func (r *userRepository) Create(user *model.User) *model.Error {
+	err := r.database.Create(user).Error
 
 	if err != nil {
 		return model.NewInternalServerApiError(err.Error())
@@ -34,7 +34,7 @@ func (ur *userRepository) Create(user *model.User) *model.ApiError {
 	return nil
 }
 
-func (ur *userRepository) Read(field string, value interface{}) (*model.User, *model.ApiError) {
+func (r *userRepository) Read(field string, value interface{}) (*model.User, *model.Error) {
 
 	if field == "" {
 		return nil, model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("field"))
@@ -43,7 +43,7 @@ func (ur *userRepository) Read(field string, value interface{}) (*model.User, *m
 
 	query := fmt.Sprintf("%s = ?", field)
 
-	err := ur.database.First(user, query, value).Error
+	err := r.database.First(user, query, value).Error
 
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -54,8 +54,8 @@ func (ur *userRepository) Read(field string, value interface{}) (*model.User, *m
 	return user, nil
 }
 
-func (ur *userRepository) Update(user *model.User) *model.ApiError {
-	err := ur.database.Save(user).Error
+func (r *userRepository) Update(user *model.User) *model.Error {
+	err := r.database.Save(user).Error
 
 	if err != nil {
 		return model.NewInternalServerApiError(err.Error())
@@ -63,8 +63,8 @@ func (ur *userRepository) Update(user *model.User) *model.ApiError {
 	return nil
 }
 
-func (ur *userRepository) Delete(user *model.User) *model.ApiError {
-	err := ur.database.Delete(user).Error
+func (r *userRepository) Delete(user *model.User) *model.Error {
+	err := r.database.Delete(user).Error
 
 	if err != nil {
 		return model.NewInternalServerApiError(err.Error())
