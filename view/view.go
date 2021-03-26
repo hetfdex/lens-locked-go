@@ -18,7 +18,7 @@ type View struct {
 	template *template.Template
 }
 
-func NewView(filename string) *View {
+func New(filename string) *View {
 	if filename == "" {
 		panic(errors.New(model.MustNotBeEmptyErrorMessage("filename")))
 	}

@@ -31,7 +31,7 @@ func newController(route string, filename string, us service.IUserService) *cont
 	}
 	return &controller{
 		Route:       route,
-		view:        view2.NewView(filename),
+		view:        view2.New(filename),
 		userService: us,
 	}
 }
