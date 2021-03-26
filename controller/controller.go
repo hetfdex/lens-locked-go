@@ -25,6 +25,14 @@ func (c *controller) Get(w http.ResponseWriter, _ *http.Request) {
 	}
 }
 
+func (c *controller) handleError(w http.ResponseWriter, err *model.ApiError, data *model.Data) {
+	log.Println(err)
+
+	data.Alert = err.Alert()
+
+	c.view.Render(w, data)
+}
+
 func newController(route string, filename string, us service.IUserService) *controller {
 	if route == "" {
 		panic(errors.New(model.MustNotBeEmptyErrorMessage("route")))
@@ -34,12 +42,4 @@ func newController(route string, filename string, us service.IUserService) *cont
 		view:        view2.New(filename),
 		userService: us,
 	}
-}
-
-func (c *controller) handleError(w http.ResponseWriter, err *model.ApiError, data *model.Data) {
-	log.Println(err)
-
-	data.Alert = err.Alert()
-
-	c.view.Render(w, data)
 }
