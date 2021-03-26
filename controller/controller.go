@@ -5,23 +5,17 @@ import (
 	"lens-locked-go/model"
 	"lens-locked-go/service"
 	"lens-locked-go/util"
-	"lens-locked-go/view"
 	"net/http"
 )
 
 type controller struct {
 	Route       string
-	view        *view.View
+	view        *model.View
 	userService service.IUserService
 }
 
 func (c *controller) Get(w http.ResponseWriter, _ *http.Request) {
-	alert := &model.Alert{
-		Level:   "success",
-		Message: "yay",
-	}
-
-	apiErr := c.view.Render(w, alert)
+	apiErr := c.view.Render(w, nil)
 
 	if apiErr != nil {
 		http.Error(w, apiErr.Message, apiErr.StatusCode)
@@ -34,7 +28,7 @@ func newController(route string, filename string, us service.IUserService) *cont
 	}
 	return &controller{
 		Route:       route,
-		view:        view.New(filename),
+		view:        model.NewView(filename),
 		userService: us,
 	}
 }
