@@ -4,11 +4,13 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"lens-locked-go/model"
-	"lens-locked-go/util"
 )
 
+const byteSliceSize = 32
+const byteSliceSizeErrorMessage = "byte slice size must be at least 16"
+
 func GenerateTokenString() (string, *model.ApiError) {
-	return generateString(util.ByteSliceSize)
+	return generateString(byteSliceSize)
 }
 
 func generateString(size uint) (string, *model.ApiError) {
@@ -22,7 +24,7 @@ func generateString(size uint) (string, *model.ApiError) {
 
 func generateBytes(size uint) ([]byte, *model.ApiError) {
 	if size < 16 {
-		return nil, model.NewInternalServerApiError(util.ByteSliceSizeErrorMessage)
+		return nil, model.NewInternalServerApiError(byteSliceSizeErrorMessage)
 	}
 	b := make([]byte, size)
 

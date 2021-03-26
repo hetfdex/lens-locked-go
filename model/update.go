@@ -1,7 +1,5 @@
 package model
 
-import "lens-locked-go/util"
-
 type Update struct {
 	Name     string `schema:"name"`
 	Email    string `schema:"email"`
@@ -10,15 +8,15 @@ type Update struct {
 
 func (u *Update) Validate() *ApiError {
 	if u.Name == "" {
-		return NewInternalServerApiError(util.MustNotBeEmptyErrorMessage("name"))
+		return NewInternalServerApiError(MustNotBeEmptyErrorMessage("name"))
 	}
 
 	if u.Email == "" {
-		return NewInternalServerApiError(util.MustNotBeEmptyErrorMessage("email"))
+		return NewInternalServerApiError(MustNotBeEmptyErrorMessage("email"))
 	}
 
 	if u.Password == "" {
-		return NewInternalServerApiError(util.MustNotBeEmptyErrorMessage("password"))
+		return NewInternalServerApiError(MustNotBeEmptyErrorMessage("password"))
 	}
 	return nil
 }

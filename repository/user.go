@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"gorm.io/gorm"
 	"lens-locked-go/model"
-	"lens-locked-go/util"
 )
 
 type IUserRepository interface {
@@ -36,7 +35,7 @@ func (ur *userRepository) Create(user *model.User) *model.ApiError {
 func (ur *userRepository) Read(field string, value interface{}) (*model.User, *model.ApiError) {
 
 	if field == "" {
-		return nil, model.NewInternalServerApiError(util.MustNotBeEmptyErrorMessage("field"))
+		return nil, model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("field"))
 	}
 	user := &model.User{}
 

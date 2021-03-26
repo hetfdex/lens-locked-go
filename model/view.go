@@ -3,9 +3,15 @@ package model
 import (
 	"errors"
 	"html/template"
-	"lens-locked-go/util"
 	"net/http"
 )
+
+const baseTag = "base"
+const baseFilename = "view/base.gohtml"
+const alertFilename = "view/alert.gohtml"
+
+const contentTypeKey = "Content-Type"
+const contentTypeValue = "text/html"
 
 type View struct {
 	template *template.Template
@@ -13,9 +19,9 @@ type View struct {
 
 func NewView(filename string) *View {
 	if filename == "" {
-		panic(errors.New(util.MustNotBeEmptyErrorMessage("filename")))
+		panic(errors.New(MustNotBeEmptyErrorMessage("filename")))
 	}
-	t, err := template.ParseFiles(util.BaseFilename, util.AlertFilename, filename)
+	t, err := template.ParseFiles(baseFilename, alertFilename, filename)
 
 	if err != nil {
 		panic(err)
@@ -26,9 +32,9 @@ func NewView(filename string) *View {
 }
 
 func (v *View) Render(w http.ResponseWriter, data *Data) *ApiError {
-	w.Header().Set(util.ContentTypeKey, util.ContentTypeValue)
+	w.Header().Set(contentTypeKey, contentTypeValue)
 
-	err := v.template.ExecuteTemplate(w, util.BaseTag, data)
+	err := v.template.ExecuteTemplate(w, baseTag, data)
 
 	if err != nil {
 		return NewInternalServerApiError(err.Error())

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gorilla/mux"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -8,9 +9,18 @@ import (
 	"lens-locked-go/model"
 	"lens-locked-go/repository"
 	"lens-locked-go/service"
-	"lens-locked-go/util"
 	"net/http"
 )
+
+const host = "localhost"
+const port = 5432
+const user = "postgres"
+const password = "Abcde12345!"
+const dbname = "lenslocked_dev"
+
+var dsn = fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
+
+const address = "localhost:8080"
 
 func main() {
 	db := openDb()
@@ -29,7 +39,7 @@ func main() {
 }
 
 func openDb() *gorm.DB {
-	db, err := gorm.Open(postgres.Open(util.Dsn), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
 	if err != nil {
 		panic(err)
@@ -55,7 +65,7 @@ func configureRouter(us service.IUserService, r *mux.Router) {
 }
 
 func listenAndServe(r *mux.Router) {
-	err := http.ListenAndServe(util.Address, r)
+	err := http.ListenAndServe(address, r)
 
 	if err != nil {
 		panic(err)

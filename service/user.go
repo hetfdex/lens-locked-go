@@ -4,8 +4,13 @@ import (
 	"lens-locked-go/hash"
 	"lens-locked-go/model"
 	"lens-locked-go/repository"
-	"lens-locked-go/util"
 )
+
+const hasherKey = "yzzmGPkAA9FTmbtzz9jB"
+const invalidPasswordErrorMessage = "invalid password"
+const invalidEmailErrorMessage = "invalid email address"
+const emailInUseErrorMessage = "email address is already in use"
+const noUserUpdateNeededErrorMessage = "no user update needed"
 
 type IUserService interface {
 	Register(register *model.Register) (*model.User, string, *model.ApiError)
@@ -20,7 +25,7 @@ type userService struct {
 }
 
 func NewUserService(ur repository.IUserRepository) *userService {
-	hs, err := hash.New(util.HasherKey)
+	hs, err := hash.New(hasherKey)
 
 	if err != nil {
 		panic(err)
@@ -35,16 +40,16 @@ func (us *userService) Register(register *model.Register) (*model.User, string, 
 	register.Email = normalizeEmail(register.Email)
 
 	if !validEmail(register.Email) {
-		return nil, "", model.NewBadRequestApiError(util.InvalidEmailErrorMessage)
+		return nil, "", model.NewBadRequestApiError(invalidEmailErrorMessage)
 	}
 	user, _ := us.getByEmail(register.Email)
 
 	if user != nil {
-		return nil, "", model.NewConflictApiError(util.EmailInUseErrorMessage)
+		return nil, "", model.NewConflictApiError(emailInUseErrorMessage)
 	}
 
 	if !validPassword(register.Password) {
-		return nil, "", model.NewBadRequestApiError(util.InvalidPasswordErrorMessage)
+		return nil, "", model.NewBadRequestApiError(invalidPasswordErrorMessage)
 	}
 	pwHash, err := generateFromPassword(register.Password)
 
@@ -75,11 +80,11 @@ func (us *userService) Edit(update *model.Update, token string) (*model.User, st
 	update.Email = normalizeEmail(update.Email)
 
 	if !validEmail(update.Email) {
-		return nil, "", model.NewBadRequestApiError(util.InvalidEmailErrorMessage)
+		return nil, "", model.NewBadRequestApiError(invalidEmailErrorMessage)
 	}
 
 	if !validPassword(update.Password) {
-		return nil, "", model.NewBadRequestApiError(util.InvalidPasswordErrorMessage)
+		return nil, "", model.NewBadRequestApiError(invalidPasswordErrorMessage)
 	}
 	user, err := us.LoginWithToken(token)
 
@@ -90,9 +95,9 @@ func (us *userService) Edit(update *model.Update, token string) (*model.User, st
 
 	if userFromEmail != nil {
 		if user.Equals(userFromEmail) {
-			return nil, "", model.NewBadRequestApiError(util.NoUserUpdateNeededErrorMessage)
+			return nil, "", model.NewBadRequestApiError(noUserUpdateNeededErrorMessage)
 		}
-		return nil, "", model.NewConflictApiError(util.EmailInUseErrorMessage)
+		return nil, "", model.NewConflictApiError(emailInUseErrorMessage)
 	}
 	newPwHash, err := generateFromPassword(update.Password)
 
@@ -123,7 +128,7 @@ func (us *userService) LoginWithPassword(login *model.Login) (*model.User, strin
 	login.Email = normalizeEmail(login.Email)
 
 	if !validEmail(login.Email) {
-		return nil, "", model.NewBadRequestApiError(util.InvalidEmailErrorMessage)
+		return nil, "", model.NewBadRequestApiError(invalidEmailErrorMessage)
 	}
 	user, err := us.getByEmail(login.Email)
 
@@ -132,7 +137,7 @@ func (us *userService) LoginWithPassword(login *model.Login) (*model.User, strin
 	}
 
 	if !validPassword(login.Password) {
-		return nil, "", model.NewBadRequestApiError(util.InvalidPasswordErrorMessage)
+		return nil, "", model.NewBadRequestApiError(invalidPasswordErrorMessage)
 	}
 	err = compareHashAndPassword(user.PasswordHash, login.Password)
 
@@ -175,7 +180,7 @@ func (us *userService) LoginWithToken(token string) (*model.User, *model.ApiErro
 
 func (us *userService) getByEmail(email string) (*model.User, *model.ApiError) {
 	if email == "" {
-		return nil, model.NewInternalServerApiError(util.MustNotBeEmptyErrorMessage("email"))
+		return nil, model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("email"))
 	}
 	user, err := us.Read("email", email)
 
@@ -187,7 +192,7 @@ func (us *userService) getByEmail(email string) (*model.User, *model.ApiError) {
 
 func (us *userService) getByTokenHash(tokenHash string) (*model.User, *model.ApiError) {
 	if tokenHash == "" {
-		return nil, model.NewInternalServerApiError(util.MustNotBeEmptyErrorMessage("tokenHash"))
+		return nil, model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("tokenHash"))
 	}
 	user, err := us.Read("token_hash", tokenHash)
 

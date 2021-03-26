@@ -3,9 +3,10 @@ package controller
 import (
 	"github.com/gorilla/schema"
 	"lens-locked-go/model"
-	"lens-locked-go/util"
 	"net/http"
 )
+
+const name = "login_token"
 
 func parseForm(req *http.Request, result interface{}) *model.ApiError {
 	err := req.ParseForm()
@@ -23,13 +24,13 @@ func parseForm(req *http.Request, result interface{}) *model.ApiError {
 	return nil
 }
 
-func makeCookie(cookieValue string) (*http.Cookie, *model.ApiError) {
-	if cookieValue == "" {
-		return nil, model.NewInternalServerApiError(util.MustNotBeEmptyErrorMessage("cookieValue"))
+func makeCookie(value string) (*http.Cookie, *model.ApiError) {
+	if value == "" {
+		return nil, model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("value"))
 	}
 	return &http.Cookie{
-		Name:     util.CookieName,
-		Value:    cookieValue,
+		Name:     name,
+		Value:    value,
 		HttpOnly: true,
 	}, nil
 }
