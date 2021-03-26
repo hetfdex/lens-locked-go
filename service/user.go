@@ -13,9 +13,9 @@ const invalidPasswordLengthErrorMessage = "password must be at least 8 character
 const noUserUpdateNeededErrorMessage = "no user update needed"
 
 type IUserService interface {
-	Register(*model.RegisterView) (*model.User, string, *model.Error)
-	Edit(*model.UpdateView, string) (*model.User, string, *model.Error)
-	LoginWithPassword(*model.LoginView) (*model.User, string, *model.Error)
+	Register(*model.UserRegister) (*model.User, string, *model.Error)
+	Edit(*model.UserUpdate, string) (*model.User, string, *model.Error)
+	LoginWithPassword(*model.UserLogin) (*model.User, string, *model.Error)
 	LoginWithToken(string) (*model.User, *model.Error)
 }
 
@@ -36,7 +36,7 @@ func NewUserService(ur repository.IUserRepository) *userService {
 	}
 }
 
-func (s *userService) Register(register *model.RegisterView) (*model.User, string, *model.Error) {
+func (s *userService) Register(register *model.UserRegister) (*model.User, string, *model.Error) {
 	register.Email = normalizeEmail(register.Email)
 
 	if !validEmail(register.Email) {
@@ -76,7 +76,7 @@ func (s *userService) Register(register *model.RegisterView) (*model.User, strin
 	return user, token, nil
 }
 
-func (s *userService) Edit(update *model.UpdateView, token string) (*model.User, string, *model.Error) {
+func (s *userService) Edit(update *model.UserUpdate, token string) (*model.User, string, *model.Error) {
 	update.Email = normalizeEmail(update.Email)
 
 	if !validEmail(update.Email) {
@@ -124,7 +124,7 @@ func (s *userService) Edit(update *model.UpdateView, token string) (*model.User,
 	return user, token, nil
 }
 
-func (s *userService) LoginWithPassword(login *model.LoginView) (*model.User, string, *model.Error) {
+func (s *userService) LoginWithPassword(login *model.UserLogin) (*model.User, string, *model.Error) {
 	login.Email = normalizeEmail(login.Email)
 
 	if !validEmail(login.Email) {

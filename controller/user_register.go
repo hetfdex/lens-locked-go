@@ -26,7 +26,7 @@ func (c *registerUserController) Get(w http.ResponseWriter, _ *http.Request) {
 
 func (c *registerUserController) Post(w http.ResponseWriter, req *http.Request) {
 	data := &model.DataView{}
-	register := &model.RegisterView{}
+	register := &model.UserRegister{}
 
 	err := parseForm(req, register)
 

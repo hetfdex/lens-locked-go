@@ -26,7 +26,7 @@ func (c *loginController) Get(w http.ResponseWriter, _ *http.Request) {
 
 func (c *loginController) Post(w http.ResponseWriter, req *http.Request) {
 	data := &model.DataView{}
-	login := &model.LoginView{}
+	login := &model.UserLogin{}
 
 	err := parseForm(req, login)
 

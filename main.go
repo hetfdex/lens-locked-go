@@ -66,17 +66,16 @@ func resetDatabase(db *gorm.DB) {
 
 func configureRouter(r *mux.Router, us service.IUserService, gs service.IGalleryService) {
 	homeController := controller.NewHomeController(us)
-	registerController := controller.NewRegisterController(us)
-	loginController := controller.NewLoginController(us)
-	galleryController := controller.NewGalleryController(gs)
+	registerUserController := controller.NewRegisterUserController(us)
+	loginUserController := controller.NewLoginUserController(us)
+	createGalleryController := controller.NewCreateGalleryController(gs)
 
 	r.HandleFunc(homeController.Route, homeController.Get).Methods(http.MethodGet)
-	r.HandleFunc(registerController.Route, registerController.Get).Methods(http.MethodGet)
-	r.HandleFunc(registerController.Route, registerController.Post).Methods(http.MethodPost)
-	r.HandleFunc(loginController.Route, loginController.Get).Methods(http.MethodGet)
-	r.HandleFunc(loginController.Route, loginController.Post).Methods(http.MethodPost)
-	r.HandleFunc(galleryController.Route, galleryController.Get).Methods(http.MethodGet)
-
+	r.HandleFunc(registerUserController.Route, registerUserController.Get).Methods(http.MethodGet)
+	r.HandleFunc(registerUserController.Route, registerUserController.Post).Methods(http.MethodPost)
+	r.HandleFunc(loginUserController.Route, loginUserController.Get).Methods(http.MethodGet)
+	r.HandleFunc(loginUserController.Route, loginUserController.Post).Methods(http.MethodPost)
+	r.HandleFunc(createGalleryController.Route, createGalleryController.Get).Methods(http.MethodGet)
 }
 
 func listenAndServe(r *mux.Router) {
