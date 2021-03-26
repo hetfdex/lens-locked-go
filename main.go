@@ -5,6 +5,7 @@ import (
 	"github.com/gorilla/mux"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 	"lens-locked-go/controller"
 	"lens-locked-go/model"
 	"lens-locked-go/repository"
@@ -23,23 +24,32 @@ var dsn = fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=dis
 const address = "localhost:8080"
 
 func main() {
-	db := openDb()
+	db := openDb(true)
 
 	resetDatabase(db)
 
 	ur := repository.NewUserRepository(db)
+	gr := repository.NewGalleryRepository(db)
 
 	us := service.NewUserService(ur)
+	gs := service.NewGalleryService(gr)
 
 	r := mux.NewRouter()
 
-	configureRouter(us, r)
+	configureRouter(r, us, gs)
 
 	listenAndServe(r)
 }
 
-func openDb() *gorm.DB {
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+func openDb(isDebug bool) *gorm.DB {
+	var logLevel = logger.Warn
+
+	if isDebug {
+		logLevel = logger.Info
+	}
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+		Logger: logger.Default.LogMode(logLevel),
+	})
 
 	if err != nil {
 		panic(err)
@@ -54,7 +64,7 @@ func resetDatabase(db *gorm.DB) {
 	_ = db.Migrator().CreateTable(&model.Gallery{})
 }
 
-func configureRouter(us service.IUserService, r *mux.Router) {
+func configureRouter(r *mux.Router, us service.IUserService, _ service.IGalleryService) {
 	homeController := controller.NewHomeController(us)
 	registerController := controller.NewRegisterController(us)
 	loginController := controller.NewLoginController(us)
