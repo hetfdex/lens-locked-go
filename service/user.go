@@ -8,9 +8,9 @@ import (
 )
 
 type IUserService interface {
-	Register(register *model.RegisterForm) (*model.User, string, *model.ApiError)
-	Edit(update *model.UpdateForm, token string) (*model.User, string, *model.ApiError)
-	LoginWithPassword(login *model.LoginForm) (*model.User, string, *model.ApiError)
+	Register(register *model.Register) (*model.User, string, *model.ApiError)
+	Edit(update *model.Update, token string) (*model.User, string, *model.ApiError)
+	LoginWithPassword(login *model.Login) (*model.User, string, *model.ApiError)
 	LoginWithToken(token string) (*model.User, *model.ApiError)
 }
 
@@ -31,7 +31,7 @@ func NewUserService(ur repository.IUserRepository) *userService {
 	}
 }
 
-func (us *userService) Register(register *model.RegisterForm) (*model.User, string, *model.ApiError) {
+func (us *userService) Register(register *model.Register) (*model.User, string, *model.ApiError) {
 	register.Email = normalizeEmail(register.Email)
 
 	if !validEmail(register.Email) {
@@ -71,7 +71,7 @@ func (us *userService) Register(register *model.RegisterForm) (*model.User, stri
 	return user, token, nil
 }
 
-func (us *userService) Edit(update *model.UpdateForm, token string) (*model.User, string, *model.ApiError) {
+func (us *userService) Edit(update *model.Update, token string) (*model.User, string, *model.ApiError) {
 	update.Email = normalizeEmail(update.Email)
 
 	if !validEmail(update.Email) {
@@ -119,7 +119,7 @@ func (us *userService) Edit(update *model.UpdateForm, token string) (*model.User
 	return user, newToken, nil
 }
 
-func (us *userService) LoginWithPassword(login *model.LoginForm) (*model.User, string, *model.ApiError) {
+func (us *userService) LoginWithPassword(login *model.Login) (*model.User, string, *model.ApiError) {
 	login.Email = normalizeEmail(login.Email)
 
 	if !validEmail(login.Email) {

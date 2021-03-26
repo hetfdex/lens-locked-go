@@ -2,13 +2,13 @@ package model
 
 import "lens-locked-go/util"
 
-type RegisterForm struct {
+type Register struct {
 	Name     string `schema:"name"`
 	Email    string `schema:"email"`
 	Password string `schema:"password"`
 }
 
-func (r *RegisterForm) Validate() *ApiError {
+func (r *Register) Validate() *ApiError {
 	if r.Name == "" {
 		return NewInternalServerApiError(util.MustNotBeEmptyErrorMessage("name"))
 	}
@@ -23,7 +23,7 @@ func (r *RegisterForm) Validate() *ApiError {
 	return nil
 }
 
-func (r *RegisterForm) User(passwordHash string, tokenHash string) *User {
+func (r *Register) User(passwordHash string, tokenHash string) *User {
 	return &User{
 		Name:         r.Name,
 		Email:        r.Email,

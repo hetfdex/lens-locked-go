@@ -2,13 +2,13 @@ package model
 
 import "lens-locked-go/util"
 
-type UpdateForm struct {
+type Update struct {
 	Name     string `schema:"name"`
 	Email    string `schema:"email"`
 	Password string `schema:"password"`
 }
 
-func (u *UpdateForm) Validate() *ApiError {
+func (u *Update) Validate() *ApiError {
 	if u.Name == "" {
 		return NewInternalServerApiError(util.MustNotBeEmptyErrorMessage("name"))
 	}

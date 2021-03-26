@@ -35,7 +35,7 @@ func (u *User) Equals(other *User) bool {
 	return true
 }
 
-func (u *User) Update(update *UpdateForm, passwordHash string, tokenHash string) {
+func (u *User) Update(update *Update, passwordHash string, tokenHash string) {
 	u.Name = update.Name
 	u.Email = update.Email
 	u.PasswordHash = passwordHash
