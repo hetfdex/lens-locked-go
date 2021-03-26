@@ -3,6 +3,7 @@ package controller
 import (
 	"github.com/gorilla/schema"
 	"lens-locked-go/model"
+	"lens-locked-go/view"
 	"net/http"
 )
 
@@ -40,4 +41,12 @@ func redirect(w http.ResponseWriter, req *http.Request, route string) {
 		return
 	}
 	http.Redirect(w, req, route, http.StatusFound)
+}
+
+func handleError(view *view.View, w http.ResponseWriter, err *model.Error, data *model.DataView) {
+	data.Alert = err.Alert()
+
+	w.WriteHeader(err.StatusCode)
+
+	view.Render(w, data)
 }
