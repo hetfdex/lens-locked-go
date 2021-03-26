@@ -64,16 +64,19 @@ func resetDatabase(db *gorm.DB) {
 	_ = db.Migrator().CreateTable(&model.Gallery{})
 }
 
-func configureRouter(r *mux.Router, us service.IUserService, _ service.IGalleryService) {
+func configureRouter(r *mux.Router, us service.IUserService, gs service.IGalleryService) {
 	homeController := controller.NewHomeController(us)
 	registerController := controller.NewRegisterController(us)
 	loginController := controller.NewLoginController(us)
+	galleryController := controller.NewGalleryController(gs)
 
 	r.HandleFunc(homeController.Route, homeController.Get).Methods(http.MethodGet)
 	r.HandleFunc(registerController.Route, registerController.Get).Methods(http.MethodGet)
 	r.HandleFunc(registerController.Route, registerController.Post).Methods(http.MethodPost)
 	r.HandleFunc(loginController.Route, loginController.Get).Methods(http.MethodGet)
 	r.HandleFunc(loginController.Route, loginController.Post).Methods(http.MethodPost)
+	r.HandleFunc(galleryController.Route, galleryController.Get).Methods(http.MethodGet)
+
 }
 
 func listenAndServe(r *mux.Router) {
