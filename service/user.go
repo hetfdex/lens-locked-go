@@ -6,7 +6,7 @@ import (
 	"lens-locked-go/repository"
 )
 
-const hasherKey = "yzzmGPkAA9FTmbtzz9jB"
+const key = "yzzmGPkAA9FTmbtzz9jB"
 const invalidEmailErrorMessage = "invalid email address"
 const emailInUseErrorMessage = "email address is already in use"
 const invalidPasswordLengthErrorMessage = "password must be at least 8 characters"
@@ -25,7 +25,7 @@ type userService struct {
 }
 
 func NewUserService(ur repository.IUserRepository) *userService {
-	hs, err := hash.New(hasherKey)
+	hs, err := hash.New(key)
 
 	if err != nil {
 		panic(err)
@@ -51,7 +51,7 @@ func (s *userService) Register(register *model.RegisterView) (*model.User, strin
 	if !validPassword(register.Password) {
 		return nil, "", model.NewBadRequestApiError(invalidPasswordLengthErrorMessage)
 	}
-	pwHash, err := generateFromPassword(register.Password)
+	pwHash, err := generateHashFromPassword(register.Password)
 
 	if err != nil {
 		return nil, "", err
@@ -99,29 +99,29 @@ func (s *userService) Edit(update *model.UpdateView, token string) (*model.User,
 		}
 		return nil, "", model.NewConflictApiError(emailInUseErrorMessage)
 	}
-	newPwHash, err := generateFromPassword(update.Password)
+	pwHash, err := generateHashFromPassword(update.Password)
 
 	if err != nil {
 		return nil, "", err
 	}
-	newToken, err := generateToken()
+	token, err = generateToken()
 
 	if err != nil {
 		return nil, "", err
 	}
-	newTokenHash, err := s.Hasher.GenerateTokenHash(newToken)
+	tokenHash, err := s.Hasher.GenerateTokenHash(token)
 
 	if err != nil {
 		return nil, "", err
 	}
-	user.Update(update, newPwHash, newTokenHash)
+	user.Update(update, pwHash, tokenHash)
 
 	err = s.Update(user)
 
 	if err != nil {
 		return nil, "", err
 	}
-	return user, newToken, nil
+	return user, token, nil
 }
 
 func (s *userService) LoginWithPassword(login *model.LoginView) (*model.User, string, *model.Error) {
@@ -190,11 +190,11 @@ func (s *userService) getByEmail(email string) (*model.User, *model.Error) {
 	return user, nil
 }
 
-func (s *userService) getByTokenHash(tokenHash string) (*model.User, *model.Error) {
-	if tokenHash == "" {
+func (s *userService) getByTokenHash(hash string) (*model.User, *model.Error) {
+	if hash == "" {
 		return nil, model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("tokenHash"))
 	}
-	user, err := s.Read("token_hash", tokenHash)
+	user, err := s.Read("token_hash", hash)
 
 	if err != nil {
 		return nil, err
