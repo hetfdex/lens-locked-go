@@ -7,16 +7,6 @@ import (
 	"net/http"
 )
 
-type Alert struct {
-	Level   string
-	Message string
-}
-
-type Data struct {
-	Alert *Alert
-	Data  interface{}
-}
-
 type View struct {
 	template *template.Template
 }
