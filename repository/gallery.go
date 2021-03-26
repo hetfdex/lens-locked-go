@@ -9,10 +9,10 @@ import (
 const galleryNotFoundError = "gallery not found"
 
 type IGalleryRepository interface {
-	Create(gallery *model.Gallery) *model.ApiError
-	Read(field string, value interface{}) (*model.Gallery, *model.ApiError)
-	Update(gallery *model.Gallery) *model.ApiError
-	Delete(gallery *model.Gallery) *model.ApiError
+	Create(*model.Gallery) *model.ApiError
+	Read(string, interface{}) (*model.Gallery, *model.ApiError)
+	Update(*model.Gallery) *model.ApiError
+	Delete(*model.Gallery) *model.ApiError
 }
 
 type galleryRepository struct {

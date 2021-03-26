@@ -9,10 +9,10 @@ import (
 const userNotFoundError = "user not found"
 
 type IUserRepository interface {
-	Create(user *model.User) *model.ApiError
-	Read(field string, value interface{}) (*model.User, *model.ApiError)
-	Update(user *model.User) *model.ApiError
-	Delete(user *model.User) *model.ApiError
+	Create(*model.User) *model.ApiError
+	Read(string, interface{}) (*model.User, *model.ApiError)
+	Update(*model.User) *model.ApiError
+	Delete(*model.User) *model.ApiError
 }
 
 type userRepository struct {

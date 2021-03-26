@@ -13,10 +13,10 @@ const invalidPasswordLengthErrorMessage = "password must be at least 8 character
 const noUserUpdateNeededErrorMessage = "no user update needed"
 
 type IUserService interface {
-	Register(register *model.Register) (*model.User, string, *model.ApiError)
-	Edit(update *model.Update, token string) (*model.User, string, *model.ApiError)
-	LoginWithPassword(login *model.Login) (*model.User, string, *model.ApiError)
-	LoginWithToken(token string) (*model.User, *model.ApiError)
+	Register(*model.Register) (*model.User, string, *model.ApiError)
+	Edit(*model.Update, string) (*model.User, string, *model.ApiError)
+	LoginWithPassword(*model.Login) (*model.User, string, *model.ApiError)
+	LoginWithToken(string) (*model.User, *model.ApiError)
 }
 
 type userService struct {
