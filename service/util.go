@@ -59,6 +59,10 @@ func normalizeEmail(email string) string {
 	return strings.ToLower(strings.TrimSpace(email))
 }
 
+func normalizeTitle(title string) string {
+	return strings.TrimSpace(title)
+}
+
 func validEmail(email string) bool {
 	if len(email) < 3 && len(email) > 254 {
 		return false
