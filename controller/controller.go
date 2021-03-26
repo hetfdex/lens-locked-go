@@ -27,6 +27,8 @@ func (c *controller) Get(w http.ResponseWriter, _ *http.Request) {
 func (c *controller) handleError(w http.ResponseWriter, err *model.ApiError, data *model.Data) {
 	data.Alert = err.Alert()
 
+	w.WriteHeader(err.StatusCode)
+
 	c.view.Render(w, data)
 }
 
