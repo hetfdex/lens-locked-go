@@ -9,8 +9,9 @@ import (
 const titleInUseErrorMessage = "title is already in use"
 
 type IGalleryService interface {
-	Create(gallery *model.CreateGallery, userId uuid.UUID) (*model.Gallery, *model.Error)
+	Create(*model.CreateGallery, uuid.UUID) (*model.Gallery, *model.Error)
 	Get(id uuid.UUID) (*model.Gallery, *model.Error)
+	Edit(*model.Gallery, *model.EditGallery) (*model.Gallery, *model.Error)
 }
 
 type galleryService struct {
@@ -43,6 +44,24 @@ func (s *galleryService) Create(create *model.CreateGallery, userId uuid.UUID) (
 
 func (s *galleryService) Get(id uuid.UUID) (*model.Gallery, *model.Error) {
 	return s.getById(id)
+}
+
+func (s *galleryService) Edit(gallery *model.Gallery, edit *model.EditGallery) (*model.Gallery, *model.Error) {
+	edit.Name = trimSpace(edit.Name)
+
+	galleryByTitle, _ := s.getByTitle(edit.Name)
+
+	if galleryByTitle != nil {
+		return nil, model.NewNotFoundApiError(titleInUseErrorMessage)
+	}
+	gallery = edit.Gallery(gallery.UserId)
+
+	err := s.repository.Update(gallery)
+
+	if err != nil {
+		return nil, err
+	}
+	return gallery, nil
 }
 
 func (s *galleryService) getById(id uuid.UUID) (*model.Gallery, *model.Error) {
