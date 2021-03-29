@@ -10,6 +10,7 @@ const titleInUseErrorMessage = "title is already in use"
 
 type IGalleryService interface {
 	Create(gallery *model.CreateGallery, userId uuid.UUID) (*model.Gallery, *model.Error)
+	Get(id uuid.UUID) (*model.Gallery, *model.Error)
 }
 
 type galleryService struct {
@@ -33,6 +34,22 @@ func (s *galleryService) Create(create *model.CreateGallery, userId uuid.UUID) (
 	gallery = create.Gallery(userId)
 
 	err := s.repository.Create(gallery)
+
+	if err != nil {
+		return nil, err
+	}
+	return gallery, nil
+}
+
+func (s *galleryService) Get(id uuid.UUID) (*model.Gallery, *model.Error) {
+	return s.getById(id)
+}
+
+func (s *galleryService) getById(id uuid.UUID) (*model.Gallery, *model.Error) {
+	if id == uuid.Nil {
+		return nil, model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("id"))
+	}
+	gallery, err := s.repository.Read("id", id)
 
 	if err != nil {
 		return nil, err
