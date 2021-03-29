@@ -7,6 +7,20 @@ import (
 	"net/http"
 )
 
+const homeRoute = "/"
+const homeFilename = "view/home.gohtml"
+
+const LoginUserRoute = "/login"
+const loginUserFilename = "view/user_login.gohtml"
+
+const registerUserRoute = "/register"
+const registerUserFilename = "view/user_register.gohtml"
+
+const createGalleryRoute = "/gallery/create"
+const createGalleryFilename = "view/gallery_create.gohtml"
+
+const noUserInContextErrorMessage = "no user found in context"
+
 const CookieName = "login_token"
 
 func parseForm(req *http.Request, result interface{}) *model.Error {
