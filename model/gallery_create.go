@@ -6,16 +6,16 @@ type CreateGallery struct {
 	Name string `schema:"name"`
 }
 
-func (c *CreateGallery) Validate() *Error {
-	if c.Name == "" {
+func (g *CreateGallery) Validate() *Error {
+	if g.Name == "" {
 		return NewBadRequestApiError(MustNotBeEmptyErrorMessage("title"))
 	}
 	return nil
 }
 
-func (c *CreateGallery) Gallery(userId uuid.UUID) *Gallery {
+func (g *CreateGallery) Gallery(userId uuid.UUID) *Gallery {
 	return &Gallery{
-		Title:  c.Name,
+		Title:  g.Name,
 		UserId: userId,
 	}
 }
