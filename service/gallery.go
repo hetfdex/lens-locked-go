@@ -27,14 +27,22 @@ func NewGalleryService(ur repository.IGalleryRepository) *galleryService {
 func (s *galleryService) Create(create *model.CreateGallery, userId uuid.UUID) (*model.Gallery, *model.Error) {
 	create.Name = trimSpace(create.Name)
 
-	gallery, _ := s.getByTitle(create.Name)
+	galleriesByTitle, err := s.getAllByTitle(create.Name)
 
-	if gallery != nil && gallery.UserId == userId {
-		return nil, model.NewConflictApiError(titleInUseErrorMessage)
+	if err != nil {
+		return nil, err
 	}
-	gallery = create.Gallery(userId)
 
-	err := s.repository.Create(gallery)
+	if galleriesByTitle != nil {
+		for _, g := range galleriesByTitle {
+			if g.UserId == userId {
+				return nil, model.NewConflictApiError(titleInUseErrorMessage)
+			}
+		}
+	}
+	gallery := create.Gallery(userId)
+
+	err = s.repository.Create(gallery)
 
 	if err != nil {
 		return nil, err
@@ -49,14 +57,22 @@ func (s *galleryService) Get(id uuid.UUID) (*model.Gallery, *model.Error) {
 func (s *galleryService) Edit(gallery *model.Gallery, edit *model.EditGallery) (*model.Gallery, *model.Error) {
 	edit.Name = trimSpace(edit.Name)
 
-	galleryByTitle, _ := s.getByTitle(edit.Name)
+	galleriesByTitle, err := s.getAllByTitle(edit.Name)
 
-	if galleryByTitle != nil {
-		return nil, model.NewNotFoundApiError(titleInUseErrorMessage)
+	if err != nil {
+		return nil, err
+	}
+
+	if galleriesByTitle != nil {
+		for _, g := range galleriesByTitle {
+			if g.UserId == gallery.UserId {
+				return nil, model.NewConflictApiError(titleInUseErrorMessage)
+			}
+		}
 	}
 	gallery = edit.Gallery(gallery.UserId)
 
-	err := s.repository.Update(gallery)
+	err = s.repository.Update(gallery)
 
 	if err != nil {
 		return nil, err
@@ -76,11 +92,11 @@ func (s *galleryService) getById(id uuid.UUID) (*model.Gallery, *model.Error) {
 	return gallery, nil
 }
 
-func (s *galleryService) getByTitle(title string) (*model.Gallery, *model.Error) {
+func (s *galleryService) getAllByTitle(title string) ([]*model.Gallery, *model.Error) {
 	if title == "" {
 		return nil, model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("title"))
 	}
-	gallery, err := s.repository.Read("title", title)
+	gallery, err := s.repository.ReadAll("title", title)
 
 	if err != nil {
 		return nil, err
