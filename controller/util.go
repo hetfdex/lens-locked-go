@@ -19,6 +19,9 @@ const registerUserFilename = "view/user_register.gohtml"
 const createGalleryRoute = "/gallery/create"
 const createGalleryFilename = "view/gallery_create.gohtml"
 
+const galleryRoute = "/gallery/:id"
+const galleryFilename = "view/gallery.gohtml"
+
 const noUserInContextErrorMessage = "no user found in context"
 
 const CookieName = "login_token"
