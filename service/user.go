@@ -12,8 +12,8 @@ const emailInUseErrorMessage = "email address is already in use"
 const invalidPasswordLengthErrorMessage = "password must be at least 8 characters"
 
 type IUserService interface {
-	Register(*model.UserRegister) (*model.User, string, *model.Error)
-	LoginWithPassword(*model.UserLogin) (*model.User, string, *model.Error)
+	Register(*model.RegisterUser) (*model.User, string, *model.Error)
+	LoginWithPassword(*model.LoginUser) (*model.User, string, *model.Error)
 	LoginWithToken(string) (*model.User, *model.Error)
 }
 
@@ -34,7 +34,7 @@ func NewUserService(ur repository.IUserRepository) *userService {
 	}
 }
 
-func (s *userService) Register(register *model.UserRegister) (*model.User, string, *model.Error) {
+func (s *userService) Register(register *model.RegisterUser) (*model.User, string, *model.Error) {
 	register.Email = lower(trimSpace(register.Email))
 
 	if !validEmail(register.Email) {
@@ -74,7 +74,7 @@ func (s *userService) Register(register *model.UserRegister) (*model.User, strin
 	return user, token, nil
 }
 
-func (s *userService) LoginWithPassword(login *model.UserLogin) (*model.User, string, *model.Error) {
+func (s *userService) LoginWithPassword(login *model.LoginUser) (*model.User, string, *model.Error) {
 	login.Email = lower(trimSpace(login.Email))
 
 	if !validEmail(login.Email) {
