@@ -70,6 +70,7 @@ func configureRouter(r *mux.Router, us service.IUserService, gs service.IGallery
 	registerUserController := controller.NewRegisterUserController(us)
 	loginUserController := controller.NewLoginUserController(us)
 	createGalleryController := controller.NewCreateGalleryController(gs)
+	galleryController := controller.NewGalleryController(gs)
 
 	mdw := middleware.NewMiddleware(us)
 
@@ -80,6 +81,7 @@ func configureRouter(r *mux.Router, us service.IUserService, gs service.IGallery
 	r.HandleFunc(loginUserController.Route, loginUserController.Post).Methods(http.MethodPost)
 	r.HandleFunc(createGalleryController.Route, mdw.RequireUser(createGalleryController.Get)).Methods(http.MethodGet)
 	r.HandleFunc(createGalleryController.Route, mdw.RequireUser(createGalleryController.Post)).Methods(http.MethodPost)
+	r.HandleFunc(galleryController.Route, mdw.RequireUser(galleryController.Get)).Methods(http.MethodGet)
 }
 
 func listenAndServe(r *mux.Router) {
