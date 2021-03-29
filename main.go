@@ -71,15 +71,15 @@ func configureRouter(r *mux.Router, us service.IUserService, gs service.IGallery
 	loginUserController := controller.NewLoginUserController(us)
 	createGalleryController := controller.NewCreateGalleryController(gs)
 
-	requireUserMiddleware := middleware.NewRequireUserMiddleware(us)
+	mdw := middleware.NewMiddleware(us)
 
 	r.HandleFunc(homeController.Route, homeController.Get).Methods(http.MethodGet)
 	r.HandleFunc(registerUserController.Route, registerUserController.Get).Methods(http.MethodGet)
 	r.HandleFunc(registerUserController.Route, registerUserController.Post).Methods(http.MethodPost)
 	r.HandleFunc(loginUserController.Route, loginUserController.Get).Methods(http.MethodGet)
 	r.HandleFunc(loginUserController.Route, loginUserController.Post).Methods(http.MethodPost)
-	r.HandleFunc(createGalleryController.Route, requireUserMiddleware.Apply(createGalleryController.Get)).Methods(http.MethodGet)
-	r.HandleFunc(createGalleryController.Route, requireUserMiddleware.Apply(createGalleryController.Post)).Methods(http.MethodPost)
+	r.HandleFunc(createGalleryController.Route, mdw.RequireUser(createGalleryController.Get)).Methods(http.MethodGet)
+	r.HandleFunc(createGalleryController.Route, mdw.RequireUser(createGalleryController.Post)).Methods(http.MethodPost)
 }
 
 func listenAndServe(r *mux.Router) {
