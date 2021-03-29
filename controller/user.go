@@ -41,7 +41,7 @@ func (c *userController) LoginGet(w http.ResponseWriter, _ *http.Request) {
 
 func (c *userController) RegisterPost(w http.ResponseWriter, req *http.Request) {
 	data := &model.DataView{}
-	register := &model.UserRegister{}
+	register := &model.RegisterUser{}
 
 	err := parseForm(req, register)
 
@@ -78,7 +78,7 @@ func (c *userController) RegisterPost(w http.ResponseWriter, req *http.Request) 
 
 func (c *userController) LoginPost(w http.ResponseWriter, req *http.Request) {
 	data := &model.DataView{}
-	login := &model.UserLogin{}
+	login := &model.LoginUser{}
 
 	err := parseForm(req, login)
 
