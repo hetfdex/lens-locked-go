@@ -12,6 +12,7 @@ type IGalleryService interface {
 	Create(*model.CreateGallery, uuid.UUID) (*model.Gallery, *model.Error)
 	Get(id uuid.UUID) (*model.Gallery, *model.Error)
 	Edit(*model.Gallery, *model.EditGallery) (*model.Gallery, *model.Error)
+	Delete(*model.Gallery) *model.Error
 }
 
 type galleryService struct {
@@ -80,6 +81,10 @@ func (s *galleryService) Edit(gallery *model.Gallery, edit *model.EditGallery) (
 	return gallery, nil
 }
 
+func (s *galleryService) Delete(gallery *model.Gallery) *model.Error {
+	return s.repository.Delete(gallery)
+}
+
 func (s *galleryService) getById(id uuid.UUID) (*model.Gallery, *model.Error) {
 	if id == uuid.Nil {
 		return nil, model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("id"))
@@ -92,7 +97,7 @@ func (s *galleryService) getById(id uuid.UUID) (*model.Gallery, *model.Error) {
 	return gallery, nil
 }
 
-func (s *galleryService) getAllByTitle(title string) ([]*model.Gallery, *model.Error) {
+func (s *galleryService) getAllByTitle(title string) ([]model.Gallery, *model.Error) {
 	if title == "" {
 		return nil, model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("title"))
 	}
