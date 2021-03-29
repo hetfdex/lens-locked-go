@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/gofrs/uuid"
 	"lens-locked-go/model"
 	"lens-locked-go/repository"
 )
@@ -8,7 +9,7 @@ import (
 const titleInUseErrorMessage = "title is already in use"
 
 type IGalleryService interface {
-	Create(gallery *model.CreateGallery) (*model.Gallery, *model.Error)
+	Create(gallery *model.CreateGallery, userId uuid.UUID) (*model.Gallery, *model.Error)
 }
 
 type galleryService struct {
@@ -21,16 +22,15 @@ func NewGalleryService(ur repository.IGalleryRepository) *galleryService {
 	}
 }
 
-func (s *galleryService) Create(create *model.CreateGallery) (*model.Gallery, *model.Error) {
+func (s *galleryService) Create(create *model.CreateGallery, userId uuid.UUID) (*model.Gallery, *model.Error) {
 	create.Name = trimSpace(create.Name)
 
 	gallery, _ := s.getByTitle(create.Name)
 
-	//TODO: Get & check userId
-	/*if gallery != nil && gallery.UserId == X {
+	if gallery != nil && gallery.UserId == userId {
 		return nil, model.NewConflictApiError(titleInUseErrorMessage)
-	}*/
-	gallery = create.Gallery()
+	}
+	gallery = create.Gallery(userId)
 
 	err := s.repository.Create(gallery)
 

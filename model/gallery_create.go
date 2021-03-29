@@ -1,5 +1,7 @@
 package model
 
+import "github.com/gofrs/uuid"
+
 type CreateGallery struct {
 	Name string `schema:"name"`
 }
@@ -11,8 +13,9 @@ func (c *CreateGallery) Validate() *Error {
 	return nil
 }
 
-func (c *CreateGallery) Gallery() *Gallery {
+func (c *CreateGallery) Gallery(userId uuid.UUID) *Gallery {
 	return &Gallery{
-		Title: c.Name,
+		Title:  c.Name,
+		UserId: userId,
 	}
 }
