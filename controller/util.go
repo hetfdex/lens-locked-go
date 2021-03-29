@@ -10,25 +10,6 @@ import (
 	"net/http"
 )
 
-const homeRoute = "/"
-const homeFilename = "view/home.gohtml"
-
-const LoginUserRoute = "/login"
-const loginUserFilename = "view/user_login.gohtml"
-
-const registerUserRoute = "/register"
-const registerUserFilename = "view/user_register.gohtml"
-
-const createGalleryRoute = "/gallery/create"
-const createGalleryFilename = "view/gallery_create.gohtml"
-
-const editGalleryRoute = "/gallery/{id}/edit"
-const editGalleryFilename = "view/gallery_edit.gohtml"
-
-const GalleryRouteName = "gallery"
-const galleryRoute = "/gallery/{id}"
-const galleryFilename = "view/gallery.gohtml"
-
 const CookieName = "login_token"
 
 func parseForm(req *http.Request, result interface{}) *model.Error {
@@ -65,7 +46,7 @@ func Redirect(w http.ResponseWriter, req *http.Request, route string) {
 	http.Redirect(w, req, route, http.StatusFound)
 }
 
-func handleError(view *view.View, w http.ResponseWriter, err *model.Error, data *model.DataView) {
+func handleError(w http.ResponseWriter, view *view.View, err *model.Error, data *model.DataView) {
 	data.Alert = err.Alert()
 
 	w.WriteHeader(err.StatusCode)
