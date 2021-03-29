@@ -2,7 +2,7 @@ package controller
 
 import (
 	"errors"
-	"fmt"
+	"lens-locked-go/context"
 	"lens-locked-go/model"
 	"lens-locked-go/service"
 	"lens-locked-go/view"
@@ -16,7 +16,7 @@ type newGalleryController struct {
 }
 
 func NewCreateGalleryController(gs service.IGalleryService) *newGalleryController {
-	return newCreateGalleryController("/gallery/create", "view/gallery_create.gohtml", gs)
+	return newCreateGalleryController(createGalleryRoute, createGalleryFilename, gs)
 }
 
 func (c *newGalleryController) Get(w http.ResponseWriter, _ *http.Request) {
@@ -43,15 +43,23 @@ func (c *newGalleryController) Post(w http.ResponseWriter, req *http.Request) {
 
 		return
 	}
-	gallery, err := c.galleryService.Create(create)
+	user := context.User(req.Context())
+
+	if user == nil {
+		err = model.NewInternalServerApiError(noUserInContextErrorMessage)
+
+		handleError(c.view, w, err, data)
+
+		return
+	}
+	_, err = c.galleryService.Create(create, user.ID)
 
 	if err != nil {
 		handleError(c.view, w, err, data)
 
 		return
 	}
-	_, _ = fmt.Fprintln(w, gallery)
-	//redirect(w, req, "/gallery")
+	Redirect(w, req, homeRoute)
 }
 
 func newCreateGalleryController(route string, filename string, gs service.IGalleryService) *newGalleryController {
