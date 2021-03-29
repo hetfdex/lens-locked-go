@@ -2,8 +2,6 @@ package controller
 
 import (
 	"errors"
-	"github.com/gofrs/uuid"
-	"github.com/gorilla/mux"
 	"lens-locked-go/model"
 	"lens-locked-go/service"
 	"lens-locked-go/view"
@@ -27,18 +25,7 @@ func NewGalleryController(gs service.IGalleryService) *galleryController {
 func (c *galleryController) Get(w http.ResponseWriter, req *http.Request) {
 	data := &model.DataView{}
 
-	vars := mux.Vars(req)
-
-	id := uuid.FromStringOrNil(vars[idKey])
-
-	if id == uuid.Nil {
-		err := model.NewBadRequestApiError(invalidUUIDErrorMessage)
-
-		handleError(c.view, w, err, data)
-
-		return
-	}
-	gallery, err := c.galleryService.Get(id)
+	gallery, err := getGallery(req, c.galleryService)
 
 	if err != nil {
 		handleError(c.view, w, err, data)
