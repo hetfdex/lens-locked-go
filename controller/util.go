@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-const cookieName = "login_token"
+const CookieName = "login_token"
 
 func parseForm(req *http.Request, result interface{}) *model.Error {
 	err := req.ParseForm()
@@ -30,13 +30,13 @@ func makeCookie(value string) (*http.Cookie, *model.Error) {
 		return nil, model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("value"))
 	}
 	return &http.Cookie{
-		Name:     cookieName,
+		Name:     CookieName,
 		Value:    value,
 		HttpOnly: true,
 	}, nil
 }
 
-func redirect(w http.ResponseWriter, req *http.Request, route string) {
+func Redirect(w http.ResponseWriter, req *http.Request, route string) {
 	if route == "" {
 		return
 	}
