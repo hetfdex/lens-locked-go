@@ -27,7 +27,7 @@ const address = "localhost:8080"
 func main() {
 	db := openDb(true)
 
-	resetDatabase(db)
+	//resetDatabase(db)
 
 	ur := repository.NewUserRepository(db)
 	gr := repository.NewGalleryRepository(db)
@@ -69,7 +69,7 @@ func configureRouter(r *mux.Router, us service.IUserService, gs service.IGallery
 	homeController := controller.NewHomeController(us)
 	registerUserController := controller.NewRegisterUserController(us)
 	loginUserController := controller.NewLoginUserController(us)
-	createGalleryController := controller.NewCreateGalleryController(gs)
+	createGalleryController := controller.NewCreateGalleryController(r, gs)
 	galleryController := controller.NewGalleryController(gs)
 
 	mdw := middleware.NewMiddleware(us)
@@ -81,7 +81,7 @@ func configureRouter(r *mux.Router, us service.IUserService, gs service.IGallery
 	r.HandleFunc(loginUserController.Route, loginUserController.Post).Methods(http.MethodPost)
 	r.HandleFunc(createGalleryController.Route, mdw.RequireUser(createGalleryController.Get)).Methods(http.MethodGet)
 	r.HandleFunc(createGalleryController.Route, mdw.RequireUser(createGalleryController.Post)).Methods(http.MethodPost)
-	r.HandleFunc(galleryController.Route, galleryController.Get).Methods(http.MethodGet)
+	r.HandleFunc(galleryController.Route, galleryController.Get).Methods(http.MethodGet).Name(controller.GalleryRouteName)
 }
 
 func listenAndServe(r *mux.Router) {
