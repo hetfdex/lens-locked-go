@@ -9,6 +9,8 @@ import (
 	"net/http"
 )
 
+const noUserInContextErrorMessage = "no user found in context"
+
 type createGalleryController struct {
 	Route          string
 	view           *view.View
