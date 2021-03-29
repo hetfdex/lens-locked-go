@@ -15,6 +15,8 @@ const createGalleryFilename = "view/gallery_create.gohtml"
 const editGalleryRoute = "/gallery/{id}/edit"
 const editGalleryFilename = "view/gallery_edit.gohtml"
 
+const deleteGalleryRoute = "/gallery/{id}/delete"
+
 const GalleryRouteName = "gallery"
 const galleryRoute = "/gallery/{id}"
 const galleryFilename = "view/gallery.gohtml"
@@ -24,10 +26,13 @@ const idKey = "id"
 const invalidUUIDErrorMessage = "invalid gallery id"
 const userNotOwnerErrorMessage = "galleries can only be edited by their owners"
 
+const deleteSuccessMessage = "Deleted Successfully"
+
 type galleryController struct {
 	galleryView    *view.View
 	createView     *view.View
 	editView       *view.View
+	deleteView     *view.View
 	router         *mux.Router
 	galleryService service.IGalleryService
 }
@@ -37,6 +42,7 @@ func NewGalleryController(r *mux.Router, gs service.IGalleryService) *galleryCon
 		galleryView:    view.New(galleryRoute, galleryFilename),
 		createView:     view.New(createGalleryRoute, createGalleryFilename),
 		editView:       view.New(editGalleryRoute, editGalleryFilename),
+		deleteView:     view.New(deleteGalleryRoute, galleryFilename),
 		router:         r,
 		galleryService: gs,
 	}
@@ -48,7 +54,7 @@ func (c *galleryController) GalleryGet(w http.ResponseWriter, req *http.Request)
 	gallery, err := getGallery(req, c.galleryService)
 
 	if err != nil {
-		handleError(w, c.galleryView, err, data)
+		handleError(w, c.createView, err, data)
 
 		return
 	}
@@ -127,8 +133,6 @@ func (c *galleryController) EditPost(w http.ResponseWriter, req *http.Request) {
 	gallery, err := getGalleryWithPermission(req, c.galleryService)
 
 	if err != nil {
-		data.Data = gallery
-
 		handleError(w, c.createView, err, data)
 
 		return
@@ -164,6 +168,28 @@ func (c *galleryController) EditPost(w http.ResponseWriter, req *http.Request) {
 	Redirect(w, req, url)
 }
 
+func (c *galleryController) DeleteGet(w http.ResponseWriter, req *http.Request) {
+	data := &model.DataView{}
+
+	gallery, err := getGalleryWithPermission(req, c.galleryService)
+
+	if err != nil {
+		handleError(w, c.createView, err, data)
+
+		return
+	}
+	err = c.galleryService.Delete(gallery)
+
+	if err != nil {
+		handleError(w, c.deleteView, err, data)
+
+		return
+	}
+	data.Alert = model.NewSuccessAlert(deleteSuccessMessage)
+
+	c.createView.Render(w, data)
+}
+
 func (c *galleryController) GalleryRoute() string {
 	return c.galleryView.Route()
 }
@@ -174,4 +200,8 @@ func (c *galleryController) CreateRoute() string {
 
 func (c *galleryController) EditRoute() string {
 	return c.editView.Route()
+}
+
+func (c *galleryController) DeleteRoute() string {
+	return c.deleteView.Route()
 }
