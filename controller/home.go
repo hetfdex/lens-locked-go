@@ -15,7 +15,7 @@ type homeController struct {
 }
 
 func NewHomeController(us service.IUserService) *homeController {
-	return newHomeController("/", "view/home.gohtml", us)
+	return newHomeController(homeRoute, homeFilename, us)
 }
 
 func (c *homeController) Get(w http.ResponseWriter, _ *http.Request) {

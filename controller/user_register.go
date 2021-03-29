@@ -15,7 +15,7 @@ type registerUserController struct {
 }
 
 func NewRegisterUserController(us service.IUserService) *registerUserController {
-	return newRegisterUserController("/register", "view/user_register.gohtml", us)
+	return newRegisterUserController(registerUserRoute, registerUserFilename, us)
 }
 
 func (c *registerUserController) Get(w http.ResponseWriter, _ *http.Request) {
@@ -58,7 +58,7 @@ func (c *registerUserController) Post(w http.ResponseWriter, req *http.Request) 
 	}
 	http.SetCookie(w, cookie)
 
-	Redirect(w, req, "/")
+	Redirect(w, req, homeRoute)
 }
 
 func newRegisterUserController(route string, filename string, us service.IUserService) *registerUserController {

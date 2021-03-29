@@ -15,7 +15,7 @@ type loginController struct {
 }
 
 func NewLoginUserController(us service.IUserService) *loginController {
-	return newLoginUserController("/login", "view/user_login.gohtml", us)
+	return newLoginUserController(LoginUserRoute, loginUserFilename, us)
 }
 
 func (c *loginController) Get(w http.ResponseWriter, _ *http.Request) {
@@ -58,7 +58,7 @@ func (c *loginController) Post(w http.ResponseWriter, req *http.Request) {
 	}
 	http.SetCookie(w, cookie)
 
-	Redirect(w, req, "/")
+	Redirect(w, req, homeRoute)
 }
 
 func newLoginUserController(route string, filename string, us service.IUserService) *loginController {
