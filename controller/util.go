@@ -1,9 +1,11 @@
 package controller
 
 import (
+	"errors"
 	"github.com/gofrs/uuid"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/schema"
+	"lens-locked-go/context"
 	"lens-locked-go/model"
 	"lens-locked-go/service"
 	"lens-locked-go/view"
@@ -11,6 +13,13 @@ import (
 )
 
 const CookieName = "login_token"
+
+func Redirect(w http.ResponseWriter, req *http.Request, route string) {
+	if route == "" {
+		panic(errors.New(model.MustNotBeEmptyErrorMessage("route")))
+	}
+	http.Redirect(w, req, route, http.StatusFound)
+}
 
 func parseForm(req *http.Request, result interface{}) *model.Error {
 	err := req.ParseForm()
@@ -37,13 +46,6 @@ func makeCookie(value string) (*http.Cookie, *model.Error) {
 		Value:    value,
 		HttpOnly: true,
 	}, nil
-}
-
-func Redirect(w http.ResponseWriter, req *http.Request, route string) {
-	if route == "" {
-		return
-	}
-	http.Redirect(w, req, route, http.StatusFound)
 }
 
 func handleError(w http.ResponseWriter, view *view.View, err *model.Error, data *model.DataView) {
@@ -78,6 +80,26 @@ func getGallery(req *http.Request, gs service.IGalleryService) (*model.Gallery, 
 	gallery, err := gs.Get(id)
 
 	if err != nil {
+		return nil, err
+	}
+	return gallery, nil
+}
+
+func getGalleryWithPermission(req *http.Request, gs service.IGalleryService) (*model.Gallery, *model.Error) {
+	gallery, err := getGallery(req, gs)
+
+	if err != nil {
+		return nil, err
+	}
+	user, err := context.User(req.Context())
+
+	if err != nil {
+		return nil, err
+	}
+
+	if gallery.UserId != user.ID {
+		err = model.NewForbiddenApiError(userNotOwnerErrorMessage)
+
 		return nil, err
 	}
 	return gallery, nil
