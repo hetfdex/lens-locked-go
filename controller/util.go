@@ -1,10 +1,12 @@
 package controller
 
 import (
+	"github.com/gofrs/uuid"
 	"github.com/gorilla/schema"
 	"lens-locked-go/model"
 	"lens-locked-go/view"
 	"net/http"
+	"strings"
 )
 
 const homeRoute = "/"
@@ -56,6 +58,12 @@ func Redirect(w http.ResponseWriter, req *http.Request, route string) {
 		return
 	}
 	http.Redirect(w, req, route, http.StatusFound)
+}
+
+func redirectToGallery(w http.ResponseWriter, req *http.Request, id uuid.UUID) {
+	route := strings.ReplaceAll(galleryRoute, "{id}", "") + id.String()
+
+	Redirect(w, req, route)
 }
 
 func handleError(view *view.View, w http.ResponseWriter, err *model.Error, data *model.DataView) {

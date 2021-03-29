@@ -54,14 +54,14 @@ func (c *createGalleryController) Post(w http.ResponseWriter, req *http.Request)
 
 		return
 	}
-	_, err = c.galleryService.Create(create, user.ID)
+	gallery, err := c.galleryService.Create(create, user.ID)
 
 	if err != nil {
 		handleError(c.view, w, err, data)
 
 		return
 	}
-	Redirect(w, req, homeRoute)
+	redirectToGallery(w, req, gallery.ID)
 }
 
 func newCreateGalleryController(route string, filename string, gs service.IGalleryService) *createGalleryController {
