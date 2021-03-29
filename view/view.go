@@ -15,10 +15,14 @@ const contentTypeKey = "Content-Type"
 const contentTypeValue = "text/html"
 
 type View struct {
+	route    string
 	template *template.Template
 }
 
-func New(filename string) *View {
+func New(route string, filename string) *View {
+	if route == "" {
+		panic(errors.New(model.MustNotBeEmptyErrorMessage("route")))
+	}
 	if filename == "" {
 		panic(errors.New(model.MustNotBeEmptyErrorMessage("filename")))
 	}
@@ -28,6 +32,7 @@ func New(filename string) *View {
 		panic(err)
 	}
 	return &View{
+		route:    route,
 		template: t,
 	}
 }
@@ -42,4 +47,8 @@ func (v *View) Render(w http.ResponseWriter, data *model.DataView) {
 
 		http.Error(w, er.Message, er.StatusCode)
 	}
+}
+
+func (v *View) Route() string {
+	return v.route
 }
