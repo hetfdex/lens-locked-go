@@ -1,30 +1,30 @@
 package model
 
-type UserRegister struct {
+type RegisterUser struct {
 	Name     string `schema:"name"`
 	Email    string `schema:"email"`
 	Password string `schema:"password"`
 }
 
-func (r *UserRegister) Validate() *Error {
-	if r.Name == "" {
+func (u *RegisterUser) Validate() *Error {
+	if u.Name == "" {
 		return NewBadRequestApiError(MustNotBeEmptyErrorMessage("name"))
 	}
 
-	if r.Email == "" {
+	if u.Email == "" {
 		return NewBadRequestApiError(MustNotBeEmptyErrorMessage("email"))
 	}
 
-	if r.Password == "" {
+	if u.Password == "" {
 		return NewBadRequestApiError(MustNotBeEmptyErrorMessage("password"))
 	}
 	return nil
 }
 
-func (r *UserRegister) User(passwordHash string, tokenHash string) *User {
+func (u *RegisterUser) User(passwordHash string, tokenHash string) *User {
 	return &User{
-		Name:         r.Name,
-		Email:        r.Email,
+		Name:         u.Name,
+		Email:        u.Email,
 		PasswordHash: passwordHash,
 		TokenHash:    tokenHash,
 	}

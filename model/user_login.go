@@ -1,16 +1,16 @@
 package model
 
-type UserLogin struct {
+type LoginUser struct {
 	Email    string `schema:"email"`
 	Password string `schema:"password"`
 }
 
-func (l *UserLogin) Validate() *Error {
-	if l.Email == "" {
+func (u *LoginUser) Validate() *Error {
+	if u.Email == "" {
 		return NewBadRequestApiError(MustNotBeEmptyErrorMessage("email"))
 	}
 
-	if l.Password == "" {
+	if u.Password == "" {
 		return NewBadRequestApiError(MustNotBeEmptyErrorMessage("password"))
 	}
 	return nil
