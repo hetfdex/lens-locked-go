@@ -9,23 +9,23 @@ import (
 	"net/http"
 )
 
-type newGalleryController struct {
+type createGalleryController struct {
 	Route          string
 	view           *view.View
 	galleryService service.IGalleryService
 }
 
-func NewCreateGalleryController(gs service.IGalleryService) *newGalleryController {
+func NewCreateGalleryController(gs service.IGalleryService) *createGalleryController {
 	return newCreateGalleryController(createGalleryRoute, createGalleryFilename, gs)
 }
 
-func (c *newGalleryController) Get(w http.ResponseWriter, _ *http.Request) {
+func (c *createGalleryController) Get(w http.ResponseWriter, _ *http.Request) {
 	data := &model.DataView{}
 
 	c.view.Render(w, data)
 }
 
-func (c *newGalleryController) Post(w http.ResponseWriter, req *http.Request) {
+func (c *createGalleryController) Post(w http.ResponseWriter, req *http.Request) {
 	data := &model.DataView{}
 	create := &model.CreateGallery{}
 
@@ -62,11 +62,11 @@ func (c *newGalleryController) Post(w http.ResponseWriter, req *http.Request) {
 	Redirect(w, req, homeRoute)
 }
 
-func newCreateGalleryController(route string, filename string, gs service.IGalleryService) *newGalleryController {
+func newCreateGalleryController(route string, filename string, gs service.IGalleryService) *createGalleryController {
 	if route == "" {
 		panic(errors.New(model.MustNotBeEmptyErrorMessage("route")))
 	}
-	return &newGalleryController{
+	return &createGalleryController{
 		Route:          route,
 		view:           view.New(filename),
 		galleryService: gs,
