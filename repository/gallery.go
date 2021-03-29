@@ -11,7 +11,7 @@ const galleryNotFoundError = "gallery not found"
 type IGalleryRepository interface {
 	Create(*model.Gallery) *model.Error
 	Read(string, interface{}) (*model.Gallery, *model.Error)
-	ReadAll(string, interface{}) ([]*model.Gallery, *model.Error)
+	ReadAll(string, interface{}) ([]model.Gallery, *model.Error)
 	Update(*model.Gallery) *model.Error
 	Delete(*model.Gallery) *model.Error
 }
@@ -54,15 +54,15 @@ func (r *galleryRepository) Read(field string, value interface{}) (*model.Galler
 	return gallery, nil
 }
 
-func (r *galleryRepository) ReadAll(field string, value interface{}) ([]*model.Gallery, *model.Error) {
+func (r *galleryRepository) ReadAll(field string, value interface{}) ([]model.Gallery, *model.Error) {
 	if field == "" {
 		return nil, model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("field"))
 	}
-	var galleries []*model.Gallery
+	var galleries []model.Gallery
 
 	query := fmt.Sprintf("%s = ?", field)
 
-	err := r.database.Find(galleries, query, value).Error
+	err := r.database.Find(&galleries, query, value).Error
 
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
