@@ -2,6 +2,7 @@ package controller
 
 import (
 	"errors"
+	"github.com/gorilla/mux"
 	"lens-locked-go/context"
 	"lens-locked-go/model"
 	"lens-locked-go/service"
@@ -14,11 +15,12 @@ const noUserInContextErrorMessage = "no user found in context"
 type createGalleryController struct {
 	Route          string
 	view           *view.View
+	router         *mux.Router
 	galleryService service.IGalleryService
 }
 
-func NewCreateGalleryController(gs service.IGalleryService) *createGalleryController {
-	return newCreateGalleryController(createGalleryRoute, createGalleryFilename, gs)
+func NewCreateGalleryController(r *mux.Router, gs service.IGalleryService) *createGalleryController {
+	return newCreateGalleryController(createGalleryRoute, createGalleryFilename, r, gs)
 }
 
 func (c *createGalleryController) Get(w http.ResponseWriter, _ *http.Request) {
@@ -61,16 +63,26 @@ func (c *createGalleryController) Post(w http.ResponseWriter, req *http.Request)
 
 		return
 	}
-	redirectToGallery(w, req, gallery.ID)
+	url, er := c.router.Get(GalleryRouteName).URL(idKey, gallery.ID.String())
+
+	if er != nil {
+		err = model.NewInternalServerApiError(er.Error())
+
+		handleError(c.view, w, err, data)
+
+		return
+	}
+	Redirect(w, req, url.String())
 }
 
-func newCreateGalleryController(route string, filename string, gs service.IGalleryService) *createGalleryController {
+func newCreateGalleryController(route string, filename string, r *mux.Router, gs service.IGalleryService) *createGalleryController {
 	if route == "" {
 		panic(errors.New(model.MustNotBeEmptyErrorMessage("route")))
 	}
 	return &createGalleryController{
 		Route:          route,
 		view:           view.New(filename),
+		router:         r,
 		galleryService: gs,
 	}
 }
