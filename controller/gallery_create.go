@@ -63,16 +63,14 @@ func (c *createGalleryController) Post(w http.ResponseWriter, req *http.Request)
 
 		return
 	}
-	url, er := c.router.Get(GalleryRouteName).URL(idKey, gallery.ID.String())
+	url, err := makeUrl(c.router, GalleryRouteName, idKey, gallery.ID.String())
 
-	if er != nil {
-		err = model.NewInternalServerApiError(er.Error())
-
+	if err != nil {
 		handleError(c.view, w, err, data)
 
 		return
 	}
-	Redirect(w, req, url.String())
+	Redirect(w, req, url)
 }
 
 func newCreateGalleryController(route string, filename string, r *mux.Router, gs service.IGalleryService) *createGalleryController {
