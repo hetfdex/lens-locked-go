@@ -58,7 +58,7 @@ func (c *loginController) Post(w http.ResponseWriter, req *http.Request) {
 	}
 	http.SetCookie(w, cookie)
 
-	redirect(w, req, "/")
+	Redirect(w, req, "/")
 }
 
 func newLoginUserController(route string, filename string, us service.IUserService) *loginController {

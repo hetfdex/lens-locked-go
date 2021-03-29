@@ -58,7 +58,7 @@ func (c *registerUserController) Post(w http.ResponseWriter, req *http.Request) 
 	}
 	http.SetCookie(w, cookie)
 
-	redirect(w, req, "/")
+	Redirect(w, req, "/")
 }
 
 func newRegisterUserController(route string, filename string, us service.IUserService) *registerUserController {
