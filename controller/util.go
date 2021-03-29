@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-const name = "login_token"
+const cookieName = "login_token"
 
 func parseForm(req *http.Request, result interface{}) *model.Error {
 	err := req.ParseForm()
@@ -30,7 +30,7 @@ func makeCookie(value string) (*http.Cookie, *model.Error) {
 		return nil, model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("value"))
 	}
 	return &http.Cookie{
-		Name:     name,
+		Name:     cookieName,
 		Value:    value,
 		HttpOnly: true,
 	}, nil
