@@ -22,7 +22,7 @@ const galleryFilename = "view/gallery.gohtml"
 const idKey = "id"
 
 const invalidUUIDErrorMessage = "invalid gallery id"
-const noUserInContextErrorMessage = "no user in context"
+const userNotOwnerErrorMessage = "galleries can only be edited by their owners"
 
 type galleryController struct {
 	galleryView    *view.View
@@ -81,11 +81,9 @@ func (c *galleryController) CreatePost(w http.ResponseWriter, req *http.Request)
 
 		return
 	}
-	user := context.User(req.Context())
+	user, err := context.User(req.Context())
 
-	if user == nil {
-		err = model.NewInternalServerApiError(noUserInContextErrorMessage)
-
+	if err != nil {
 		handleError(w, c.createView, err, data)
 
 		return
@@ -110,10 +108,10 @@ func (c *galleryController) CreatePost(w http.ResponseWriter, req *http.Request)
 func (c *galleryController) EditGet(w http.ResponseWriter, req *http.Request) {
 	data := &model.DataView{}
 
-	gallery, err := getGallery(req, c.galleryService)
+	gallery, err := getGalleryWithPermission(req, c.galleryService)
 
 	if err != nil {
-		handleError(w, c.editView, err, data)
+		handleError(w, c.createView, err, data)
 
 		return
 	}
@@ -123,6 +121,47 @@ func (c *galleryController) EditGet(w http.ResponseWriter, req *http.Request) {
 }
 
 func (c *galleryController) EditPost(w http.ResponseWriter, req *http.Request) {
+	data := &model.DataView{}
+	edit := &model.EditGallery{}
+
+	gallery, err := getGalleryWithPermission(req, c.galleryService)
+
+	if err != nil {
+		data.Data = gallery
+
+		handleError(w, c.createView, err, data)
+
+		return
+	}
+	err = parseForm(req, edit)
+
+	if err != nil {
+		handleError(w, c.editView, err, data)
+
+		return
+	}
+	err = edit.Validate()
+
+	if err != nil {
+		handleError(w, c.editView, err, data)
+
+		return
+	}
+	gallery, err = c.galleryService.Edit(gallery, edit)
+
+	if err != nil {
+		handleError(w, c.editView, err, data)
+
+		return
+	}
+	url, err := makeUrl(c.router, GalleryRouteName, idKey, gallery.ID.String())
+
+	if err != nil {
+		handleError(w, c.editView, err, data)
+
+		return
+	}
+	Redirect(w, req, url)
 }
 
 func (c *galleryController) GalleryRoute() string {
