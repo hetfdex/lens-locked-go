@@ -12,17 +12,20 @@ import (
 	"net/http"
 )
 
-const CookieName = "login_token"
+const cookieName = "login_token"
+const invalidTokenValue = "invalidTokenValue"
 
 const successRouteQuery = "?success="
 const successRouteKey = "success"
 const registerUserValue = "register"
 const loginUserValue = "login"
+const logoutUserValue = "logout"
 const createGalleryValue = "createGallery"
 const editGalleryValue = "editGallery"
 const deleteGalleryValue = "deleteGallery"
 const registerUserSuccessMessage = "Registration Successful"
 const loginUserSuccessMessage = "Login Successful"
+const logoutUserSuccessMessage = "Logout Successful"
 const createGallerySuccessMessage = "Created Successfully"
 const editGallerySuccessMessage = "Edited Successfully"
 const deleteGallerySuccessMessage = "Deleted Successfully"
@@ -32,6 +35,10 @@ func Redirect(w http.ResponseWriter, req *http.Request, route string) {
 		panic(errors.New(model.MustNotBeEmptyErrorMessage("route")))
 	}
 	http.Redirect(w, req, route, http.StatusFound)
+}
+
+func CookieName() string {
+	return cookieName
 }
 
 func makeSuccessRoute(route string, value string) string {
@@ -61,6 +68,8 @@ func parseSuccessRoute(req *http.Request, viewData *model.DataView) {
 		viewData.Alert = model.NewSuccessAlert(registerUserSuccessMessage)
 	} else if param == loginUserValue {
 		viewData.Alert = model.NewSuccessAlert(loginUserSuccessMessage)
+	} else if param == logoutUserValue {
+		viewData.Alert = model.NewSuccessAlert(logoutUserSuccessMessage)
 	} else if param == createGalleryValue {
 		viewData.Alert = model.NewSuccessAlert(createGallerySuccessMessage)
 	} else if param == editGalleryValue {
@@ -75,7 +84,7 @@ func makeCookie(value string) (*http.Cookie, *model.Error) {
 		return nil, model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("value"))
 	}
 	return &http.Cookie{
-		Name:     CookieName,
+		Name:     cookieName,
 		Value:    value,
 		HttpOnly: true,
 	}, nil
