@@ -11,6 +11,7 @@ import (
 const baseTag = "base"
 
 const baseFilename = "view/base.gohtml"
+const navbarFilename = "view/navbar.gohtml"
 const alertFilename = "view/alert.gohtml"
 
 const contentTypeKey = "Content-Type"
@@ -28,7 +29,7 @@ func New(route string, filename string) *View {
 	if filename == "" {
 		panic(errors.New(model.MustNotBeEmptyErrorMessage("filename")))
 	}
-	t, err := template.ParseFiles(baseFilename, alertFilename, filename)
+	t, err := template.ParseFiles(baseFilename, navbarFilename, alertFilename, filename)
 
 	if err != nil {
 		panic(err)
