@@ -7,39 +7,36 @@ import (
 	"net/http"
 )
 
-const LoginUserRoute = "/login"
-const loginUserFilename = "view/user_login.gohtml"
-
 const registerUserRoute = "/register"
 const registerUserFilename = "view/user_register.gohtml"
 
+const LoginUserRoute = "/login"
+const loginUserFilename = "view/user_login.gohtml"
+
 type userController struct {
-	loginView    *view.View
 	registerView *view.View
+	loginView    *view.View
 	userService  service.IUserService
 }
 
 func NewUserController(us service.IUserService) *userController {
 	return &userController{
-		loginView:    view.New(LoginUserRoute, loginUserFilename),
 		registerView: view.New(registerUserRoute, registerUserFilename),
+		loginView:    view.New(LoginUserRoute, loginUserFilename),
 		userService:  us,
 	}
 }
 
-func (c *userController) RegisterGet(w http.ResponseWriter, _ *http.Request) {
+//Register user
+func (c *userController) GetRegisterUser(w http.ResponseWriter, req *http.Request) {
 	data := &model.DataView{}
+
+	parseSuccessRoute(req, data)
 
 	c.registerView.Render(w, data)
 }
 
-func (c *userController) LoginGet(w http.ResponseWriter, _ *http.Request) {
-	data := &model.DataView{}
-
-	c.loginView.Render(w, data)
-}
-
-func (c *userController) RegisterPost(w http.ResponseWriter, req *http.Request) {
+func (c *userController) PostRegisterUser(w http.ResponseWriter, req *http.Request) {
 	data := &model.DataView{}
 	register := &model.RegisterUser{}
 
@@ -73,10 +70,21 @@ func (c *userController) RegisterPost(w http.ResponseWriter, req *http.Request) 
 	}
 	http.SetCookie(w, cookie)
 
-	Redirect(w, req, homeRoute)
+	route := makeSuccessRoute(homeRoute, registerUserValue)
+
+	Redirect(w, req, route)
 }
 
-func (c *userController) LoginPost(w http.ResponseWriter, req *http.Request) {
+//Login user
+func (c *userController) GetLoginUser(w http.ResponseWriter, req *http.Request) {
+	data := &model.DataView{}
+
+	parseSuccessRoute(req, data)
+
+	c.loginView.Render(w, data)
+}
+
+func (c *userController) PostLoginUser(w http.ResponseWriter, req *http.Request) {
 	data := &model.DataView{}
 	login := &model.LoginUser{}
 
@@ -110,13 +118,15 @@ func (c *userController) LoginPost(w http.ResponseWriter, req *http.Request) {
 	}
 	http.SetCookie(w, cookie)
 
-	Redirect(w, req, homeRoute)
+	route := makeSuccessRoute(homeRoute, loginUserValue)
+
+	Redirect(w, req, route)
 }
 
-func (c *userController) LoginRoute() string {
+func (c *userController) LoginUserRoute() string {
 	return c.loginView.Route()
 }
 
-func (c *userController) RegisterRoute() string {
+func (c *userController) RegisterUserRoute() string {
 	return c.registerView.Route()
 }
