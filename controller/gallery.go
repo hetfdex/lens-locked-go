@@ -62,7 +62,7 @@ func (c *galleryController) GetIndexGallery(w http.ResponseWriter, req *http.Req
 
 		return
 	}
-	galleries, err := c.galleryService.GetAllById(user.ID)
+	galleries, err := c.galleryService.GetAllByUserId(user.ID)
 
 	if err != nil {
 		handleError(w, c.indexGalleryView, err, viewData)
