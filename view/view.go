@@ -3,6 +3,7 @@ package view
 import (
 	"errors"
 	"html/template"
+	"lens-locked-go/context"
 	"lens-locked-go/model"
 	"net/http"
 )
@@ -37,9 +38,14 @@ func New(route string, filename string) *View {
 	}
 }
 
-func (v *View) Render(w http.ResponseWriter, viewData *model.DataView) {
+func (v *View) Render(w http.ResponseWriter, req *http.Request, viewData *model.DataView) {
 	w.Header().Set(contentTypeKey, contentTypeValue)
 
+	user, _ := context.User(req.Context())
+
+	if user != nil {
+		viewData.User = user
+	}
 	err := v.template.ExecuteTemplate(w, baseTag, viewData)
 
 	if err != nil {
