@@ -22,14 +22,14 @@ func (m *Middleware) RequireUser(next http.HandlerFunc) http.HandlerFunc {
 		cookie, err := req.Cookie(controller.CookieName)
 
 		if err != nil {
-			controller.Redirect(w, req, controller.LoginUserRoute)
+			controller.Redirect(w, req, controller.LoginUserRoute())
 
 			return
 		}
 		user, er := m.LoginWithToken(cookie.Value)
 
 		if er != nil {
-			controller.Redirect(w, req, controller.LoginUserRoute)
+			controller.Redirect(w, req, controller.LoginUserRoute())
 
 			return
 		}

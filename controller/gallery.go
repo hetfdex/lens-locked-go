@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"github.com/gorilla/mux"
+	"github.com/gofrs/uuid"
 	"lens-locked-go/context"
 	"lens-locked-go/model"
 	"lens-locked-go/service"
@@ -20,7 +20,7 @@ const editGalleryFilename = "view/gallery_edit.gohtml"
 
 const deleteGalleryRoute = "/gallery/{id}/delete"
 
-const GalleryRouteName = "gallery"
+const galleryRouteName = "gallery"
 const galleryRoute = "/gallery/{id}"
 const galleryFilename = "view/gallery.gohtml"
 
@@ -35,18 +35,16 @@ type galleryController struct {
 	editGalleryView   *view.View
 	deleteGalleryView *view.View
 	galleryView       *view.View
-	router            *mux.Router
 	galleryService    service.IGalleryService
 }
 
-func NewGalleryController(r *mux.Router, gs service.IGalleryService) *galleryController {
+func NewGalleryController(gs service.IGalleryService) *galleryController {
 	return &galleryController{
 		indexGalleryView:  view.New(indexGalleryRoute, indexGalleryFilename),
 		createGalleryView: view.New(createGalleryRoute, createGalleryFilename),
 		editGalleryView:   view.New(editGalleryRoute, editGalleryFilename),
 		deleteGalleryView: view.New(deleteGalleryRoute, galleryFilename),
 		galleryView:       view.New(galleryRoute, galleryFilename),
-		router:            r,
 		galleryService:    gs,
 	}
 }
@@ -115,14 +113,9 @@ func (c *galleryController) PostCreateGallery(w http.ResponseWriter, req *http.R
 
 		return
 	}
-	url, err := makeUrl(c.router, GalleryRouteName, idKey, gallery.ID.String())
+	route := makeGalleryRouteFromId(gallery.ID)
 
-	if err != nil {
-		handleError(w, c.createGalleryView, err, viewData)
-
-		return
-	}
-	route := makeSuccessRoute(url, createGalleryValue)
+	route = makeSuccessRoute(route, createGalleryValue)
 
 	Redirect(w, req, route)
 }
@@ -175,14 +168,9 @@ func (c *galleryController) PostEditGallery(w http.ResponseWriter, req *http.Req
 
 		return
 	}
-	url, err := makeUrl(c.router, GalleryRouteName, idKey, gallery.ID.String())
+	route := makeGalleryRouteFromId(gallery.ID)
 
-	if err != nil {
-		handleError(w, c.editGalleryView, err, viewData)
-
-		return
-	}
-	route := makeSuccessRoute(url, editGalleryValue)
+	route = makeSuccessRoute(route, editGalleryValue)
 
 	Redirect(w, req, route)
 }
@@ -228,22 +216,26 @@ func (c *galleryController) GetGallery(w http.ResponseWriter, req *http.Request)
 	c.galleryView.Render(w, viewData)
 }
 
-func (c *galleryController) IndexGalleryRoute() string {
-	return c.indexGalleryView.Route()
+func IndexGalleryRoute() string {
+	return indexGalleryRoute
 }
 
-func (c *galleryController) CreateGalleryRoute() string {
-	return c.createGalleryView.Route()
+func CreateGalleryRoute() string {
+	return createGalleryRoute
 }
 
-func (c *galleryController) EditGalleryRoute() string {
-	return c.editGalleryView.Route()
+func EditGalleryRoute() string {
+	return editGalleryRoute
 }
 
-func (c *galleryController) DeleteGalleryRoute() string {
-	return c.deleteGalleryView.Route()
+func DeleteGalleryRoute() string {
+	return deleteGalleryRoute
 }
 
-func (c *galleryController) GalleryRoute() string {
-	return c.galleryView.Route()
+func GalleryRoute() string {
+	return galleryRoute
+}
+
+func makeGalleryRouteFromId(id uuid.UUID) string {
+	return indexGalleryRoute + "/" + id.String()
 }

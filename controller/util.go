@@ -89,17 +89,6 @@ func handleError(w http.ResponseWriter, view *view.View, err *model.Error, viewD
 	view.Render(w, viewData)
 }
 
-func makeUrl(router *mux.Router, routeName string, key string, value string) (string, *model.Error) {
-	url, err := router.Get(routeName).URL(key, value)
-
-	if err != nil {
-		er := model.NewInternalServerApiError(err.Error())
-
-		return "", er
-	}
-	return url.String(), nil
-}
-
 func getGallery(req *http.Request, gs service.IGalleryService) (*model.Gallery, *model.Error) {
 	vars := mux.Vars(req)
 

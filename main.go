@@ -68,22 +68,22 @@ func resetDatabase(db *gorm.DB) {
 func configureRouter(r *mux.Router, us service.IUserService, gs service.IGalleryService) {
 	homeController := controller.NewHomeController()
 	userController := controller.NewUserController(us)
-	galleryController := controller.NewGalleryController(r, gs)
+	galleryController := controller.NewGalleryController(gs)
 
 	mdw := middleware.NewMiddleware(us)
 
-	r.HandleFunc(homeController.HomeRoute(), homeController.GetHome).Methods(http.MethodGet)
-	r.HandleFunc(userController.RegisterUserRoute(), userController.GetRegisterUser).Methods(http.MethodGet)
-	r.HandleFunc(userController.RegisterUserRoute(), userController.PostRegisterUser).Methods(http.MethodPost)
-	r.HandleFunc(userController.LoginUserRoute(), userController.GetLoginUser).Methods(http.MethodGet)
-	r.HandleFunc(userController.LoginUserRoute(), userController.PostLoginUser).Methods(http.MethodPost)
-	r.HandleFunc(galleryController.IndexGalleryRoute(), mdw.RequireUser(galleryController.GetIndexGallery)).Methods(http.MethodGet)
-	r.HandleFunc(galleryController.CreateGalleryRoute(), mdw.RequireUser(galleryController.GetCreateGallery)).Methods(http.MethodGet)
-	r.HandleFunc(galleryController.CreateGalleryRoute(), mdw.RequireUser(galleryController.PostCreateGallery)).Methods(http.MethodPost)
-	r.HandleFunc(galleryController.EditGalleryRoute(), mdw.RequireUser(galleryController.GetEditGallery)).Methods(http.MethodGet)
-	r.HandleFunc(galleryController.EditGalleryRoute(), mdw.RequireUser(galleryController.PostEditGallery)).Methods(http.MethodPost)
-	r.HandleFunc(galleryController.DeleteGalleryRoute(), mdw.RequireUser(galleryController.GetDeleteGallery)).Methods(http.MethodGet)
-	r.HandleFunc(galleryController.GalleryRoute(), galleryController.GetGallery).Methods(http.MethodGet).Name(controller.GalleryRouteName)
+	r.HandleFunc(controller.HomeRoute(), homeController.GetHome).Methods(http.MethodGet)
+	r.HandleFunc(controller.RegisterUserRoute(), userController.GetRegisterUser).Methods(http.MethodGet)
+	r.HandleFunc(controller.RegisterUserRoute(), userController.PostRegisterUser).Methods(http.MethodPost)
+	r.HandleFunc(controller.LoginUserRoute(), userController.GetLoginUser).Methods(http.MethodGet)
+	r.HandleFunc(controller.LoginUserRoute(), userController.PostLoginUser).Methods(http.MethodPost)
+	r.HandleFunc(controller.IndexGalleryRoute(), mdw.RequireUser(galleryController.GetIndexGallery)).Methods(http.MethodGet)
+	r.HandleFunc(controller.CreateGalleryRoute(), mdw.RequireUser(galleryController.GetCreateGallery)).Methods(http.MethodGet)
+	r.HandleFunc(controller.CreateGalleryRoute(), mdw.RequireUser(galleryController.PostCreateGallery)).Methods(http.MethodPost)
+	r.HandleFunc(controller.EditGalleryRoute(), mdw.RequireUser(galleryController.GetEditGallery)).Methods(http.MethodGet)
+	r.HandleFunc(controller.EditGalleryRoute(), mdw.RequireUser(galleryController.PostEditGallery)).Methods(http.MethodPost)
+	r.HandleFunc(controller.DeleteGalleryRoute(), mdw.RequireUser(galleryController.GetDeleteGallery)).Methods(http.MethodGet)
+	r.HandleFunc(controller.GalleryRoute(), galleryController.GetGallery).Methods(http.MethodGet)
 }
 
 func listenAndServe(r *mux.Router) {

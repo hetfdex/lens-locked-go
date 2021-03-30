@@ -10,7 +10,7 @@ import (
 const registerUserRoute = "/register"
 const registerUserFilename = "view/user_register.gohtml"
 
-const LoginUserRoute = "/login"
+const loginUserRoute = "/login"
 const loginUserFilename = "view/user_login.gohtml"
 
 type userController struct {
@@ -22,7 +22,7 @@ type userController struct {
 func NewUserController(us service.IUserService) *userController {
 	return &userController{
 		registerView: view.New(registerUserRoute, registerUserFilename),
-		loginView:    view.New(LoginUserRoute, loginUserFilename),
+		loginView:    view.New(loginUserRoute, loginUserFilename),
 		userService:  us,
 	}
 }
@@ -123,10 +123,10 @@ func (c *userController) PostLoginUser(w http.ResponseWriter, req *http.Request)
 	Redirect(w, req, route)
 }
 
-func (c *userController) LoginUserRoute() string {
-	return c.loginView.Route()
+func LoginUserRoute() string {
+	return loginUserRoute
 }
 
-func (c *userController) RegisterUserRoute() string {
-	return c.registerView.Route()
+func RegisterUserRoute() string {
+	return registerUserRoute
 }

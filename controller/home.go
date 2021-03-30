@@ -27,6 +27,6 @@ func (c *homeController) GetHome(w http.ResponseWriter, req *http.Request) {
 	c.homeView.Render(w, viewData)
 }
 
-func (c *homeController) HomeRoute() string {
-	return c.homeView.Route()
+func HomeRoute() string {
+	return homeRoute
 }
