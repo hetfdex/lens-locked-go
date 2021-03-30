@@ -26,10 +26,10 @@ func NewGalleryService(ur repository.IGalleryRepository) *galleryService {
 	}
 }
 
-func (s *galleryService) Create(create *model.CreateGallery, userId uuid.UUID) (*model.Gallery, *model.Error) {
-	create.Name = trimSpace(create.Name)
+func (s *galleryService) Create(form *model.CreateGallery, userId uuid.UUID) (*model.Gallery, *model.Error) {
+	form.Name = trimSpace(form.Name)
 
-	galleriesByTitle, err := s.getAllByTitle(create.Name)
+	galleriesByTitle, err := s.getAllByTitle(form.Name)
 
 	if err != nil {
 		return nil, err
@@ -43,7 +43,7 @@ func (s *galleryService) Create(create *model.CreateGallery, userId uuid.UUID) (
 		}
 	}
 	gallery := &model.Gallery{
-		Title:  create.Name,
+		Title:  form.Name,
 		UserId: userId,
 	}
 
@@ -79,10 +79,10 @@ func (s *galleryService) GetAllByUserId(userId uuid.UUID) ([]model.Gallery, *mod
 	return gallery, nil
 }
 
-func (s *galleryService) Edit(gallery *model.Gallery, edit *model.EditGallery) *model.Error {
-	edit.Name = trimSpace(edit.Name)
+func (s *galleryService) Edit(gallery *model.Gallery, form *model.EditGallery) *model.Error {
+	form.Name = trimSpace(form.Name)
 
-	galleriesByTitle, err := s.getAllByTitle(edit.Name)
+	galleriesByTitle, err := s.getAllByTitle(form.Name)
 
 	if err != nil {
 		return err
@@ -95,7 +95,7 @@ func (s *galleryService) Edit(gallery *model.Gallery, edit *model.EditGallery) *
 			}
 		}
 	}
-	gallery.Title = edit.Name
+	gallery.Title = form.Name
 
 	err = s.repository.Update(gallery)
 

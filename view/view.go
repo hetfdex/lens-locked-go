@@ -9,6 +9,7 @@ import (
 )
 
 const baseTag = "base"
+
 const baseFilename = "view/base.gohtml"
 const alertFilename = "view/alert.gohtml"
 
@@ -38,15 +39,15 @@ func New(route string, filename string) *View {
 	}
 }
 
-func (v *View) Render(w http.ResponseWriter, req *http.Request, viewData *model.DataView) {
+func (v *View) Render(w http.ResponseWriter, req *http.Request, data *model.Data) {
 	w.Header().Set(contentTypeKey, contentTypeValue)
 
 	user, _ := context.User(req.Context())
 
 	if user != nil {
-		viewData.User = user
+		data.User = user
 	}
-	err := v.template.ExecuteTemplate(w, baseTag, viewData)
+	err := v.template.ExecuteTemplate(w, baseTag, data)
 
 	if err != nil {
 		er := model.NewInternalServerApiError(err.Error())

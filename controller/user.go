@@ -4,6 +4,7 @@ import (
 	"lens-locked-go/context"
 	"lens-locked-go/model"
 	"lens-locked-go/service"
+	"lens-locked-go/util"
 	"lens-locked-go/view"
 	"net/http"
 )
@@ -15,7 +16,8 @@ const loginUserRoute = "/login"
 const loginUserFilename = "view/user_login.gohtml"
 
 const logoutUserRoute = "/logout"
-const logoutUserFilename = homeFilename
+
+const invalidTokenValue = "invalidTokenValue"
 
 type userController struct {
 	registerView *view.View
@@ -28,181 +30,181 @@ func NewUserController(us service.IUserService) *userController {
 	return &userController{
 		registerView: view.New(registerUserRoute, registerUserFilename),
 		loginView:    view.New(loginUserRoute, loginUserFilename),
-		logoutView:   view.New(logoutUserRoute, logoutUserFilename),
+		logoutView:   view.New(logoutUserRoute, homeFilename),
 		userService:  us,
 	}
 }
 
 //Register user
 func (c *userController) GetRegisterUser(w http.ResponseWriter, req *http.Request) {
-	viewData := &model.DataView{}
+	data := &model.Data{}
 
-	parseSuccessRoute(req, viewData)
+	parseSuccessFromRoute(req, data)
 
-	c.registerView.Render(w, req, viewData)
+	c.registerView.Render(w, req, data)
 }
 
 func (c *userController) PostRegisterUser(w http.ResponseWriter, req *http.Request) {
-	viewData := &model.DataView{}
-	register := &model.RegisterUser{}
+	data := &model.Data{}
+	form := &model.RegisterUser{}
 
-	err := parseForm(req, register)
+	err := parseForm(req, form)
 
 	if err != nil {
-		viewData.Alert = err.Alert()
+		data.Alert = err.Alert()
 
 		w.WriteHeader(err.StatusCode)
 
-		c.registerView.Render(w, req, viewData)
+		c.registerView.Render(w, req, data)
 
 		return
 	}
-	err = register.Validate()
+	err = form.Validate()
 
 	if err != nil {
-		viewData.Alert = err.Alert()
+		data.Alert = err.Alert()
 
 		w.WriteHeader(err.StatusCode)
 
-		c.registerView.Render(w, req, viewData)
+		c.registerView.Render(w, req, data)
 
 		return
 	}
-	_, token, err := c.userService.Register(register)
+	_, token, err := c.userService.Register(form)
 
 	if err != nil {
-		viewData.Alert = err.Alert()
+		data.Alert = err.Alert()
 
 		w.WriteHeader(err.StatusCode)
 
-		c.registerView.Render(w, req, viewData)
+		c.registerView.Render(w, req, data)
 
 		return
 	}
 	cookie, err := makeCookie(token)
 
 	if err != nil {
-		viewData.Alert = err.Alert()
+		data.Alert = err.Alert()
 
 		w.WriteHeader(err.StatusCode)
 
-		c.registerView.Render(w, req, viewData)
+		c.registerView.Render(w, req, data)
 
 		return
 	}
 	http.SetCookie(w, cookie)
 
-	route := makeSuccessRoute(homeRoute, registerUserValue)
+	route := addSuccessToRoute(homeRoute, registerUserValue)
 
-	Redirect(w, req, route)
+	util.Redirect(w, req, route)
 }
 
 //Login user
 func (c *userController) GetLoginUser(w http.ResponseWriter, req *http.Request) {
-	viewData := &model.DataView{}
+	data := &model.Data{}
 
-	parseSuccessRoute(req, viewData)
+	parseSuccessFromRoute(req, data)
 
-	c.loginView.Render(w, req, viewData)
+	c.loginView.Render(w, req, data)
 }
 
 func (c *userController) PostLoginUser(w http.ResponseWriter, req *http.Request) {
-	viewData := &model.DataView{}
-	login := &model.LoginUser{}
+	data := &model.Data{}
+	form := &model.LoginUser{}
 
-	err := parseForm(req, login)
+	err := parseForm(req, form)
 
 	if err != nil {
-		viewData.Alert = err.Alert()
+		data.Alert = err.Alert()
 
 		w.WriteHeader(err.StatusCode)
 
-		c.loginView.Render(w, req, viewData)
+		c.loginView.Render(w, req, data)
 
 		return
 	}
-	err = login.Validate()
+	err = form.Validate()
 
 	if err != nil {
-		viewData.Alert = err.Alert()
+		data.Alert = err.Alert()
 
 		w.WriteHeader(err.StatusCode)
 
-		c.loginView.Render(w, req, viewData)
+		c.loginView.Render(w, req, data)
 
 		return
 	}
-	_, token, err := c.userService.LoginWithPassword(login)
+	_, token, err := c.userService.LoginWithPassword(form)
 
 	if err != nil {
-		viewData.Alert = err.Alert()
+		data.Alert = err.Alert()
 
 		w.WriteHeader(err.StatusCode)
 
-		c.loginView.Render(w, req, viewData)
+		c.loginView.Render(w, req, data)
 
 		return
 	}
 	cookie, err := makeCookie(token)
 
 	if err != nil {
-		viewData.Alert = err.Alert()
+		data.Alert = err.Alert()
 
 		w.WriteHeader(err.StatusCode)
 
-		c.loginView.Render(w, req, viewData)
+		c.loginView.Render(w, req, data)
 
 		return
 	}
 	http.SetCookie(w, cookie)
 
-	route := makeSuccessRoute(homeRoute, loginUserValue)
+	route := addSuccessToRoute(homeRoute, loginUserValue)
 
-	Redirect(w, req, route)
+	util.Redirect(w, req, route)
 }
 
 //Logout user
 func (c *userController) GetLogoutUser(w http.ResponseWriter, req *http.Request) {
-	viewData := &model.DataView{}
+	data := &model.Data{}
 
 	user, err := context.User(req.Context())
 
 	if err != nil {
-		viewData.Alert = err.Alert()
+		data.Alert = err.Alert()
 
 		w.WriteHeader(err.StatusCode)
 
-		c.logoutView.Render(w, req, viewData)
+		c.logoutView.Render(w, req, data)
 
 		return
 	}
 	err = c.userService.Logout(user)
 
 	if err != nil {
-		viewData.Alert = err.Alert()
+		data.Alert = err.Alert()
 
 		w.WriteHeader(err.StatusCode)
 
-		c.logoutView.Render(w, req, viewData)
+		c.logoutView.Render(w, req, data)
 
 		return
 	}
 	cookie, err := makeCookie(invalidTokenValue)
 
 	if err != nil {
-		viewData.Alert = err.Alert()
+		data.Alert = err.Alert()
 
 		w.WriteHeader(err.StatusCode)
 
-		c.logoutView.Render(w, req, viewData)
+		c.logoutView.Render(w, req, data)
 
 		return
 	}
 	http.SetCookie(w, cookie)
 
-	route := makeSuccessRoute(homeRoute, logoutUserValue)
+	route := addSuccessToRoute(homeRoute, logoutUserValue)
 
-	Redirect(w, req, route)
+	util.Redirect(w, req, route)
 }
 
 func RegisterUserRoute() string {
@@ -215,4 +217,15 @@ func LoginUserRoute() string {
 
 func LogoutUserRoute() string {
 	return logoutUserRoute
+}
+
+func makeCookie(value string) (*http.Cookie, *model.Error) {
+	if value == "" {
+		return nil, model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("value"))
+	}
+	return &http.Cookie{
+		Name:     util.CookieName,
+		Value:    value,
+		HttpOnly: true,
+	}, nil
 }

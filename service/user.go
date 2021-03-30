@@ -35,22 +35,22 @@ func NewUserService(ur repository.IUserRepository) *userService {
 	}
 }
 
-func (s *userService) Register(register *model.RegisterUser) (*model.User, string, *model.Error) {
-	register.Email = lower(trimSpace(register.Email))
+func (s *userService) Register(form *model.RegisterUser) (*model.User, string, *model.Error) {
+	form.Email = lower(trimSpace(form.Email))
 
-	if !validEmail(register.Email) {
+	if !validEmail(form.Email) {
 		return nil, "", model.NewBadRequestApiError(invalidEmailErrorMessage)
 	}
-	userByEmail, _ := s.getByEmail(register.Email)
+	userByEmail, _ := s.getByEmail(form.Email)
 
 	if userByEmail != nil {
 		return nil, "", model.NewConflictApiError(emailInUseErrorMessage)
 	}
 
-	if !validPassword(register.Password) {
+	if !validPassword(form.Password) {
 		return nil, "", model.NewBadRequestApiError(invalidPasswordLengthErrorMessage)
 	}
-	pwHash, err := generateHashFromPassword(register.Password)
+	pwHash, err := generateHashFromPassword(form.Password)
 
 	if err != nil {
 		return nil, "", err
@@ -66,8 +66,8 @@ func (s *userService) Register(register *model.RegisterUser) (*model.User, strin
 		return nil, "", err
 	}
 	user := &model.User{
-		Name:         register.Name,
-		Email:        register.Email,
+		Name:         form.Name,
+		Email:        form.Email,
 		PasswordHash: pwHash,
 		TokenHash:    tokenHash,
 	}
@@ -80,22 +80,22 @@ func (s *userService) Register(register *model.RegisterUser) (*model.User, strin
 	return user, token, nil
 }
 
-func (s *userService) LoginWithPassword(login *model.LoginUser) (*model.User, string, *model.Error) {
-	login.Email = lower(trimSpace(login.Email))
+func (s *userService) LoginWithPassword(form *model.LoginUser) (*model.User, string, *model.Error) {
+	form.Email = lower(trimSpace(form.Email))
 
-	if !validEmail(login.Email) {
+	if !validEmail(form.Email) {
 		return nil, "", model.NewBadRequestApiError(invalidEmailErrorMessage)
 	}
-	user, err := s.getByEmail(login.Email)
+	user, err := s.getByEmail(form.Email)
 
 	if err != nil {
 		return nil, "", err
 	}
 
-	if !validPassword(login.Password) {
+	if !validPassword(form.Password) {
 		return nil, "", model.NewBadRequestApiError(invalidPasswordLengthErrorMessage)
 	}
-	err = compareHashAndPassword(user.PasswordHash, login.Password)
+	err = compareHashAndPassword(user.PasswordHash, form.Password)
 
 	if err != nil {
 		return nil, "", err

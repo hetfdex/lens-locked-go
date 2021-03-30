@@ -4,13 +4,13 @@ const alertLevelError = "danger"
 const alertLevelWarning = "warning"
 const alertLevelSuccess = "success"
 
-type AlertView struct {
+type Alert struct {
 	Level   string
 	Message string
 }
 
-func NewSuccessAlert(message string) *AlertView {
-	return &AlertView{
+func NewSuccessAlert(message string) *Alert {
+	return &Alert{
 		Level:   alertLevelSuccess,
 		Message: message,
 	}

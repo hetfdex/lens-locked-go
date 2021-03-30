@@ -4,6 +4,7 @@ import (
 	"lens-locked-go/context"
 	"lens-locked-go/controller"
 	"lens-locked-go/service"
+	"lens-locked-go/util"
 	"net/http"
 )
 
@@ -26,7 +27,7 @@ func (m *Middleware) SetUser(next http.Handler) http.Handler {
 
 			return
 		}
-		cookie, err := req.Cookie(controller.CookieName())
+		cookie, err := req.Cookie(util.CookieName)
 
 		if err != nil {
 			next.ServeHTTP(w, req)
@@ -55,7 +56,7 @@ func (m *Middleware) RequireUser(next http.HandlerFunc) http.HandlerFunc {
 		user, _ := context.User(req.Context())
 
 		if user == nil {
-			controller.Redirect(w, req, controller.LoginUserRoute())
+			util.Redirect(w, req, controller.LoginUserRoute())
 
 			return
 		}

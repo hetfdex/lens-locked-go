@@ -2,6 +2,7 @@ package model
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 )
@@ -13,10 +14,12 @@ type Error struct {
 	Message    string
 }
 
-func (e *Error) Alert() *AlertView {
+func (e *Error) Alert() *Alert {
 	var alertLevel string
 
 	message := e.Message
+
+	log.Println(e.StatusCode, e.Message)
 
 	switch e.StatusCode {
 	case http.StatusInternalServerError:
@@ -31,7 +34,7 @@ func (e *Error) Alert() *AlertView {
 	case http.StatusConflict:
 		alertLevel = alertLevelWarning
 	}
-	return &AlertView{
+	return &Alert{
 		Level:   alertLevel,
 		Message: strings.Title(message),
 	}
