@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"lens-locked-go/context"
 	"lens-locked-go/model"
 	"lens-locked-go/service"
 	"lens-locked-go/view"
@@ -13,9 +14,13 @@ const registerUserFilename = "view/user_register.gohtml"
 const loginUserRoute = "/login"
 const loginUserFilename = "view/user_login.gohtml"
 
+const logoutUserRoute = "/logout"
+const logoutUserFilename = homeFilename
+
 type userController struct {
 	registerView *view.View
 	loginView    *view.View
+	logoutView   *view.View
 	userService  service.IUserService
 }
 
@@ -23,6 +28,7 @@ func NewUserController(us service.IUserService) *userController {
 	return &userController{
 		registerView: view.New(registerUserRoute, registerUserFilename),
 		loginView:    view.New(loginUserRoute, loginUserFilename),
+		logoutView:   view.New(logoutUserRoute, logoutUserFilename),
 		userService:  us,
 	}
 }
@@ -123,10 +129,46 @@ func (c *userController) PostLoginUser(w http.ResponseWriter, req *http.Request)
 	Redirect(w, req, route)
 }
 
-func LoginUserRoute() string {
-	return loginUserRoute
+//Logout user
+func (c *userController) GetLogoutUser(w http.ResponseWriter, req *http.Request) {
+	viewData := &model.DataView{}
+
+	user, err := context.User(req.Context())
+
+	if err != nil {
+		handleError(w, c.logoutView, err, viewData)
+
+		return
+	}
+	err = c.userService.Logout(user)
+
+	if err != nil {
+		handleError(w, c.logoutView, err, viewData)
+
+		return
+	}
+	cookie, err := makeCookie(invalidTokenValue)
+
+	if err != nil {
+		handleError(w, c.logoutView, err, viewData)
+
+		return
+	}
+	http.SetCookie(w, cookie)
+
+	route := makeSuccessRoute(homeRoute, logoutUserValue)
+
+	Redirect(w, req, route)
 }
 
 func RegisterUserRoute() string {
 	return registerUserRoute
+}
+
+func LoginUserRoute() string {
+	return loginUserRoute
+}
+
+func LogoutUserRoute() string {
+	return logoutUserRoute
 }
