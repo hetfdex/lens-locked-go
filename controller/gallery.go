@@ -55,32 +55,38 @@ func (c *galleryController) GetIndexGallery(w http.ResponseWriter, req *http.Req
 	user, err := context.User(req.Context())
 
 	if err != nil {
-		handleError(w, c.indexGalleryView, err, viewData)
+		viewData.Alert = err.Alert()
+
+		w.WriteHeader(err.StatusCode)
+
+		c.indexGalleryView.Render(w, req, viewData)
 
 		return
 	}
 	galleries, err := c.galleryService.GetAllByUserId(user.ID)
 
 	if err != nil {
-		handleError(w, c.indexGalleryView, err, viewData)
+		viewData.Alert = err.Alert()
+
+		w.WriteHeader(err.StatusCode)
+
+		c.indexGalleryView.Render(w, req, viewData)
 
 		return
 	}
 	viewData.User = user
 	viewData.Data = galleries
 
-	c.indexGalleryView.Render(w, viewData)
+	c.indexGalleryView.Render(w, req, viewData)
 }
 
 //Create gallery
 func (c *galleryController) GetCreateGallery(w http.ResponseWriter, req *http.Request) {
 	viewData := &model.DataView{}
 
-	setUser(req, viewData)
-
 	parseSuccessRoute(req, viewData)
 
-	c.createGalleryView.Render(w, viewData)
+	c.createGalleryView.Render(w, req, viewData)
 }
 
 func (c *galleryController) PostCreateGallery(w http.ResponseWriter, req *http.Request) {
@@ -90,28 +96,44 @@ func (c *galleryController) PostCreateGallery(w http.ResponseWriter, req *http.R
 	err := parseForm(req, create)
 
 	if err != nil {
-		handleError(w, c.createGalleryView, err, viewData)
+		viewData.Alert = err.Alert()
+
+		w.WriteHeader(err.StatusCode)
+
+		c.createGalleryView.Render(w, req, viewData)
 
 		return
 	}
 	err = create.Validate()
 
 	if err != nil {
-		handleError(w, c.createGalleryView, err, viewData)
+		viewData.Alert = err.Alert()
+
+		w.WriteHeader(err.StatusCode)
+
+		c.createGalleryView.Render(w, req, viewData)
 
 		return
 	}
 	user, err := context.User(req.Context())
 
 	if err != nil {
-		handleError(w, c.createGalleryView, err, viewData)
+		viewData.Alert = err.Alert()
+
+		w.WriteHeader(err.StatusCode)
+
+		c.createGalleryView.Render(w, req, viewData)
 
 		return
 	}
 	gallery, err := c.galleryService.Create(create, user.ID)
 
 	if err != nil {
-		handleError(w, c.createGalleryView, err, viewData)
+		viewData.Alert = err.Alert()
+
+		w.WriteHeader(err.StatusCode)
+
+		c.createGalleryView.Render(w, req, viewData)
 
 		return
 	}
@@ -126,18 +148,20 @@ func (c *galleryController) PostCreateGallery(w http.ResponseWriter, req *http.R
 func (c *galleryController) GetEditGallery(w http.ResponseWriter, req *http.Request) {
 	viewData := &model.DataView{}
 
-	setUser(req, viewData)
-
 	gallery, err := getGalleryWithPermission(req, c.galleryService)
 
 	if err != nil {
-		handleError(w, c.editGalleryView, err, viewData)
+		viewData.Alert = err.Alert()
+
+		w.WriteHeader(err.StatusCode)
+
+		c.editGalleryView.Render(w, req, viewData)
 
 		return
 	}
 	viewData.Data = gallery
 
-	c.editGalleryView.Render(w, viewData)
+	c.editGalleryView.Render(w, req, viewData)
 }
 
 func (c *galleryController) PostEditGallery(w http.ResponseWriter, req *http.Request) {
@@ -147,28 +171,44 @@ func (c *galleryController) PostEditGallery(w http.ResponseWriter, req *http.Req
 	gallery, err := getGalleryWithPermission(req, c.galleryService)
 
 	if err != nil {
-		handleError(w, c.editGalleryView, err, viewData)
+		viewData.Alert = err.Alert()
+
+		w.WriteHeader(err.StatusCode)
+
+		c.editGalleryView.Render(w, req, viewData)
 
 		return
 	}
 	err = parseForm(req, edit)
 
 	if err != nil {
-		handleError(w, c.editGalleryView, err, viewData)
+		viewData.Alert = err.Alert()
+
+		w.WriteHeader(err.StatusCode)
+
+		c.editGalleryView.Render(w, req, viewData)
 
 		return
 	}
 	err = edit.Validate()
 
 	if err != nil {
-		handleError(w, c.editGalleryView, err, viewData)
+		viewData.Alert = err.Alert()
+
+		w.WriteHeader(err.StatusCode)
+
+		c.editGalleryView.Render(w, req, viewData)
 
 		return
 	}
 	gallery, err = c.galleryService.Edit(gallery, edit)
 
 	if err != nil {
-		handleError(w, c.editGalleryView, err, viewData)
+		viewData.Alert = err.Alert()
+
+		w.WriteHeader(err.StatusCode)
+
+		c.editGalleryView.Render(w, req, viewData)
 
 		return
 	}
@@ -183,19 +223,25 @@ func (c *galleryController) PostEditGallery(w http.ResponseWriter, req *http.Req
 func (c *galleryController) GetDeleteGallery(w http.ResponseWriter, req *http.Request) {
 	viewData := &model.DataView{}
 
-	setUser(req, viewData)
-
 	gallery, err := getGalleryWithPermission(req, c.galleryService)
 
 	if err != nil {
-		handleError(w, c.deleteGalleryView, err, viewData)
+		viewData.Alert = err.Alert()
+
+		w.WriteHeader(err.StatusCode)
+
+		c.deleteGalleryView.Render(w, req, viewData)
 
 		return
 	}
 	err = c.galleryService.Delete(gallery)
 
 	if err != nil {
-		handleError(w, c.deleteGalleryView, err, viewData)
+		viewData.Alert = err.Alert()
+
+		w.WriteHeader(err.StatusCode)
+
+		c.deleteGalleryView.Render(w, req, viewData)
 
 		return
 	}
@@ -208,20 +254,22 @@ func (c *galleryController) GetDeleteGallery(w http.ResponseWriter, req *http.Re
 func (c *galleryController) GetGallery(w http.ResponseWriter, req *http.Request) {
 	viewData := &model.DataView{}
 
-	setUser(req, viewData)
-
 	parseSuccessRoute(req, viewData)
 
 	gallery, err := getGallery(req, c.galleryService)
 
 	if err != nil {
-		handleError(w, c.galleryView, err, viewData)
+		viewData.Alert = err.Alert()
+
+		w.WriteHeader(err.StatusCode)
+
+		c.galleryView.Render(w, req, viewData)
 
 		return
 	}
 	viewData.Data = gallery
 
-	c.galleryView.Render(w, viewData)
+	c.galleryView.Render(w, req, viewData)
 }
 
 func IndexGalleryRoute() string {
