@@ -30,14 +30,16 @@ func main() {
 	resetDatabase(db)
 
 	ur := repository.NewUserRepository(db)
+	ir := repository.NewImageRepository(db)
 	gr := repository.NewGalleryRepository(db)
 
 	us := service.NewUserService(ur)
+	is := service.NewImageService(ir)
 	gs := service.NewGalleryService(gr)
 
 	r := mux.NewRouter()
 
-	configureRouter(r, us, gs)
+	configureRouter(r, us, gs, is)
 
 	listenAndServe(r)
 }
@@ -65,10 +67,10 @@ func resetDatabase(db *gorm.DB) {
 	_ = db.Migrator().CreateTable(&model.Gallery{})
 }
 
-func configureRouter(r *mux.Router, us service.IUserService, gs service.IGalleryService) {
+func configureRouter(r *mux.Router, us service.IUserService, gs service.IGalleryService, is service.IImageService) {
 	homeController := controller.NewHomeController()
 	userController := controller.NewUserController(us)
-	galleryController := controller.NewGalleryController(gs)
+	galleryController := controller.NewGalleryController(gs, is)
 
 	mdw := middleware.NewMiddleware(us)
 
@@ -85,6 +87,8 @@ func configureRouter(r *mux.Router, us service.IUserService, gs service.IGallery
 	r.HandleFunc(controller.CreateGalleryRoute(), mdw.RequireUser(galleryController.PostCreateGallery)).Methods(http.MethodPost)
 	r.HandleFunc(controller.EditGalleryRoute(), mdw.RequireUser(galleryController.GetEditGallery)).Methods(http.MethodGet)
 	r.HandleFunc(controller.EditGalleryRoute(), mdw.RequireUser(galleryController.PostEditGallery)).Methods(http.MethodPost)
+	r.HandleFunc(controller.UploadGalleryRoute(), mdw.RequireUser(galleryController.GetUploadGallery)).Methods(http.MethodGet)
+	r.HandleFunc(controller.UploadGalleryRoute(), mdw.RequireUser(galleryController.PostUploadGallery)).Methods(http.MethodPost)
 	r.HandleFunc(controller.DeleteGalleryRoute(), mdw.RequireUser(galleryController.GetDeleteGallery)).Methods(http.MethodGet)
 	r.HandleFunc(controller.GalleryRoute(), galleryController.GetGallery).Methods(http.MethodGet)
 }
