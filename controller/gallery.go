@@ -20,7 +20,6 @@ const editGalleryFilename = "view/gallery_edit.gohtml"
 
 const deleteGalleryRoute = "/gallery/{id}/delete"
 
-const galleryRouteName = "gallery"
 const galleryRoute = "/gallery/{id}"
 const galleryFilename = "view/gallery.gohtml"
 
@@ -67,6 +66,7 @@ func (c *galleryController) GetIndexGallery(w http.ResponseWriter, req *http.Req
 
 		return
 	}
+	viewData.User = user
 	viewData.Data = galleries
 
 	c.indexGalleryView.Render(w, viewData)
@@ -75,6 +75,8 @@ func (c *galleryController) GetIndexGallery(w http.ResponseWriter, req *http.Req
 //Create gallery
 func (c *galleryController) GetCreateGallery(w http.ResponseWriter, req *http.Request) {
 	viewData := &model.DataView{}
+
+	setUser(req, viewData)
 
 	parseSuccessRoute(req, viewData)
 
@@ -123,6 +125,8 @@ func (c *galleryController) PostCreateGallery(w http.ResponseWriter, req *http.R
 //Edit gallery
 func (c *galleryController) GetEditGallery(w http.ResponseWriter, req *http.Request) {
 	viewData := &model.DataView{}
+
+	setUser(req, viewData)
 
 	gallery, err := getGalleryWithPermission(req, c.galleryService)
 
@@ -179,6 +183,8 @@ func (c *galleryController) PostEditGallery(w http.ResponseWriter, req *http.Req
 func (c *galleryController) GetDeleteGallery(w http.ResponseWriter, req *http.Request) {
 	viewData := &model.DataView{}
 
+	setUser(req, viewData)
+
 	gallery, err := getGalleryWithPermission(req, c.galleryService)
 
 	if err != nil {
@@ -201,6 +207,8 @@ func (c *galleryController) GetDeleteGallery(w http.ResponseWriter, req *http.Re
 //Gallery
 func (c *galleryController) GetGallery(w http.ResponseWriter, req *http.Request) {
 	viewData := &model.DataView{}
+
+	setUser(req, viewData)
 
 	parseSuccessRoute(req, viewData)
 
