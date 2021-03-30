@@ -6,7 +6,7 @@ import (
 	"lens-locked-go/repository"
 )
 
-const titleInUseErrorMessage = "title is already in use"
+const nameInUseErrorMessage = "name is already in use"
 
 type IGalleryService interface {
 	Create(*model.CreateGallery, uuid.UUID) (*model.Gallery, *model.Error)
@@ -29,21 +29,21 @@ func NewGalleryService(ur repository.IGalleryRepository) *galleryService {
 func (s *galleryService) Create(form *model.CreateGallery, userId uuid.UUID) (*model.Gallery, *model.Error) {
 	form.Name = trimSpace(form.Name)
 
-	galleriesByTitle, err := s.getAllByTitle(form.Name)
+	galleriesByName, err := s.getAllByName(form.Name)
 
 	if err != nil {
 		return nil, err
 	}
 
-	if galleriesByTitle != nil {
-		for _, g := range galleriesByTitle {
+	if galleriesByName != nil {
+		for _, g := range galleriesByName {
 			if g.UserId == userId {
-				return nil, model.NewConflictApiError(titleInUseErrorMessage)
+				return nil, model.NewConflictApiError(nameInUseErrorMessage)
 			}
 		}
 	}
 	gallery := &model.Gallery{
-		Title:  form.Name,
+		Name:   form.Name,
 		UserId: userId,
 	}
 
@@ -82,20 +82,20 @@ func (s *galleryService) GetAllByUserId(userId uuid.UUID) ([]model.Gallery, *mod
 func (s *galleryService) Edit(gallery *model.Gallery, form *model.EditGallery) *model.Error {
 	form.Name = trimSpace(form.Name)
 
-	galleriesByTitle, err := s.getAllByTitle(form.Name)
+	galleriesByName, err := s.getAllByName(form.Name)
 
 	if err != nil {
 		return err
 	}
 
-	if galleriesByTitle != nil {
-		for _, g := range galleriesByTitle {
+	if galleriesByName != nil {
+		for _, g := range galleriesByName {
 			if g.UserId == gallery.UserId {
-				return model.NewConflictApiError(titleInUseErrorMessage)
+				return model.NewConflictApiError(nameInUseErrorMessage)
 			}
 		}
 	}
-	gallery.Title = form.Name
+	gallery.Name = form.Name
 
 	err = s.repository.Update(gallery)
 
@@ -109,11 +109,11 @@ func (s *galleryService) Delete(gallery *model.Gallery) *model.Error {
 	return s.repository.Delete(gallery)
 }
 
-func (s *galleryService) getAllByTitle(title string) ([]model.Gallery, *model.Error) {
-	if title == "" {
-		return nil, model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("title"))
+func (s *galleryService) getAllByName(name string) ([]model.Gallery, *model.Error) {
+	if name == "" {
+		return nil, model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("name"))
 	}
-	gallery, err := s.repository.ReadAll("title", title)
+	gallery, err := s.repository.ReadAll("name", name)
 
 	if err != nil {
 		return nil, err

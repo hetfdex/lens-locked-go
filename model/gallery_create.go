@@ -6,7 +6,7 @@ type CreateGallery struct {
 
 func (g *CreateGallery) Validate() *Error {
 	if g.Name == "" {
-		return NewBadRequestApiError(MustNotBeEmptyErrorMessage("title"))
+		return NewBadRequestApiError(MustNotBeEmptyErrorMessage("name"))
 	}
 	return nil
 }
