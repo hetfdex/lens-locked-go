@@ -22,11 +22,9 @@ func NewHomeController() *homeController {
 func (c *homeController) GetHome(w http.ResponseWriter, req *http.Request) {
 	viewData := &model.DataView{}
 
-	setUser(req, viewData)
-
 	parseSuccessRoute(req, viewData)
 
-	c.homeView.Render(w, viewData)
+	c.homeView.Render(w, req, viewData)
 }
 
 func HomeRoute() string {
