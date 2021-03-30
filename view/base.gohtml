@@ -7,31 +7,7 @@
         <title>LensLocked.com</title>
     </head>
     <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="/">LensLocked</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                    data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
-                    aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav">
-                    <li class="nav-item"><a class="nav-link active" aria-current="page" href="/gallery">My
-                            Galleries</a></li>
-                    <li class="nav-item"><a class="nav-link active" aria-current="page" href="/gallery/create">Create
-                            Gallery</a></li>
-                </ul>
-            </div>
-            <form class="d-flex">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item"><a class="nav-link active" aria-current="page" href="/login">Login</a></li>
-                    <li class="nav-item"><a class="nav-link active" aria-current="page" href="/register">Register</a>
-                    </li>
-                </ul>
-            </form>
-        </div>
-    </nav>
+    {{template "navbar" .User}}
     <div class="container-fluid mt-3">
         {{if .Alert}}
             {{template "alert" .Alert}}
@@ -45,4 +21,40 @@
             crossorigin="anonymous"></script>
     </body>
     </html>
+{{end}}
+
+{{define "navbar"}}
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/">LensLocked</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                {{if .}}
+                    <li class="nav-item"><a class="nav-link active" aria-current="page" href="/gallery">My
+                            Galleries</a></li>
+                    <li class="nav-item"><a class="nav-link active" aria-current="page" href="/gallery/create">Create
+                            Gallery</a></li>
+                {{end}}
+            </ul>
+        </div>
+        <form class="d-flex">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                {{if .}}
+                    <li class="nav-item"><a class="nav-link active" aria-current="page" href="/logout">Logout</a>
+                    </li>
+                {{else}}
+                    <li class="nav-item"><a class="nav-link active" aria-current="page" href="/login">Login</a></li>
+                    <li class="nav-item"><a class="nav-link active" aria-current="page"
+                                            href="/register">Register</a>
+                    </li>
+                {{end}}
+            </ul>
+        </form>
+    </div>
+</nav>
 {{end}}
