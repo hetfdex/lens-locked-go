@@ -20,6 +20,9 @@ const createGalleryFilename = "view/gallery_create.gohtml"
 const editGalleryRoute = "/gallery/{gallery_id}/edit"
 const editGalleryFilename = "view/gallery_edit.gohtml"
 
+const uploadGalleryRoute = "/gallery/{gallery_id}/upload"
+const uploadGalleryFilename = "view/gallery_upload.gohtml"
+
 const deleteGalleryRoute = "/gallery/{gallery_id}/delete"
 
 const galleryRoute = "/gallery/{gallery_id}"
@@ -29,24 +32,33 @@ const galleryIdKey = "gallery_id"
 
 const invalidIdErrorMessage = "invalid gallery id"
 const userNotOwnerErrorMessage = "galleries can only be edited by their owners"
+const unsupportedFileErrorMessage = "unsupported file"
+
+const multipartFileKey = "images"
+
+const maxMultipartMemory = 1 << 20 //1 megabyte
 
 type galleryController struct {
 	indexGalleryView  *view.View
 	createGalleryView *view.View
 	editGalleryView   *view.View
+	uploadGalleryView *view.View
 	deleteGalleryView *view.View
 	galleryView       *view.View
 	galleryService    service.IGalleryService
+	imageService      service.IImageService
 }
 
-func NewGalleryController(gs service.IGalleryService) *galleryController {
+func NewGalleryController(gs service.IGalleryService, is service.IImageService) *galleryController {
 	return &galleryController{
 		indexGalleryView:  view.New(indexGalleryRoute, indexGalleryFilename),
 		createGalleryView: view.New(createGalleryRoute, createGalleryFilename),
 		editGalleryView:   view.New(editGalleryRoute, editGalleryFilename),
+		uploadGalleryView: view.New(uploadGalleryRoute, uploadGalleryFilename),
 		deleteGalleryView: view.New(deleteGalleryRoute, galleryFilename),
 		galleryView:       view.New(galleryRoute, galleryFilename),
 		galleryService:    gs,
+		imageService:      is,
 	}
 }
 
@@ -76,7 +88,6 @@ func (c *galleryController) GetIndexGallery(w http.ResponseWriter, req *http.Req
 
 		return
 	}
-	data.User = user
 	data.Value = galleries
 
 	c.indexGalleryView.Render(w, req, data)
@@ -221,6 +232,72 @@ func (c *galleryController) PostEditGallery(w http.ResponseWriter, req *http.Req
 	util.Redirect(w, req, route)
 }
 
+//Upload gallery
+func (c *galleryController) GetUploadGallery(w http.ResponseWriter, req *http.Request) {
+	data := &model.Data{}
+
+	gallery, err := getGalleryWithPermission(req, c.galleryService)
+
+	if err != nil {
+		data.Alert = err.Alert()
+
+		w.WriteHeader(err.StatusCode)
+
+		c.uploadGalleryView.Render(w, req, data)
+
+		return
+	}
+	data.Value = gallery
+
+	c.uploadGalleryView.Render(w, req, data)
+}
+
+func (c *galleryController) PostUploadGallery(w http.ResponseWriter, req *http.Request) {
+	data := &model.Data{}
+
+	gallery, err := getGalleryWithPermission(req, c.galleryService)
+
+	if err != nil {
+		data.Alert = err.Alert()
+
+		w.WriteHeader(err.StatusCode)
+
+		c.uploadGalleryView.Render(w, req, data)
+
+		return
+	}
+	paths, err := parsePaths(req)
+
+	if err != nil {
+		data.Alert = err.Alert()
+
+		w.WriteHeader(err.StatusCode)
+
+		c.uploadGalleryView.Render(w, req, data)
+
+		return
+	}
+
+	for _, path := range paths {
+		_, err = c.imageService.Create(path, gallery.ID)
+
+		if err != nil {
+			data.Alert = err.Alert()
+
+			w.WriteHeader(err.StatusCode)
+
+			c.editGalleryView.Render(w, req, data)
+
+			return
+		}
+	}
+	route := makeRouteFromId(gallery.ID)
+
+	route = addSuccessToRoute(route, uploadGalleryValue)
+
+	util.Redirect(w, req, route)
+}
+
 //Delete gallery
 func (c *galleryController) GetDeleteGallery(w http.ResponseWriter, req *http.Request) {
 	data := &model.Data{}
@@ -286,6 +363,10 @@ func EditGalleryRoute() string {
 	return editGalleryRoute
 }
 
+func UploadGalleryRoute() string {
+	return uploadGalleryRoute
+}
+
 func DeleteGalleryRoute() string {
 	return deleteGalleryRoute
 }
@@ -334,4 +415,24 @@ func getGalleryWithPermission(req *http.Request, gs service.IGalleryService) (*m
 		return nil, err
 	}
 	return gallery, nil
+}
+
+func parsePaths(req *http.Request) ([]string, *model.Error) {
+	err := req.ParseMultipartForm(maxMultipartMemory)
+
+	if err != nil {
+		return nil, model.NewInternalServerApiError(err.Error())
+	}
+	files := req.MultipartForm.File[multipartFileKey]
+
+	var paths []string
+
+	for _, f := range files {
+		/*if !validExtension {
+			return nil, model.NewBadRequestApiError(unsupportedFileErrorMessage)
+
+		}*/
+		paths = append(paths, f.Filename)
+	}
+	return nil, nil
 }
