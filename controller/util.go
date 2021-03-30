@@ -110,7 +110,7 @@ func getGallery(req *http.Request, gs service.IGalleryService) (*model.Gallery, 
 
 		return nil, err
 	}
-	gallery, err := gs.Get(id)
+	gallery, err := gs.GetById(id)
 
 	if err != nil {
 		return nil, err
