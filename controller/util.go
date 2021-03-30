@@ -126,3 +126,11 @@ func getGalleryWithPermission(req *http.Request, gs service.IGalleryService) (*m
 	}
 	return gallery, nil
 }
+
+func setUser(req *http.Request, viewData *model.DataView) {
+	user, _ := context.User(req.Context())
+
+	if user != nil {
+		viewData.User = user
+	}
+}
