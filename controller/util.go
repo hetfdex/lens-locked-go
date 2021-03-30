@@ -54,19 +54,19 @@ func parseForm(req *http.Request, result interface{}) *model.Error {
 	return nil
 }
 
-func parseSuccessRoute(req *http.Request, data *model.DataView) {
+func parseSuccessRoute(req *http.Request, viewData *model.DataView) {
 	param := req.URL.Query().Get(successRouteKey)
 
 	if param == registerUserValue {
-		data.Alert = model.NewSuccessAlert(registerUserSuccessMessage)
+		viewData.Alert = model.NewSuccessAlert(registerUserSuccessMessage)
 	} else if param == loginUserValue {
-		data.Alert = model.NewSuccessAlert(loginUserSuccessMessage)
+		viewData.Alert = model.NewSuccessAlert(loginUserSuccessMessage)
 	} else if param == createGalleryValue {
-		data.Alert = model.NewSuccessAlert(createGallerySuccessMessage)
+		viewData.Alert = model.NewSuccessAlert(createGallerySuccessMessage)
 	} else if param == editGalleryValue {
-		data.Alert = model.NewSuccessAlert(editGallerySuccessMessage)
+		viewData.Alert = model.NewSuccessAlert(editGallerySuccessMessage)
 	} else if param == deleteGalleryValue {
-		data.Alert = model.NewSuccessAlert(deleteGallerySuccessMessage)
+		viewData.Alert = model.NewSuccessAlert(deleteGallerySuccessMessage)
 	}
 }
 
@@ -81,12 +81,12 @@ func makeCookie(value string) (*http.Cookie, *model.Error) {
 	}, nil
 }
 
-func handleError(w http.ResponseWriter, view *view.View, err *model.Error, data *model.DataView) {
-	data.Alert = err.Alert()
+func handleError(w http.ResponseWriter, view *view.View, err *model.Error, viewData *model.DataView) {
+	viewData.Alert = err.Alert()
 
 	w.WriteHeader(err.StatusCode)
 
-	view.Render(w, data)
+	view.Render(w, viewData)
 }
 
 func makeUrl(router *mux.Router, routeName string, key string, value string) (string, *model.Error) {

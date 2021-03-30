@@ -29,42 +29,42 @@ func NewUserController(us service.IUserService) *userController {
 
 //Register user
 func (c *userController) GetRegisterUser(w http.ResponseWriter, req *http.Request) {
-	data := &model.DataView{}
+	viewData := &model.DataView{}
 
-	parseSuccessRoute(req, data)
+	parseSuccessRoute(req, viewData)
 
-	c.registerView.Render(w, data)
+	c.registerView.Render(w, viewData)
 }
 
 func (c *userController) PostRegisterUser(w http.ResponseWriter, req *http.Request) {
-	data := &model.DataView{}
+	viewData := &model.DataView{}
 	register := &model.RegisterUser{}
 
 	err := parseForm(req, register)
 
 	if err != nil {
-		handleError(w, c.registerView, err, data)
+		handleError(w, c.registerView, err, viewData)
 
 		return
 	}
 	err = register.Validate()
 
 	if err != nil {
-		handleError(w, c.registerView, err, data)
+		handleError(w, c.registerView, err, viewData)
 
 		return
 	}
 	_, token, err := c.userService.Register(register)
 
 	if err != nil {
-		handleError(w, c.registerView, err, data)
+		handleError(w, c.registerView, err, viewData)
 
 		return
 	}
 	cookie, err := makeCookie(token)
 
 	if err != nil {
-		handleError(w, c.registerView, err, data)
+		handleError(w, c.registerView, err, viewData)
 
 		return
 	}
@@ -77,42 +77,42 @@ func (c *userController) PostRegisterUser(w http.ResponseWriter, req *http.Reque
 
 //Login user
 func (c *userController) GetLoginUser(w http.ResponseWriter, req *http.Request) {
-	data := &model.DataView{}
+	viewData := &model.DataView{}
 
-	parseSuccessRoute(req, data)
+	parseSuccessRoute(req, viewData)
 
-	c.loginView.Render(w, data)
+	c.loginView.Render(w, viewData)
 }
 
 func (c *userController) PostLoginUser(w http.ResponseWriter, req *http.Request) {
-	data := &model.DataView{}
+	viewData := &model.DataView{}
 	login := &model.LoginUser{}
 
 	err := parseForm(req, login)
 
 	if err != nil {
-		handleError(w, c.loginView, err, data)
+		handleError(w, c.loginView, err, viewData)
 
 		return
 	}
 	err = login.Validate()
 
 	if err != nil {
-		handleError(w, c.loginView, err, data)
+		handleError(w, c.loginView, err, viewData)
 
 		return
 	}
 	_, token, err := c.userService.LoginWithPassword(login)
 
 	if err != nil {
-		handleError(w, c.loginView, err, data)
+		handleError(w, c.loginView, err, viewData)
 
 		return
 	}
 	cookie, err := makeCookie(token)
 
 	if err != nil {
-		handleError(w, c.loginView, err, data)
+		handleError(w, c.loginView, err, viewData)
 
 		return
 	}

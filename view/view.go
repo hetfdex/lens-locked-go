@@ -37,10 +37,10 @@ func New(route string, filename string) *View {
 	}
 }
 
-func (v *View) Render(w http.ResponseWriter, data *model.DataView) {
+func (v *View) Render(w http.ResponseWriter, viewData *model.DataView) {
 	w.Header().Set(contentTypeKey, contentTypeValue)
 
-	err := v.template.ExecuteTemplate(w, baseTag, data)
+	err := v.template.ExecuteTemplate(w, baseTag, viewData)
 
 	if err != nil {
 		er := model.NewInternalServerApiError(err.Error())
