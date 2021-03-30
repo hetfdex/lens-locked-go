@@ -26,7 +26,7 @@ func (m *Middleware) SetUser(next http.Handler) http.Handler {
 
 			return
 		}
-		cookie, err := req.Cookie(controller.CookieName)
+		cookie, err := req.Cookie(controller.CookieName())
 
 		if err != nil {
 			next.ServeHTTP(w, req)
