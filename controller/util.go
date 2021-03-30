@@ -15,6 +15,7 @@ const loginUserValue = "login"
 const logoutUserValue = "logout"
 const createGalleryValue = "createGallery"
 const editGalleryValue = "editGallery"
+const uploadGalleryValue = "uploadGallery"
 const deleteGalleryValue = "deleteGallery"
 
 const registerUserSuccessMessage = "Registration Successful"
@@ -22,6 +23,7 @@ const loginUserSuccessMessage = "Login Successful"
 const logoutUserSuccessMessage = "Logout Successful"
 const createGallerySuccessMessage = "Created Successfully"
 const editGallerySuccessMessage = "Edited Successfully"
+const uploadGallerySuccessMessage = "Uploaded Successfully"
 const deleteGallerySuccessMessage = "Deleted Successfully"
 
 func addSuccessToRoute(route string, value string) string {
@@ -58,6 +60,8 @@ func parseSuccessFromRoute(req *http.Request, data *model.Data) {
 		data.Alert = model.NewSuccessAlert(createGallerySuccessMessage)
 	case editGalleryValue:
 		data.Alert = model.NewSuccessAlert(editGallerySuccessMessage)
+	case uploadGalleryValue:
+		data.Alert = model.NewSuccessAlert(uploadGallerySuccessMessage)
 	case deleteGalleryValue:
 		data.Alert = model.NewSuccessAlert(deleteGallerySuccessMessage)
 	}
