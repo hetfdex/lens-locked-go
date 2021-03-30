@@ -8,7 +8,6 @@ import (
 	"lens-locked-go/context"
 	"lens-locked-go/model"
 	"lens-locked-go/service"
-	"lens-locked-go/view"
 	"net/http"
 )
 
@@ -90,14 +89,6 @@ func makeCookie(value string) (*http.Cookie, *model.Error) {
 	}, nil
 }
 
-func handleError(w http.ResponseWriter, view *view.View, err *model.Error, viewData *model.DataView) {
-	viewData.Alert = err.Alert()
-
-	w.WriteHeader(err.StatusCode)
-
-	view.Render(w, viewData)
-}
-
 func getGallery(req *http.Request, gs service.IGalleryService) (*model.Gallery, *model.Error) {
 	vars := mux.Vars(req)
 
@@ -134,12 +125,4 @@ func getGalleryWithPermission(req *http.Request, gs service.IGalleryService) (*m
 		return nil, err
 	}
 	return gallery, nil
-}
-
-func setUser(req *http.Request, viewData *model.DataView) {
-	user, _ := context.User(req.Context())
-
-	if user != nil {
-		viewData.User = user
-	}
 }
