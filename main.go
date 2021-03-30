@@ -27,7 +27,7 @@ const address = "localhost:8080"
 func main() {
 	db := openDb(true)
 
-	//resetDatabase(db)
+	resetDatabase(db)
 
 	ur := repository.NewUserRepository(db)
 	gr := repository.NewGalleryRepository(db)
@@ -71,6 +71,8 @@ func configureRouter(r *mux.Router, us service.IUserService, gs service.IGallery
 	galleryController := controller.NewGalleryController(gs)
 
 	mdw := middleware.NewMiddleware(us)
+
+	r.Use(mdw.SetUser)
 
 	r.HandleFunc(controller.HomeRoute(), homeController.GetHome).Methods(http.MethodGet)
 	r.HandleFunc(controller.RegisterUserRoute(), userController.GetRegisterUser).Methods(http.MethodGet)
