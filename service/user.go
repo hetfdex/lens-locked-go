@@ -15,6 +15,7 @@ type IUserService interface {
 	Register(*model.RegisterUser) (*model.User, string, *model.Error)
 	LoginWithPassword(*model.LoginUser) (*model.User, string, *model.Error)
 	LoginWithToken(string) (*model.User, *model.Error)
+	Logout(*model.User) *model.Error
 }
 
 type userService struct {
@@ -126,6 +127,17 @@ func (s *userService) LoginWithToken(token string) (*model.User, *model.Error) {
 		return nil, err
 	}
 	return user, nil
+}
+
+func (s *userService) Logout(user *model.User) *model.Error {
+	user.TokenHash = ""
+
+	err := s.repository.Update(user)
+
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (s *userService) getByEmail(email string) (*model.User, *model.Error) {
