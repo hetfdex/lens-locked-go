@@ -58,10 +58,6 @@ func (c *galleryController) GetIndexGallery(w http.ResponseWriter, _ *http.Reque
 	c.indexGalleryView.Render(w, data)
 }
 
-func (c *galleryController) PostIndexGallery(_ http.ResponseWriter, _ *http.Request) {
-
-}
-
 //Gallery
 func (c *galleryController) GetGallery(w http.ResponseWriter, req *http.Request) {
 	data := &model.DataView{}

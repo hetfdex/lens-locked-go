@@ -78,7 +78,6 @@ func configureRouter(r *mux.Router, us service.IUserService, gs service.IGallery
 	r.HandleFunc(userController.LoginUserRoute(), userController.GetLoginUser).Methods(http.MethodGet)
 	r.HandleFunc(userController.LoginUserRoute(), userController.PostLoginUser).Methods(http.MethodPost)
 	r.HandleFunc(galleryController.IndexGalleryRoute(), mdw.RequireUser(galleryController.GetIndexGallery)).Methods(http.MethodGet)
-	r.HandleFunc(galleryController.IndexGalleryRoute(), mdw.RequireUser(galleryController.PostIndexGallery)).Methods(http.MethodPost)
 	r.HandleFunc(galleryController.CreateGalleryRoute(), mdw.RequireUser(galleryController.GetCreateGallery)).Methods(http.MethodGet)
 	r.HandleFunc(galleryController.CreateGalleryRoute(), mdw.RequireUser(galleryController.PostCreateGallery)).Methods(http.MethodPost)
 	r.HandleFunc(galleryController.EditGalleryRoute(), mdw.RequireUser(galleryController.GetEditGallery)).Methods(http.MethodGet)
