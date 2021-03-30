@@ -20,12 +20,3 @@ func (u *RegisterUser) Validate() *Error {
 	}
 	return nil
 }
-
-func (u *RegisterUser) User(passwordHash string, tokenHash string) *User {
-	return &User{
-		Name:         u.Name,
-		Email:        u.Email,
-		PasswordHash: passwordHash,
-		TokenHash:    tokenHash,
-	}
-}

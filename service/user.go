@@ -41,9 +41,9 @@ func (s *userService) Register(register *model.RegisterUser) (*model.User, strin
 	if !validEmail(register.Email) {
 		return nil, "", model.NewBadRequestApiError(invalidEmailErrorMessage)
 	}
-	user, _ := s.getByEmail(register.Email)
+	userByEmail, _ := s.getByEmail(register.Email)
 
-	if user != nil {
+	if userByEmail != nil {
 		return nil, "", model.NewConflictApiError(emailInUseErrorMessage)
 	}
 
@@ -65,7 +65,12 @@ func (s *userService) Register(register *model.RegisterUser) (*model.User, strin
 	if err != nil {
 		return nil, "", err
 	}
-	user = register.User(pwHash, tokenHash)
+	user := &model.User{
+		Name:         register.Name,
+		Email:        register.Email,
+		PasswordHash: pwHash,
+		TokenHash:    tokenHash,
+	}
 
 	err = s.repository.Create(user)
 

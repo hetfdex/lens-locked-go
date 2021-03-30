@@ -12,7 +12,7 @@ type IGalleryService interface {
 	Create(*model.CreateGallery, uuid.UUID) (*model.Gallery, *model.Error)
 	GetById(uuid.UUID) (*model.Gallery, *model.Error)
 	GetAllByUserId(uuid.UUID) ([]model.Gallery, *model.Error)
-	Edit(*model.Gallery, *model.EditGallery) (*model.Gallery, *model.Error)
+	Edit(*model.Gallery, *model.EditGallery) *model.Error
 	Delete(*model.Gallery) *model.Error
 }
 
@@ -42,7 +42,10 @@ func (s *galleryService) Create(create *model.CreateGallery, userId uuid.UUID) (
 			}
 		}
 	}
-	gallery := create.Gallery(userId)
+	gallery := &model.Gallery{
+		Title:  create.Name,
+		UserId: userId,
+	}
 
 	err = s.repository.Create(gallery)
 
@@ -76,30 +79,30 @@ func (s *galleryService) GetAllByUserId(userId uuid.UUID) ([]model.Gallery, *mod
 	return gallery, nil
 }
 
-func (s *galleryService) Edit(gallery *model.Gallery, edit *model.EditGallery) (*model.Gallery, *model.Error) {
+func (s *galleryService) Edit(gallery *model.Gallery, edit *model.EditGallery) *model.Error {
 	edit.Name = trimSpace(edit.Name)
 
 	galleriesByTitle, err := s.getAllByTitle(edit.Name)
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if galleriesByTitle != nil {
 		for _, g := range galleriesByTitle {
 			if g.UserId == gallery.UserId {
-				return nil, model.NewConflictApiError(titleInUseErrorMessage)
+				return model.NewConflictApiError(titleInUseErrorMessage)
 			}
 		}
 	}
-	gallery = edit.Gallery(gallery.UserId)
+	gallery.Title = edit.Name
 
 	err = s.repository.Update(gallery)
 
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return gallery, nil
+	return nil
 }
 
 func (s *galleryService) Delete(gallery *model.Gallery) *model.Error {

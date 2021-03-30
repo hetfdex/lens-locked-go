@@ -201,7 +201,7 @@ func (c *galleryController) PostEditGallery(w http.ResponseWriter, req *http.Req
 
 		return
 	}
-	gallery, err = c.galleryService.Edit(gallery, edit)
+	err = c.galleryService.Edit(gallery, edit)
 
 	if err != nil {
 		viewData.Alert = err.Alert()
@@ -245,7 +245,7 @@ func (c *galleryController) GetDeleteGallery(w http.ResponseWriter, req *http.Re
 
 		return
 	}
-	route := makeSuccessRoute(homeRoute, deleteGalleryValue)
+	route := makeSuccessRoute(indexGalleryRoute, deleteGalleryValue)
 
 	Redirect(w, req, route)
 }
