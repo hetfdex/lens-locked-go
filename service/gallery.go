@@ -12,7 +12,7 @@ type IGalleryService interface {
 	Create(*model.CreateGallery, uuid.UUID) (*model.Gallery, *model.Error)
 	GetById(uuid.UUID) (*model.Gallery, *model.Error)
 	GetAllByUserId(uuid.UUID) ([]*model.Gallery, *model.Error)
-	Edit(*model.Gallery, *model.EditGallery) *model.Error
+	Update(*model.Gallery, *model.EditGallery) *model.Error
 	Delete(*model.Gallery) *model.Error
 }
 
@@ -79,7 +79,7 @@ func (s *galleryService) GetAllByUserId(userId uuid.UUID) ([]*model.Gallery, *mo
 	return gallery, nil
 }
 
-func (s *galleryService) Edit(gallery *model.Gallery, form *model.EditGallery) *model.Error {
+func (s *galleryService) Update(gallery *model.Gallery, form *model.EditGallery) *model.Error {
 	form.Name = trimSpace(form.Name)
 
 	galleriesByName, err := s.getAllByName(form.Name)
