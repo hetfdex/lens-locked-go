@@ -69,3 +69,15 @@ func (s *imageService) GetById(id uuid.UUID) (*model.Image, *model.Error) {
 	}
 	return image, nil
 }
+
+func (s *imageService) GetAllByGalleryId(galleryId uuid.UUID) ([]*model.Image, *model.Error) {
+	if galleryId == uuid.Nil {
+		return nil, model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("galleryId"))
+	}
+	images, err := s.repository.ReadAll("gallery_id", galleryId)
+
+	if err != nil {
+		return nil, err
+	}
+	return images, nil
+}
