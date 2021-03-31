@@ -6,15 +6,16 @@ import (
 	"io"
 	"lens-locked-go/model"
 	"lens-locked-go/repository"
-	"mime/multipart"
 	"path/filepath"
+	"strings"
 )
 
 const unsupportedFileErrorMessage = "unsupported file"
 
 type IImageService interface {
-	Create(*multipart.FileHeader, uuid.UUID) *model.Error
+	Create(io.ReadCloser, string, uuid.UUID) *model.Error
 	GetById(uuid.UUID) (*model.Image, *model.Error)
+	GetAllByGalleryId(uuid.UUID) ([]*model.Image, *model.Error)
 }
 
 type imageService struct {
@@ -27,35 +28,38 @@ func NewImageService(ir repository.IImageRepository) *imageService {
 	}
 }
 
-func (s *imageService) Create(fileHeader *multipart.FileHeader, galleryId uuid.UUID) *model.Error {
-	extension := lower(filepath.Ext(fileHeader.Filename))
+func (s *imageService) Create(file io.ReadCloser, filename string, galleryId uuid.UUID) *model.Error {
+	defer file.Close()
 
-	if extension == "jpg" || extension == "jpeg" || extension == "png" {
-		file, err := fileHeader.Open()
+	filename = lower(filepath.Base(filename))
 
-		if err != nil {
-			return model.NewInternalServerApiError(err.Error())
-		}
-		defer file.Close()
+	extension := filepath.Ext(filename)
 
-		buffer := bytes.NewBuffer(nil)
-
-		_, err = io.Copy(buffer, file)
-
-		image := &model.Image{
-			Bytes:     buffer.Bytes(),
-			Extension: extension,
-			GalleryId: galleryId,
-		}
-
-		er := s.repository.Create(image)
-
-		if er != nil {
-			return er
-		}
-		return nil
+	if extension != ".jpg" && extension != ".jpeg" && extension != ".png" {
+		return model.NewBadRequestApiError(unsupportedFileErrorMessage)
 	}
-	return model.NewBadRequestApiError(unsupportedFileErrorMessage)
+	buffer := bytes.NewBuffer(nil)
+
+	_, err := io.Copy(buffer, file)
+
+	if err != nil {
+		return model.NewInternalServerApiError(err.Error())
+	}
+	filename = strings.TrimSuffix(filename, extension)
+
+	image := &model.Image{
+		Bytes:     buffer.Bytes(),
+		Name:      filename,
+		Extension: extension,
+		GalleryId: galleryId,
+	}
+
+	er := s.repository.Create(image)
+
+	if er != nil {
+		return er
+	}
+	return nil
 }
 
 func (s *imageService) GetById(id uuid.UUID) (*model.Image, *model.Error) {
