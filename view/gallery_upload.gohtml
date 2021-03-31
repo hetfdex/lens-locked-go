@@ -5,6 +5,7 @@
                 <h5 class="card-header text-white bg-primary">Upload Images</h5>
                 <div class="card-body">
                     <form action="/gallery/{{.ID}}/upload" method="post" enctype="multipart/form-data">
+                        {{csrfField}}
                         <div class="mb-3">
                             <label for="images" class="form-label">Images</label>
                             <input class="form-control" type="file" id="images" name="images" multiple>

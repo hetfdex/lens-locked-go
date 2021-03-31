@@ -5,6 +5,7 @@
                 <h5 class="card-header text-white bg-primary">Login</h5>
                 <div class="card-body">
                     <form action="/login" method="post">
+                        {{csrfField}}
                         <div class="mb-3">
                             <label for="email" class="form-label">Email address</label>
                             <input type="email" name="email" class="form-control" id="email"
