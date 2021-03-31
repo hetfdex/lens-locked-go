@@ -12,7 +12,6 @@ type IUserRepository interface {
 	Create(*model.User) *model.Error
 	Read(string, interface{}) (*model.User, *model.Error)
 	Update(*model.User) *model.Error
-	Delete(*model.User) *model.Error
 }
 
 type userRepository struct {
@@ -55,15 +54,6 @@ func (r *userRepository) Read(field string, value interface{}) (*model.User, *mo
 
 func (r *userRepository) Update(user *model.User) *model.Error {
 	err := r.database.Save(user).Error
-
-	if err != nil {
-		return model.NewInternalServerApiError(err.Error())
-	}
-	return nil
-}
-
-func (r *userRepository) Delete(user *model.User) *model.Error {
-	err := r.database.Delete(user).Error
 
 	if err != nil {
 		return model.NewInternalServerApiError(err.Error())
