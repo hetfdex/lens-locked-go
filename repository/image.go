@@ -1,12 +1,16 @@
 package repository
 
 import (
+	"fmt"
 	"gorm.io/gorm"
 	"lens-locked-go/model"
 )
 
+const imageNotFoundError = "image not found"
+
 type IImageRepository interface {
 	Create(*model.Image) *model.Error
+	Read(string, interface{}) (*model.Image, *model.Error)
 }
 
 type imageRepository struct {
@@ -26,4 +30,23 @@ func (r *imageRepository) Create(image *model.Image) *model.Error {
 		return model.NewInternalServerApiError(err.Error())
 	}
 	return nil
+}
+
+func (r *imageRepository) Read(field string, value interface{}) (*model.Image, *model.Error) {
+	if field == "" {
+		return nil, model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("field"))
+	}
+	image := &model.Image{}
+
+	query := fmt.Sprintf("%s = ?", field)
+
+	err := r.database.First(image, query, value).Error
+
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, model.NewNotFoundApiError(imageNotFoundError)
+		}
+		return nil, model.NewInternalServerApiError(err.Error())
+	}
+	return image, nil
 }
