@@ -77,7 +77,7 @@ func (c *userController) RegisterPost(w http.ResponseWriter, req *http.Request) 
 	}
 	http.SetCookie(w, cookie)
 
-	route := addSuccessToRoute(homeRoute, registerUserValue)
+	route := addSuccessToRoute(indexGalleryRoute, registerUserValue)
 
 	util.Redirect(w, req, route)
 }
@@ -124,7 +124,7 @@ func (c *userController) LoginPost(w http.ResponseWriter, req *http.Request) {
 	}
 	http.SetCookie(w, cookie)
 
-	route := addSuccessToRoute(homeRoute, loginUserValue)
+	route := addSuccessToRoute(indexGalleryRoute, loginUserValue)
 
 	util.Redirect(w, req, route)
 }
