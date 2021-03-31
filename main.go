@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -9,6 +10,7 @@ import (
 	"lens-locked-go/controller"
 	"lens-locked-go/middleware"
 	"lens-locked-go/model"
+	"lens-locked-go/rand"
 	"lens-locked-go/repository"
 	"lens-locked-go/service"
 	"net/http"
@@ -22,8 +24,10 @@ const dbname = "lenslocked_dev"
 
 const address = "localhost:8080"
 
+const isDebug = true
+
 func main() {
-	db := openDb(true)
+	db := openDb(isDebug)
 
 	//resetDatabase(db)
 
@@ -74,8 +78,16 @@ func configureRouter(r *mux.Router, us service.IUserService, gs service.IGallery
 	userController := controller.NewUserController(us)
 	galleryController := controller.NewGalleryController(gs, is)
 
+	authKey, err := rand.GenerateAuthKey()
+
+	if err != nil {
+		panic(err.Message)
+	}
+	csrfMdw := csrf.Protect(authKey, csrf.Secure(isDebug))
+
 	mdw := middleware.NewMiddleware(us, userController.LoginRoute())
 
+	r.Use(csrfMdw)
 	r.Use(mdw.SetUser)
 
 	r.HandleFunc(homeController.HomeRoute(), homeController.HomeGet).Methods(http.MethodGet)
