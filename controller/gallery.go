@@ -269,6 +269,15 @@ func (c *galleryController) GalleryGet(w http.ResponseWriter, req *http.Request)
 
 		return
 	}
+	images, err := c.imageService.GetAllByGalleryId(gallery.ID)
+
+	if err != nil {
+		handleError(w, req, data, err, c.galleryView)
+
+		return
+	}
+	gallery.Images = images
+	
 	data.Value = gallery
 
 	c.galleryView.Render(w, req, data)
