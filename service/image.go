@@ -2,6 +2,7 @@ package service
 
 import (
 	"bytes"
+	"encoding/base64"
 	"github.com/gofrs/uuid"
 	"io"
 	"lens-locked-go/model"
@@ -45,10 +46,12 @@ func (s *imageService) Create(file io.ReadCloser, filename string, galleryId uui
 	if err != nil {
 		return model.NewInternalServerApiError(err.Error())
 	}
+	source := base64.StdEncoding.EncodeToString(buffer.Bytes())
+
 	filename = strings.TrimSuffix(filename, extension)
 
 	image := &model.Image{
-		Bytes:     buffer.Bytes(),
+		Source:    source,
 		Name:      filename,
 		Extension: extension,
 		GalleryId: galleryId,
