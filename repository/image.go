@@ -11,7 +11,7 @@ const imageNotFoundError = "image not found"
 type IImageRepository interface {
 	Create(*model.Image) *model.Error
 	Read(string, interface{}) (*model.Image, *model.Error)
-	ReadAll(string, interface{}) ([]model.Image, *model.Error)
+	ReadAll(string, interface{}) ([]*model.Image, *model.Error)
 	Update(*model.Image) *model.Error
 	Delete(*model.Image) *model.Error
 }
@@ -54,11 +54,11 @@ func (r *imageRepository) Read(field string, value interface{}) (*model.Image, *
 	return image, nil
 }
 
-func (r *imageRepository) ReadAll(field string, value interface{}) ([]model.Image, *model.Error) {
+func (r *imageRepository) ReadAll(field string, value interface{}) ([]*model.Image, *model.Error) {
 	if field == "" {
 		return nil, model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("field"))
 	}
-	var images []model.Image
+	var images []*model.Image
 
 	query := fmt.Sprintf("%s = ?", field)
 

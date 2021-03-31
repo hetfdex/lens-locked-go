@@ -1,18 +1,21 @@
 package service
 
 import (
-	"bufio"
+	"bytes"
 	"github.com/gofrs/uuid"
+	"io"
 	"lens-locked-go/model"
 	"lens-locked-go/repository"
-	"os"
+	"mime/multipart"
 	"path/filepath"
 )
 
+const unsupportedFileErrorMessage = "unsupported file"
+
 type IImageService interface {
-	Create(string, uuid.UUID) (*model.Image, *model.Error)
+	Create(*multipart.FileHeader, uuid.UUID) (*model.Image, *model.Error)
 	GetById(uuid.UUID) (*model.Image, *model.Error)
-	GetAllByGalleryId(uuid.UUID) ([]model.Image, *model.Error)
+	GetAllByGalleryId(uuid.UUID) ([]*model.Image, *model.Error)
 	Delete(*model.Image) *model.Error
 }
 
@@ -26,16 +29,35 @@ func NewImageService(ir repository.IImageRepository) *imageService {
 	}
 }
 
-func (s *imageService) Create(path string, galleryId uuid.UUID) (*model.Image, *model.Error) {
-	image, err := makeImage(path, galleryId)
+func (s *imageService) Create(fileHeader *multipart.FileHeader, galleryId uuid.UUID) (*model.Image, *model.Error) {
+	extension := lower(filepath.Ext(fileHeader.Filename))
 
-	if err != nil {
-		return nil, err
+	er := ValidExtension(extension)
+
+	if er != nil {
+		return nil, er
 	}
-	err = s.repository.Create(image)
+	file, err := fileHeader.Open()
 
 	if err != nil {
-		return nil, err
+		return nil, model.NewInternalServerApiError(err.Error())
+	}
+	defer file.Close()
+
+	buffer := bytes.NewBuffer(nil)
+
+	_, err = io.Copy(buffer, file)
+
+	image := &model.Image{
+		Bytes:     buffer.Bytes(),
+		Extension: extension,
+		GalleryId: galleryId,
+	}
+
+	er = s.repository.Create(image)
+
+	if er != nil {
+		return nil, er
 	}
 	return image, nil
 }
@@ -52,7 +74,7 @@ func (s *imageService) GetById(id uuid.UUID) (*model.Image, *model.Error) {
 	return gallery, nil
 }
 
-func (s *imageService) GetAllByGalleryId(galleryId uuid.UUID) ([]model.Image, *model.Error) {
+func (s *imageService) GetAllByGalleryId(galleryId uuid.UUID) ([]*model.Image, *model.Error) {
 	if galleryId == uuid.Nil {
 		return nil, model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("galleryId"))
 	}
@@ -68,27 +90,9 @@ func (s *imageService) Delete(gallery *model.Image) *model.Error {
 	return s.repository.Delete(gallery)
 }
 
-func makeImage(path string, galleryId uuid.UUID) (*model.Image, *model.Error) {
-	file, err := os.Open(path)
-
-	if err != nil {
-		return nil, model.NewInternalServerApiError(err.Error())
+func ValidExtension(extension string) *model.Error {
+	if extension == "jpg" || extension == "jpeg" || extension == "png" {
+		return nil
 	}
-	defer file.Close()
-
-	fileInfo, _ := file.Stat()
-
-	fileSize := fileInfo.Size()
-
-	bytes := make([]byte, fileSize)
-
-	buffer := bufio.NewReader(file)
-
-	_, err = buffer.Read(bytes)
-
-	return &model.Image{
-		Bytes:     bytes,
-		Extension: filepath.Ext(path),
-		GalleryId: galleryId,
-	}, nil
+	return model.NewBadRequestApiError(unsupportedFileErrorMessage)
 }
