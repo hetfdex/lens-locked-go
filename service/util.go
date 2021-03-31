@@ -2,6 +2,7 @@ package service
 
 import (
 	"golang.org/x/crypto/bcrypt"
+	"lens-locked-go/config"
 	"lens-locked-go/model"
 	"lens-locked-go/rand"
 	"regexp"
@@ -27,7 +28,7 @@ func generateHashFromPassword(password string) (string, *model.Error) {
 		return "", model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("password"))
 	}
 
-	hs, err := bcrypt.GenerateFromPassword([]byte(password+pepper), bcrypt.DefaultCost)
+	hs, err := bcrypt.GenerateFromPassword([]byte(password+config.Pepper), bcrypt.DefaultCost)
 
 	if err != nil {
 		return "", model.NewInternalServerApiError(err.Error())
@@ -44,7 +45,7 @@ func compareHashAndPassword(hash string, password string) *model.Error {
 	if password == "" {
 		return model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("password"))
 	}
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password+pepper))
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password+config.Pepper))
 
 	if err != nil {
 		if err == bcrypt.ErrMismatchedHashAndPassword {

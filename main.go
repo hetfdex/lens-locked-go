@@ -7,6 +7,7 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
+	"lens-locked-go/config"
 	"lens-locked-go/controller"
 	"lens-locked-go/middleware"
 	"lens-locked-go/model"
@@ -16,18 +17,8 @@ import (
 	"net/http"
 )
 
-const host = "localhost"
-const port = 5432
-const user = "postgres"
-const password = "Abcde12345!"
-const dbname = "lenslocked_dev"
-
-const address = "localhost:8080"
-
-const isDebug = true
-
 func main() {
-	db := openDb(isDebug)
+	db := openDb(config.IsDebug)
 
 	//resetDatabase(db)
 
@@ -47,7 +38,7 @@ func main() {
 }
 
 func openDb(isDebug bool) *gorm.DB {
-	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
+	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", config.Host, config.Port, config.User, config.Password, config.Dbname)
 
 	logLevel := logger.Warn
 
@@ -83,7 +74,7 @@ func configureRouter(r *mux.Router, us service.IUserService, gs service.IGallery
 	if err != nil {
 		panic(err.Message)
 	}
-	csrfMdw := csrf.Protect(authKey, csrf.Secure(isDebug))
+	csrfMdw := csrf.Protect(authKey, csrf.Secure(config.IsDebug))
 
 	mdw := middleware.NewMiddleware(us, userController.LoginRoute())
 
@@ -108,7 +99,7 @@ func configureRouter(r *mux.Router, us service.IUserService, gs service.IGallery
 }
 
 func listenAndServe(r *mux.Router) {
-	err := http.ListenAndServe(address, r)
+	err := http.ListenAndServe(config.Address, r)
 
 	if err != nil {
 		panic(err)

@@ -1,14 +1,11 @@
 package service
 
 import (
+	"lens-locked-go/config"
 	"lens-locked-go/hash"
 	"lens-locked-go/model"
 	"lens-locked-go/repository"
 )
-
-const pepper = "6Sk65RHhGW7S4qnVPV7m"
-
-const key = "yzzmGPkAA9FTmbtzz9jB"
 
 const emailInUseErrorMessage = "email address is already in use"
 
@@ -25,7 +22,7 @@ type userService struct {
 }
 
 func NewUserService(ur repository.IUserRepository) *userService {
-	hs, err := hash.New(key)
+	hs, err := hash.New(config.HasherKey)
 
 	if err != nil {
 		panic(err)
