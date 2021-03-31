@@ -2,6 +2,7 @@ package view
 
 import (
 	"errors"
+	"github.com/gorilla/csrf"
 	"html/template"
 	"lens-locked-go/context"
 	"lens-locked-go/model"
@@ -29,7 +30,11 @@ func New(route string, filename string) *View {
 	if filename == "" {
 		panic(errors.New(model.MustNotBeEmptyErrorMessage("filename")))
 	}
-	t, err := template.ParseFiles(baseFilename, navbarFilename, alertFilename, filename)
+	t, err := template.New("").Funcs(template.FuncMap{
+		"csrfField": func() template.HTML {
+			return "<h1>csrfField</h1>"
+		},
+	}).ParseFiles(baseFilename, navbarFilename, alertFilename, filename)
 
 	if err != nil {
 		panic(err)
@@ -48,7 +53,15 @@ func (v *View) Render(w http.ResponseWriter, req *http.Request, data *model.Data
 	if user != nil {
 		data.User = user
 	}
-	err := v.template.ExecuteTemplate(w, baseTag, data)
+	csrfField := csrf.TemplateField(req)
+
+	tpl := v.template.Funcs(template.FuncMap{
+		"csrfField": func() template.HTML {
+			return csrfField
+		},
+	})
+
+	err := tpl.ExecuteTemplate(w, baseTag, data)
 
 	if err != nil {
 		er := model.NewInternalServerApiError(err.Error())
