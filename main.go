@@ -20,8 +20,6 @@ const user = "postgres"
 const password = "Abcde12345!"
 const dbname = "lenslocked_dev"
 
-var dsn = fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
-
 const address = "localhost:8080"
 
 func main() {
@@ -45,7 +43,9 @@ func main() {
 }
 
 func openDb(isDebug bool) *gorm.DB {
-	var logLevel = logger.Warn
+	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
+
+	logLevel := logger.Warn
 
 	if isDebug {
 		logLevel = logger.Info
