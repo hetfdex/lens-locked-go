@@ -11,7 +11,7 @@ const nameInUseErrorMessage = "name is already in use"
 type IGalleryService interface {
 	Create(*model.CreateGallery, uuid.UUID) (*model.Gallery, *model.Error)
 	GetById(uuid.UUID) (*model.Gallery, *model.Error)
-	GetAllByUserId(uuid.UUID) ([]model.Gallery, *model.Error)
+	GetAllByUserId(uuid.UUID) ([]*model.Gallery, *model.Error)
 	Edit(*model.Gallery, *model.EditGallery) *model.Error
 	Delete(*model.Gallery) *model.Error
 }
@@ -67,7 +67,7 @@ func (s *galleryService) GetById(id uuid.UUID) (*model.Gallery, *model.Error) {
 	return gallery, nil
 }
 
-func (s *galleryService) GetAllByUserId(userId uuid.UUID) ([]model.Gallery, *model.Error) {
+func (s *galleryService) GetAllByUserId(userId uuid.UUID) ([]*model.Gallery, *model.Error) {
 	if userId == uuid.Nil {
 		return nil, model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("userId"))
 	}
@@ -109,7 +109,7 @@ func (s *galleryService) Delete(gallery *model.Gallery) *model.Error {
 	return s.repository.Delete(gallery)
 }
 
-func (s *galleryService) getAllByName(name string) ([]model.Gallery, *model.Error) {
+func (s *galleryService) getAllByName(name string) ([]*model.Gallery, *model.Error) {
 	if name == "" {
 		return nil, model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("name"))
 	}
