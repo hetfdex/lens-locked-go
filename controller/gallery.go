@@ -229,6 +229,7 @@ func (c *galleryController) UploadPost(w http.ResponseWriter, req *http.Request)
 
 			return
 		}
+		_ = file.Close()
 	}
 	route := addSuccessToRoute(indexGalleryRoute+"/"+gallery.ID.String(), uploadGalleryValue)
 
