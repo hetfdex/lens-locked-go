@@ -2,19 +2,20 @@ package middleware
 
 import (
 	"lens-locked-go/context"
-	"lens-locked-go/controller"
 	"lens-locked-go/service"
 	"lens-locked-go/util"
 	"net/http"
 )
 
 type Middleware struct {
-	service.IUserService
+	userService service.IUserService
+	loginRoute  string
 }
 
-func NewMiddleware(us service.IUserService) *Middleware {
+func NewMiddleware(us service.IUserService, lr string) *Middleware {
 	return &Middleware{
-		us,
+		userService: us,
+		loginRoute:  lr,
 	}
 }
 
@@ -34,7 +35,7 @@ func (m *Middleware) SetUser(next http.Handler) http.Handler {
 
 			return
 		}
-		user, er := m.LoginWithToken(cookie.Value)
+		user, er := m.userService.LoginWithToken(cookie.Value)
 
 		if er != nil {
 			next.ServeHTTP(w, req)
@@ -56,7 +57,7 @@ func (m *Middleware) RequireUser(next http.HandlerFunc) http.HandlerFunc {
 		user, _ := context.User(req.Context())
 
 		if user == nil {
-			util.Redirect(w, req, controller.LoginUserRoute())
+			util.Redirect(w, req, m.loginRoute)
 
 			return
 		}
