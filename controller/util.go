@@ -35,6 +35,8 @@ func parseForm(req *http.Request, result interface{}) *model.Error {
 	}
 	dec := schema.NewDecoder()
 
+	dec.IgnoreUnknownKeys(true)
+
 	err = dec.Decode(result, req.PostForm)
 
 	if err != nil {
