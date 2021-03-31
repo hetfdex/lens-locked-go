@@ -2,7 +2,6 @@ package service
 
 import (
 	"golang.org/x/crypto/bcrypt"
-	"lens-locked-go/config"
 	"lens-locked-go/model"
 	"lens-locked-go/rand"
 	"regexp"
@@ -23,12 +22,12 @@ func trimSpace(s string) string {
 	return strings.TrimSpace(s)
 }
 
-func generateHashFromPassword(password string) (string, *model.Error) {
+func generateHashFromPassword(password string, pepper string) (string, *model.Error) {
 	if password == "" {
 		return "", model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("password"))
 	}
 
-	hs, err := bcrypt.GenerateFromPassword([]byte(password+config.Pepper), bcrypt.DefaultCost)
+	hs, err := bcrypt.GenerateFromPassword([]byte(password+pepper), bcrypt.DefaultCost)
 
 	if err != nil {
 		return "", model.NewInternalServerApiError(err.Error())
@@ -36,7 +35,7 @@ func generateHashFromPassword(password string) (string, *model.Error) {
 	return string(hs), nil
 }
 
-func compareHashAndPassword(hash string, password string) *model.Error {
+func compareHashAndPassword(hash string, password string, pepper string) *model.Error {
 
 	if hash == "" {
 		return model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("hash"))
@@ -45,7 +44,7 @@ func compareHashAndPassword(hash string, password string) *model.Error {
 	if password == "" {
 		return model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("password"))
 	}
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password+config.Pepper))
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password+pepper))
 
 	if err != nil {
 		if err == bcrypt.ErrMismatchedHashAndPassword {

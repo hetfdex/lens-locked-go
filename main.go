@@ -1,10 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
-	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"lens-locked-go/config"
@@ -18,7 +16,11 @@ import (
 )
 
 func main() {
-	db := openDb(config.IsDebug)
+	serverConfig := config.DefaultServerConfig()
+	dbConfig := config.DefaultPostgresConfig()
+	cryptoConfig := config.DefaultCryptoConfig()
+
+	db := openDb(serverConfig, dbConfig)
 
 	//resetDatabase(db)
 
@@ -26,26 +28,24 @@ func main() {
 	ir := repository.NewImageRepository(db)
 	gr := repository.NewGalleryRepository(db)
 
-	us := service.NewUserService(ur)
+	us := service.NewUserService(ur, cryptoConfig)
 	is := service.NewImageService(ir)
 	gs := service.NewGalleryService(gr)
 
 	r := mux.NewRouter()
 
-	configureRouter(r, us, gs, is)
+	configureRouter(r, serverConfig, us, gs, is)
 
-	listenAndServe(r)
+	listenAndServe(r, serverConfig)
 }
 
-func openDb(isDebug bool) *gorm.DB {
-	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", config.Host, config.Port, config.User, config.Password, config.Dbname)
-
+func openDb(sc *config.ServerConfig, dbc *config.PostgresConfig) *gorm.DB {
 	logLevel := logger.Warn
 
-	if isDebug {
+	if sc.IsDebug {
 		logLevel = logger.Info
 	}
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+	db, err := gorm.Open(dbc.Dialector(), &gorm.Config{
 		Logger: logger.Default.LogMode(logLevel),
 	})
 
@@ -64,7 +64,7 @@ func resetDatabase(db *gorm.DB) {
 	_ = db.Migrator().CreateTable(&model.Image{})
 }
 
-func configureRouter(r *mux.Router, us service.IUserService, gs service.IGalleryService, is service.IImageService) {
+func configureRouter(r *mux.Router, sc *config.ServerConfig, us service.IUserService, gs service.IGalleryService, is service.IImageService) {
 	homeController := controller.NewHomeController()
 	userController := controller.NewUserController(us)
 	galleryController := controller.NewGalleryController(gs, is)
@@ -74,7 +74,7 @@ func configureRouter(r *mux.Router, us service.IUserService, gs service.IGallery
 	if err != nil {
 		panic(err.Message)
 	}
-	csrfMdw := csrf.Protect(authKey, csrf.Secure(config.IsDebug))
+	csrfMdw := csrf.Protect(authKey, csrf.Secure(sc.IsDebug))
 
 	mdw := middleware.NewMiddleware(us, userController.LoginRoute())
 
@@ -98,8 +98,8 @@ func configureRouter(r *mux.Router, us service.IUserService, gs service.IGallery
 	r.HandleFunc(galleryController.GalleryRoute(), galleryController.GalleryGet).Methods(http.MethodGet)
 }
 
-func listenAndServe(r *mux.Router) {
-	err := http.ListenAndServe(config.Address, r)
+func listenAndServe(r *mux.Router, sc *config.ServerConfig) {
+	err := http.ListenAndServe(sc.Address, r)
 
 	if err != nil {
 		panic(err)

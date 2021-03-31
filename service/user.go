@@ -18,18 +18,20 @@ type IUserService interface {
 
 type userService struct {
 	repository repository.IUserRepository
-	*hash.Hasher
+	cryptoConfig *config.CryptoConfig
+	hasher *hash.Hasher
 }
 
-func NewUserService(ur repository.IUserRepository) *userService {
-	hs, err := hash.New(config.HasherKey)
+func NewUserService(ur repository.IUserRepository, cc *config.CryptoConfig) *userService {
+	hs, err := hash.New(cc.HasherKey)
 
 	if err != nil {
 		panic(err)
 	}
 	return &userService{
-		ur,
-		hs,
+		repository:ur,
+		cryptoConfig:cc,
+		hasher:hs,
 	}
 }
 
@@ -51,7 +53,7 @@ func (s *userService) Register(form *model.RegisterUser) (*model.User, string, *
 	if err != nil {
 		return nil, "", err
 	}
-	pwHash, err := generateHashFromPassword(form.Password)
+	pwHash, err := generateHashFromPassword(form.Password, s.cryptoConfig.Pepper)
 
 	if err != nil {
 		return nil, "", err
@@ -61,7 +63,7 @@ func (s *userService) Register(form *model.RegisterUser) (*model.User, string, *
 	if err != nil {
 		return nil, "", err
 	}
-	tokenHash, err := s.Hasher.GenerateTokenHash(token)
+	tokenHash, err := s.hasher.GenerateTokenHash(token)
 
 	if err != nil {
 		return nil, "", err
@@ -100,7 +102,7 @@ func (s *userService) LoginWithPassword(form *model.LoginUser) (*model.User, str
 	if err != nil {
 		return nil, "", err
 	}
-	err = compareHashAndPassword(user.PasswordHash, form.Password)
+	err = compareHashAndPassword(user.PasswordHash, form.Password, s.cryptoConfig.Pepper)
 
 	if err != nil {
 		return nil, "", err
@@ -110,7 +112,7 @@ func (s *userService) LoginWithPassword(form *model.LoginUser) (*model.User, str
 	if err != nil {
 		return nil, "", err
 	}
-	tokenHash, err := s.Hasher.GenerateTokenHash(token)
+	tokenHash, err := s.hasher.GenerateTokenHash(token)
 
 	if err != nil {
 		return nil, "", err
@@ -126,7 +128,7 @@ func (s *userService) LoginWithPassword(form *model.LoginUser) (*model.User, str
 }
 
 func (s *userService) LoginWithToken(token string) (*model.User, *model.Error) {
-	tokenHash, err := s.Hasher.GenerateTokenHash(token)
+	tokenHash, err := s.hasher.GenerateTokenHash(token)
 
 	if err != nil {
 		return nil, err
