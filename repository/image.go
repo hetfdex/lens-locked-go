@@ -11,6 +11,7 @@ const imageNotFoundError = "image not found"
 type IImageRepository interface {
 	Create(*model.Image) *model.Error
 	Read(string, interface{}) (*model.Image, *model.Error)
+	ReadAll(field string, value interface{}) ([]*model.Image, *model.Error)
 }
 
 type imageRepository struct {
@@ -49,4 +50,23 @@ func (r *imageRepository) Read(field string, value interface{}) (*model.Image, *
 		return nil, model.NewInternalServerApiError(err.Error())
 	}
 	return image, nil
+}
+
+func (r *imageRepository) ReadAll(field string, value interface{}) ([]*model.Image, *model.Error) {
+	if field == "" {
+		return nil, model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("field"))
+	}
+	var images []*model.Image
+
+	query := fmt.Sprintf("%s = ?", field)
+
+	err := r.database.Find(&images, query, value).Error
+
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, model.NewNotFoundApiError(imageNotFoundError)
+		}
+		return nil, model.NewInternalServerApiError(err.Error())
+	}
+	return images, nil
 }
