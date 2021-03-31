@@ -71,12 +71,12 @@ func (s *galleryService) GetAllByUserId(userId uuid.UUID) ([]*model.Gallery, *mo
 	if userId == uuid.Nil {
 		return nil, model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("userId"))
 	}
-	gallery, err := s.repository.ReadAll("user_id", userId)
+	galleries, err := s.repository.ReadAll("user_id", userId)
 
 	if err != nil {
 		return nil, err
 	}
-	return gallery, nil
+	return galleries, nil
 }
 
 func (s *galleryService) Update(gallery *model.Gallery, form *model.EditGallery) *model.Error {
