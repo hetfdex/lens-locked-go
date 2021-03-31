@@ -35,13 +35,12 @@ func (s *galleryService) Create(form *model.CreateGallery, userId uuid.UUID) (*m
 		return nil, err
 	}
 
-	if galleriesByName != nil {
-		for _, g := range galleriesByName {
-			if g.UserId == userId {
-				return nil, model.NewConflictApiError(nameInUseErrorMessage)
-			}
+	for _, g := range galleriesByName {
+		if g.UserId == userId {
+			return nil, model.NewConflictApiError(nameInUseErrorMessage)
 		}
 	}
+
 	gallery := &model.Gallery{
 		Name:   form.Name,
 		UserId: userId,
@@ -88,13 +87,12 @@ func (s *galleryService) Update(gallery *model.Gallery, form *model.EditGallery)
 		return err
 	}
 
-	if galleriesByName != nil {
-		for _, g := range galleriesByName {
-			if g.UserId == gallery.UserId {
-				return model.NewConflictApiError(nameInUseErrorMessage)
-			}
+	for _, g := range galleriesByName {
+		if g.UserId == gallery.UserId {
+			return model.NewConflictApiError(nameInUseErrorMessage)
 		}
 	}
+
 	gallery.Name = form.Name
 
 	err = s.repository.Update(gallery)
