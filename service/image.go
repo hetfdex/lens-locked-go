@@ -1,10 +1,11 @@
 package service
 
 import (
-	"bytes"
+	"bufio"
 	"encoding/base64"
 	"github.com/gofrs/uuid"
 	"io"
+	"io/ioutil"
 	"lens-locked-go/model"
 	"lens-locked-go/repository"
 	"path/filepath"
@@ -32,23 +33,23 @@ func NewImageService(ir repository.IImageRepository) *imageService {
 func (s *imageService) Create(file io.ReadCloser, filename string, galleryId uuid.UUID) *model.Error {
 	defer file.Close()
 
-	filename = lower(filepath.Base(filename))
+	filename = lower(filename)
 
 	extension := filepath.Ext(filename)
+
+	filename = strings.TrimSuffix(filename, extension)
 
 	if extension != ".jpg" && extension != ".jpeg" && extension != ".png" {
 		return model.NewBadRequestApiError(unsupportedFileErrorMessage)
 	}
-	buffer := bytes.NewBuffer(nil)
+	reader := bufio.NewReader(file)
 
-	_, err := io.Copy(buffer, file)
+	content, err := ioutil.ReadAll(reader)
 
 	if err != nil {
 		return model.NewInternalServerApiError(err.Error())
 	}
-	source := base64.StdEncoding.EncodeToString(buffer.Bytes())
-
-	filename = strings.TrimSuffix(filename, extension)
+	source := base64.StdEncoding.EncodeToString(content)
 
 	image := &model.Image{
 		Source:    source,
