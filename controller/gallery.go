@@ -277,7 +277,7 @@ func (c *galleryController) GalleryGet(w http.ResponseWriter, req *http.Request)
 		return
 	}
 	gallery.Images = images
-	
+
 	data.Value = gallery
 
 	c.galleryView.Render(w, req, data)
