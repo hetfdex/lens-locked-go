@@ -12,6 +12,10 @@ func GenerateTokenString() (string, *model.Error) {
 	return generateString(byteSliceSize)
 }
 
+func GenerateAuthKey() ([]byte, *model.Error) {
+	return generateBytes(byteSliceSize)
+}
+
 func generateString(size uint) (string, *model.Error) {
 	b, err := generateBytes(size)
 
