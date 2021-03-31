@@ -32,7 +32,6 @@ const galleryIdKey = "gallery_id"
 
 const invalidIdErrorMessage = "invalid gallery id"
 const userNotOwnerErrorMessage = "galleries can only be edited by their owners"
-const unsupportedFileErrorMessage = "unsupported file"
 
 const multipartFileKey = "images"
 
@@ -266,7 +265,18 @@ func (c *galleryController) PostUploadGallery(w http.ResponseWriter, req *http.R
 
 		return
 	}
-	paths, err := parsePaths(req)
+	er := req.ParseMultipartForm(maxMultipartMemory)
+
+	if er != nil {
+		err = model.NewInternalServerApiError(er.Error())
+
+		data.Alert = err.Alert()
+
+		w.WriteHeader(err.StatusCode)
+
+		c.uploadGalleryView.Render(w, req, data)
+	}
+	fileHeaders := req.MultipartForm.File[multipartFileKey]
 
 	if err != nil {
 		data.Alert = err.Alert()
@@ -278,15 +288,15 @@ func (c *galleryController) PostUploadGallery(w http.ResponseWriter, req *http.R
 		return
 	}
 
-	for _, path := range paths {
-		_, err = c.imageService.Create(path, gallery.ID)
+	for _, fileHeader := range fileHeaders {
+		_, err = c.imageService.Create(fileHeader, gallery.ID)
 
 		if err != nil {
 			data.Alert = err.Alert()
 
 			w.WriteHeader(err.StatusCode)
 
-			c.editGalleryView.Render(w, req, data)
+			c.uploadGalleryView.Render(w, req, data)
 
 			return
 		}
@@ -415,24 +425,4 @@ func getGalleryWithPermission(req *http.Request, gs service.IGalleryService) (*m
 		return nil, err
 	}
 	return gallery, nil
-}
-
-func parsePaths(req *http.Request) ([]string, *model.Error) {
-	err := req.ParseMultipartForm(maxMultipartMemory)
-
-	if err != nil {
-		return nil, model.NewInternalServerApiError(err.Error())
-	}
-	files := req.MultipartForm.File[multipartFileKey]
-
-	var paths []string
-
-	for _, f := range files {
-		/*if !validExtension {
-			return nil, model.NewBadRequestApiError(unsupportedFileErrorMessage)
-
-		}*/
-		paths = append(paths, f.Filename)
-	}
-	return nil, nil
 }
