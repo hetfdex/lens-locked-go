@@ -35,8 +35,7 @@ func NewUserController(us service.IUserService) *userController {
 	}
 }
 
-//Register user
-func (c *userController) GetRegisterUser(w http.ResponseWriter, req *http.Request) {
+func (c *userController) RegisterGet(w http.ResponseWriter, req *http.Request) {
 	data := &model.Data{}
 
 	parseSuccessFromRoute(req, data)
@@ -44,51 +43,35 @@ func (c *userController) GetRegisterUser(w http.ResponseWriter, req *http.Reques
 	c.registerView.Render(w, req, data)
 }
 
-func (c *userController) PostRegisterUser(w http.ResponseWriter, req *http.Request) {
+func (c *userController) RegisterPost(w http.ResponseWriter, req *http.Request) {
 	data := &model.Data{}
 	form := &model.RegisterUser{}
 
 	err := parseForm(req, form)
 
 	if err != nil {
-		data.Alert = err.Alert()
-
-		w.WriteHeader(err.StatusCode)
-
-		c.registerView.Render(w, req, data)
+		handleError(w, req, data, err, c.registerView)
 
 		return
 	}
 	err = form.Validate()
 
 	if err != nil {
-		data.Alert = err.Alert()
-
-		w.WriteHeader(err.StatusCode)
-
-		c.registerView.Render(w, req, data)
+		handleError(w, req, data, err, c.registerView)
 
 		return
 	}
 	_, token, err := c.userService.Register(form)
 
 	if err != nil {
-		data.Alert = err.Alert()
-
-		w.WriteHeader(err.StatusCode)
-
-		c.registerView.Render(w, req, data)
+		handleError(w, req, data, err, c.registerView)
 
 		return
 	}
 	cookie, err := makeCookie(token)
 
 	if err != nil {
-		data.Alert = err.Alert()
-
-		w.WriteHeader(err.StatusCode)
-
-		c.registerView.Render(w, req, data)
+		handleError(w, req, data, err, c.registerView)
 
 		return
 	}
@@ -99,8 +82,7 @@ func (c *userController) PostRegisterUser(w http.ResponseWriter, req *http.Reque
 	util.Redirect(w, req, route)
 }
 
-//Login user
-func (c *userController) GetLoginUser(w http.ResponseWriter, req *http.Request) {
+func (c *userController) LoginGet(w http.ResponseWriter, req *http.Request) {
 	data := &model.Data{}
 
 	parseSuccessFromRoute(req, data)
@@ -108,51 +90,35 @@ func (c *userController) GetLoginUser(w http.ResponseWriter, req *http.Request) 
 	c.loginView.Render(w, req, data)
 }
 
-func (c *userController) PostLoginUser(w http.ResponseWriter, req *http.Request) {
+func (c *userController) LoginPost(w http.ResponseWriter, req *http.Request) {
 	data := &model.Data{}
 	form := &model.LoginUser{}
 
 	err := parseForm(req, form)
 
 	if err != nil {
-		data.Alert = err.Alert()
-
-		w.WriteHeader(err.StatusCode)
-
-		c.loginView.Render(w, req, data)
+		handleError(w, req, data, err, c.loginView)
 
 		return
 	}
 	err = form.Validate()
 
 	if err != nil {
-		data.Alert = err.Alert()
-
-		w.WriteHeader(err.StatusCode)
-
-		c.loginView.Render(w, req, data)
+		handleError(w, req, data, err, c.loginView)
 
 		return
 	}
 	_, token, err := c.userService.LoginWithPassword(form)
 
 	if err != nil {
-		data.Alert = err.Alert()
-
-		w.WriteHeader(err.StatusCode)
-
-		c.loginView.Render(w, req, data)
+		handleError(w, req, data, err, c.loginView)
 
 		return
 	}
 	cookie, err := makeCookie(token)
 
 	if err != nil {
-		data.Alert = err.Alert()
-
-		w.WriteHeader(err.StatusCode)
-
-		c.loginView.Render(w, req, data)
+		handleError(w, req, data, err, c.loginView)
 
 		return
 	}
@@ -163,40 +129,27 @@ func (c *userController) PostLoginUser(w http.ResponseWriter, req *http.Request)
 	util.Redirect(w, req, route)
 }
 
-//Logout user
-func (c *userController) GetLogoutUser(w http.ResponseWriter, req *http.Request) {
+func (c *userController) LogoutGet(w http.ResponseWriter, req *http.Request) {
 	data := &model.Data{}
 
 	user, err := context.User(req.Context())
 
 	if err != nil {
-		data.Alert = err.Alert()
-
-		w.WriteHeader(err.StatusCode)
-
-		c.logoutView.Render(w, req, data)
+		handleError(w, req, data, err, c.logoutView)
 
 		return
 	}
 	err = c.userService.Logout(user)
 
 	if err != nil {
-		data.Alert = err.Alert()
-
-		w.WriteHeader(err.StatusCode)
-
-		c.logoutView.Render(w, req, data)
+		handleError(w, req, data, err, c.logoutView)
 
 		return
 	}
 	cookie, err := makeCookie(invalidTokenValue)
 
 	if err != nil {
-		data.Alert = err.Alert()
-
-		w.WriteHeader(err.StatusCode)
-
-		c.logoutView.Render(w, req, data)
+		handleError(w, req, data, err, c.logoutView)
 
 		return
 	}
@@ -207,16 +160,16 @@ func (c *userController) GetLogoutUser(w http.ResponseWriter, req *http.Request)
 	util.Redirect(w, req, route)
 }
 
-func RegisterUserRoute() string {
-	return registerUserRoute
+func (c *userController) RegisterRoute() string {
+	return c.registerView.Route()
 }
 
-func LoginUserRoute() string {
-	return loginUserRoute
+func (c *userController) LoginRoute() string {
+	return c.loginView.Route()
 }
 
-func LogoutUserRoute() string {
-	return logoutUserRoute
+func (c *userController) LogoutRoute() string {
+	return c.logoutView.Route()
 }
 
 func makeCookie(value string) (*http.Cookie, *model.Error) {

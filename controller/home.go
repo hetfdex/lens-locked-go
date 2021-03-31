@@ -19,7 +19,7 @@ func NewHomeController() *homeController {
 	}
 }
 
-func (c *homeController) GetHome(w http.ResponseWriter, req *http.Request) {
+func (c *homeController) HomeGet(w http.ResponseWriter, req *http.Request) {
 	data := &model.Data{}
 
 	parseSuccessFromRoute(req, data)
@@ -27,6 +27,6 @@ func (c *homeController) GetHome(w http.ResponseWriter, req *http.Request) {
 	c.homeView.Render(w, req, data)
 }
 
-func HomeRoute() string {
-	return homeRoute
+func (c *homeController) HomeRoute() string {
+	return c.homeView.Route()
 }

@@ -3,6 +3,7 @@ package controller
 import (
 	"github.com/gorilla/schema"
 	"lens-locked-go/model"
+	"lens-locked-go/view"
 	"net/http"
 )
 
@@ -26,10 +27,6 @@ const editGallerySuccessMessage = "Edited Successfully"
 const uploadGallerySuccessMessage = "Uploaded Successfully"
 const deleteGallerySuccessMessage = "Deleted Successfully"
 
-func addSuccessToRoute(route string, value string) string {
-	return route + successRouteQuery + value
-}
-
 func parseForm(req *http.Request, result interface{}) *model.Error {
 	err := req.ParseForm()
 
@@ -44,6 +41,10 @@ func parseForm(req *http.Request, result interface{}) *model.Error {
 		return model.NewInternalServerApiError(err.Error())
 	}
 	return nil
+}
+
+func addSuccessToRoute(route string, value string) string {
+	return route + successRouteQuery + value
 }
 
 func parseSuccessFromRoute(req *http.Request, data *model.Data) {
@@ -65,4 +66,12 @@ func parseSuccessFromRoute(req *http.Request, data *model.Data) {
 	case deleteGalleryValue:
 		data.Alert = model.NewSuccessAlert(deleteGallerySuccessMessage)
 	}
+}
+
+func handleError(w http.ResponseWriter, req *http.Request, data *model.Data, err *model.Error, view *view.View) {
+	data.Alert = err.Alert()
+
+	w.WriteHeader(err.StatusCode)
+
+	view.Render(w, req, data)
 }

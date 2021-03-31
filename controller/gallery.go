@@ -61,29 +61,20 @@ func NewGalleryController(gs service.IGalleryService, is service.IImageService) 
 	}
 }
 
-//Index gallery
-func (c *galleryController) GetIndexGallery(w http.ResponseWriter, req *http.Request) {
+func (c *galleryController) IndexGet(w http.ResponseWriter, req *http.Request) {
 	data := &model.Data{}
 
 	user, err := context.User(req.Context())
 
 	if err != nil {
-		data.Alert = err.Alert()
-
-		w.WriteHeader(err.StatusCode)
-
-		c.indexGalleryView.Render(w, req, data)
+		handleError(w, req, data, err, c.indexGalleryView)
 
 		return
 	}
 	galleries, err := c.galleryService.GetAllByUserId(user.ID)
 
 	if err != nil {
-		data.Alert = err.Alert()
-
-		w.WriteHeader(err.StatusCode)
-
-		c.indexGalleryView.Render(w, req, data)
+		handleError(w, req, data, err, c.indexGalleryView)
 
 		return
 	}
@@ -92,8 +83,7 @@ func (c *galleryController) GetIndexGallery(w http.ResponseWriter, req *http.Req
 	c.indexGalleryView.Render(w, req, data)
 }
 
-//Create gallery
-func (c *galleryController) GetCreateGallery(w http.ResponseWriter, req *http.Request) {
+func (c *galleryController) CreateGet(w http.ResponseWriter, req *http.Request) {
 	data := &model.Data{}
 
 	parseSuccessFromRoute(req, data)
@@ -101,73 +91,50 @@ func (c *galleryController) GetCreateGallery(w http.ResponseWriter, req *http.Re
 	c.createGalleryView.Render(w, req, data)
 }
 
-func (c *galleryController) PostCreateGallery(w http.ResponseWriter, req *http.Request) {
+func (c *galleryController) CreatePost(w http.ResponseWriter, req *http.Request) {
 	data := &model.Data{}
 	form := &model.CreateGallery{}
 
 	err := parseForm(req, form)
 
 	if err != nil {
-		data.Alert = err.Alert()
-
-		w.WriteHeader(err.StatusCode)
-
-		c.createGalleryView.Render(w, req, data)
+		handleError(w, req, data, err, c.createGalleryView)
 
 		return
 	}
 	err = form.Validate()
 
 	if err != nil {
-		data.Alert = err.Alert()
-
-		w.WriteHeader(err.StatusCode)
-
-		c.createGalleryView.Render(w, req, data)
+		handleError(w, req, data, err, c.createGalleryView)
 
 		return
 	}
 	user, err := context.User(req.Context())
 
 	if err != nil {
-		data.Alert = err.Alert()
-
-		w.WriteHeader(err.StatusCode)
-
-		c.createGalleryView.Render(w, req, data)
+		handleError(w, req, data, err, c.createGalleryView)
 
 		return
 	}
-	gallery, err := c.galleryService.Create(form, user.ID)
+	_, err = c.galleryService.Create(form, user.ID)
 
 	if err != nil {
-		data.Alert = err.Alert()
-
-		w.WriteHeader(err.StatusCode)
-
-		c.createGalleryView.Render(w, req, data)
+		handleError(w, req, data, err, c.createGalleryView)
 
 		return
 	}
-	route := makeRouteFromId(gallery.ID)
-
-	route = addSuccessToRoute(route, createGalleryValue)
+	route := addSuccessToRoute(indexGalleryRoute, createGalleryValue)
 
 	util.Redirect(w, req, route)
 }
 
-//Edit gallery
-func (c *galleryController) GetEditGallery(w http.ResponseWriter, req *http.Request) {
+func (c *galleryController) EditGet(w http.ResponseWriter, req *http.Request) {
 	data := &model.Data{}
 
 	gallery, err := getGalleryWithPermission(req, c.galleryService)
 
 	if err != nil {
-		data.Alert = err.Alert()
-
-		w.WriteHeader(err.StatusCode)
-
-		c.editGalleryView.Render(w, req, data)
+		handleError(w, req, data, err, c.editGalleryView)
 
 		return
 	}
@@ -176,73 +143,50 @@ func (c *galleryController) GetEditGallery(w http.ResponseWriter, req *http.Requ
 	c.editGalleryView.Render(w, req, data)
 }
 
-func (c *galleryController) PostEditGallery(w http.ResponseWriter, req *http.Request) {
+func (c *galleryController) EditPost(w http.ResponseWriter, req *http.Request) {
 	data := &model.Data{}
 	form := &model.EditGallery{}
 
 	gallery, err := getGalleryWithPermission(req, c.galleryService)
 
 	if err != nil {
-		data.Alert = err.Alert()
-
-		w.WriteHeader(err.StatusCode)
-
-		c.editGalleryView.Render(w, req, data)
+		handleError(w, req, data, err, c.editGalleryView)
 
 		return
 	}
 	err = parseForm(req, form)
 
 	if err != nil {
-		data.Alert = err.Alert()
-
-		w.WriteHeader(err.StatusCode)
-
-		c.editGalleryView.Render(w, req, data)
+		handleError(w, req, data, err, c.editGalleryView)
 
 		return
 	}
 	err = form.Validate()
 
 	if err != nil {
-		data.Alert = err.Alert()
-
-		w.WriteHeader(err.StatusCode)
-
-		c.editGalleryView.Render(w, req, data)
+		handleError(w, req, data, err, c.editGalleryView)
 
 		return
 	}
-	err = c.galleryService.Edit(gallery, form)
+	err = c.galleryService.Update(gallery, form)
 
 	if err != nil {
-		data.Alert = err.Alert()
-
-		w.WriteHeader(err.StatusCode)
-
-		c.editGalleryView.Render(w, req, data)
+		handleError(w, req, data, err, c.editGalleryView)
 
 		return
 	}
-	route := makeRouteFromId(gallery.ID)
-
-	route = addSuccessToRoute(route, editGalleryValue)
+	route := addSuccessToRoute(indexGalleryRoute, editGalleryValue)
 
 	util.Redirect(w, req, route)
 }
 
-//Upload gallery
-func (c *galleryController) GetUploadGallery(w http.ResponseWriter, req *http.Request) {
+func (c *galleryController) UploadGet(w http.ResponseWriter, req *http.Request) {
 	data := &model.Data{}
 
 	gallery, err := getGalleryWithPermission(req, c.galleryService)
 
 	if err != nil {
-		data.Alert = err.Alert()
-
-		w.WriteHeader(err.StatusCode)
-
-		c.uploadGalleryView.Render(w, req, data)
+		handleError(w, req, data, err, c.uploadGalleryView)
 
 		return
 	}
@@ -251,86 +195,53 @@ func (c *galleryController) GetUploadGallery(w http.ResponseWriter, req *http.Re
 	c.uploadGalleryView.Render(w, req, data)
 }
 
-func (c *galleryController) PostUploadGallery(w http.ResponseWriter, req *http.Request) {
+func (c *galleryController) UploadPost(w http.ResponseWriter, req *http.Request) {
 	data := &model.Data{}
 
 	gallery, err := getGalleryWithPermission(req, c.galleryService)
 
 	if err != nil {
-		data.Alert = err.Alert()
-
-		w.WriteHeader(err.StatusCode)
-
-		c.uploadGalleryView.Render(w, req, data)
+		handleError(w, req, data, err, c.uploadGalleryView)
 
 		return
 	}
 	er := req.ParseMultipartForm(maxMultipartMemory)
 
 	if er != nil {
-		err = model.NewInternalServerApiError(er.Error())
-
-		data.Alert = err.Alert()
-
-		w.WriteHeader(err.StatusCode)
-
-		c.uploadGalleryView.Render(w, req, data)
-	}
-	fileHeaders := req.MultipartForm.File[multipartFileKey]
-
-	if err != nil {
-		data.Alert = err.Alert()
-
-		w.WriteHeader(err.StatusCode)
-
-		c.uploadGalleryView.Render(w, req, data)
+		handleError(w, req, data, model.NewInternalServerApiError(er.Error()), c.uploadGalleryView)
 
 		return
 	}
+	fileHeaders := req.MultipartForm.File[multipartFileKey]
 
 	for _, fileHeader := range fileHeaders {
-		_, err = c.imageService.Create(fileHeader, gallery.ID)
+		err = c.imageService.Create(fileHeader, gallery.ID)
 
 		if err != nil {
-			data.Alert = err.Alert()
-
-			w.WriteHeader(err.StatusCode)
-
-			c.uploadGalleryView.Render(w, req, data)
+			handleError(w, req, data, err, c.uploadGalleryView)
 
 			return
 		}
 	}
-	route := makeRouteFromId(gallery.ID)
-
-	route = addSuccessToRoute(route, uploadGalleryValue)
+	route := addSuccessToRoute(indexGalleryRoute+"/"+gallery.ID.String(), uploadGalleryValue)
 
 	util.Redirect(w, req, route)
 }
 
-//Delete gallery
-func (c *galleryController) GetDeleteGallery(w http.ResponseWriter, req *http.Request) {
+func (c *galleryController) DeleteGet(w http.ResponseWriter, req *http.Request) {
 	data := &model.Data{}
 
 	gallery, err := getGalleryWithPermission(req, c.galleryService)
 
 	if err != nil {
-		data.Alert = err.Alert()
-
-		w.WriteHeader(err.StatusCode)
-
-		c.deleteGalleryView.Render(w, req, data)
+		handleError(w, req, data, err, c.deleteGalleryView)
 
 		return
 	}
 	err = c.galleryService.Delete(gallery)
 
 	if err != nil {
-		data.Alert = err.Alert()
-
-		w.WriteHeader(err.StatusCode)
-
-		c.deleteGalleryView.Render(w, req, data)
+		handleError(w, req, data, err, c.deleteGalleryView)
 
 		return
 	}
@@ -339,8 +250,7 @@ func (c *galleryController) GetDeleteGallery(w http.ResponseWriter, req *http.Re
 	util.Redirect(w, req, route)
 }
 
-//Gallery
-func (c *galleryController) GetGallery(w http.ResponseWriter, req *http.Request) {
+func (c *galleryController) GalleryGet(w http.ResponseWriter, req *http.Request) {
 	data := &model.Data{}
 
 	parseSuccessFromRoute(req, data)
@@ -348,11 +258,7 @@ func (c *galleryController) GetGallery(w http.ResponseWriter, req *http.Request)
 	gallery, err := getGallery(req, c.galleryService)
 
 	if err != nil {
-		data.Alert = err.Alert()
-
-		w.WriteHeader(err.StatusCode)
-
-		c.galleryView.Render(w, req, data)
+		handleError(w, req, data, err, c.galleryView)
 
 		return
 	}
@@ -361,32 +267,28 @@ func (c *galleryController) GetGallery(w http.ResponseWriter, req *http.Request)
 	c.galleryView.Render(w, req, data)
 }
 
-func IndexGalleryRoute() string {
-	return indexGalleryRoute
+func (c *galleryController) IndexRoute() string {
+	return c.indexGalleryView.Route()
 }
 
-func CreateGalleryRoute() string {
-	return createGalleryRoute
+func (c *galleryController) CreateRoute() string {
+	return c.createGalleryView.Route()
 }
 
-func EditGalleryRoute() string {
-	return editGalleryRoute
+func (c *galleryController) EditRoute() string {
+	return c.editGalleryView.Route()
 }
 
-func UploadGalleryRoute() string {
-	return uploadGalleryRoute
+func (c *galleryController) UploadRoute() string {
+	return c.uploadGalleryView.Route()
 }
 
-func DeleteGalleryRoute() string {
-	return deleteGalleryRoute
+func (c *galleryController) DeleteRoute() string {
+	return c.deleteGalleryView.Route()
 }
 
-func GalleryRoute() string {
-	return galleryRoute
-}
-
-func makeRouteFromId(id uuid.UUID) string {
-	return indexGalleryRoute + "/" + id.String()
+func (c *galleryController) GalleryRoute() string {
+	return c.galleryView.Route()
 }
 
 func getGallery(req *http.Request, gs service.IGalleryService) (*model.Gallery, *model.Error) {
