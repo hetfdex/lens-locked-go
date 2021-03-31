@@ -6,8 +6,6 @@ import (
 	"lens-locked-go/model"
 )
 
-const userNotFoundError = "user not found"
-
 type IUserRepository interface {
 	Create(*model.User) *model.Error
 	Read(string, interface{}) (*model.User, *model.Error)
@@ -45,7 +43,7 @@ func (r *userRepository) Read(field string, value interface{}) (*model.User, *mo
 
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return nil, model.NewNotFoundApiError(userNotFoundError)
+			return nil, model.NewNotFoundApiError(notFoundErrorMessage("user"))
 		}
 		return nil, model.NewInternalServerApiError(err.Error())
 	}

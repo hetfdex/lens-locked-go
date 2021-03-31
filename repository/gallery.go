@@ -6,8 +6,6 @@ import (
 	"lens-locked-go/model"
 )
 
-const galleryNotFoundError = "gallery not found"
-
 type IGalleryRepository interface {
 	Create(*model.Gallery) *model.Error
 	Read(string, interface{}) (*model.Gallery, *model.Error)
@@ -47,7 +45,7 @@ func (r *galleryRepository) Read(field string, value interface{}) (*model.Galler
 
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return nil, model.NewNotFoundApiError(galleryNotFoundError)
+			return nil, model.NewNotFoundApiError(notFoundErrorMessage("gallery"))
 		}
 		return nil, model.NewInternalServerApiError(err.Error())
 	}
@@ -66,7 +64,7 @@ func (r *galleryRepository) ReadAll(field string, value interface{}) ([]*model.G
 
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return nil, model.NewNotFoundApiError(galleryNotFoundError)
+			return nil, model.NewNotFoundApiError(notFoundErrorMessage("gallery"))
 		}
 		return nil, model.NewInternalServerApiError(err.Error())
 	}

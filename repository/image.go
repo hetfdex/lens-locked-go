@@ -6,8 +6,6 @@ import (
 	"lens-locked-go/model"
 )
 
-const imageNotFoundError = "image not found"
-
 type IImageRepository interface {
 	Create(*model.Image) *model.Error
 	Read(string, interface{}) (*model.Image, *model.Error)
@@ -45,7 +43,7 @@ func (r *imageRepository) Read(field string, value interface{}) (*model.Image, *
 
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return nil, model.NewNotFoundApiError(imageNotFoundError)
+			return nil, model.NewNotFoundApiError(notFoundErrorMessage("image"))
 		}
 		return nil, model.NewInternalServerApiError(err.Error())
 	}
@@ -64,7 +62,7 @@ func (r *imageRepository) ReadAll(field string, value interface{}) ([]*model.Ima
 
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return nil, model.NewNotFoundApiError(imageNotFoundError)
+			return nil, model.NewNotFoundApiError(notFoundErrorMessage("image"))
 		}
 		return nil, model.NewInternalServerApiError(err.Error())
 	}
