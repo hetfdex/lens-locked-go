@@ -212,10 +212,17 @@ func (c *galleryController) UploadPost(w http.ResponseWriter, req *http.Request)
 
 		return
 	}
-	fileHeaders := req.MultipartForm.File[multipartFileKey]
+	fhs := req.MultipartForm.File[multipartFileKey]
 
-	for _, fileHeader := range fileHeaders {
-		err = c.imageService.Create(fileHeader, gallery.ID)
+	for _, fh := range fhs {
+		file, e := fh.Open()
+
+		if e != nil {
+			handleError(w, req, data, model.NewInternalServerApiError(e.Error()), c.uploadGalleryView)
+
+			return
+		}
+		err = c.imageService.Create(file, fh.Filename, gallery.ID)
 
 		if err != nil {
 			handleError(w, req, data, err, c.uploadGalleryView)
