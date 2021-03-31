@@ -27,7 +27,7 @@ const address = "localhost:8080"
 func main() {
 	db := openDb(true)
 
-	resetDatabase(db)
+	//resetDatabase(db)
 
 	ur := repository.NewUserRepository(db)
 	ir := repository.NewImageRepository(db)
