@@ -16,11 +16,9 @@ import (
 )
 
 func main() {
-	serverConfig := config.DefaultServerConfig()
-	dbConfig := config.DefaultPostgresConfig()
-	cryptoConfig := config.DefaultCryptoConfig()
+	cfg := config.LoadConfig(false)
 
-	db := openDb(serverConfig, dbConfig)
+	db := openDb(cfg.Server, cfg.Postgres)
 
 	//resetDatabase(db)
 
@@ -28,15 +26,15 @@ func main() {
 	ir := repository.NewImageRepository(db)
 	gr := repository.NewGalleryRepository(db)
 
-	us := service.NewUserService(ur, cryptoConfig)
+	us := service.NewUserService(ur, cfg.Crypto)
 	is := service.NewImageService(ir)
 	gs := service.NewGalleryService(gr)
 
 	r := mux.NewRouter()
 
-	configureRouter(r, serverConfig, us, gs, is)
+	configureRouter(r, cfg.Server, us, gs, is)
 
-	listenAndServe(r, serverConfig)
+	listenAndServe(r, cfg.Server)
 }
 
 func openDb(sc *config.ServerConfig, dbc *config.PostgresConfig) *gorm.DB {
