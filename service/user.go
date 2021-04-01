@@ -17,9 +17,9 @@ type IUserService interface {
 }
 
 type userService struct {
-	repository repository.IUserRepository
+	repository   repository.IUserRepository
 	cryptoConfig *config.CryptoConfig
-	hasher *hash.Hasher
+	hasher       *hash.Hasher
 }
 
 func NewUserService(ur repository.IUserRepository, cc *config.CryptoConfig) *userService {
@@ -29,9 +29,9 @@ func NewUserService(ur repository.IUserRepository, cc *config.CryptoConfig) *use
 		panic(err)
 	}
 	return &userService{
-		repository:ur,
-		cryptoConfig:cc,
-		hasher:hs,
+		repository:   ur,
+		cryptoConfig: cc,
+		hasher:       hs,
 	}
 }
 

@@ -18,6 +18,7 @@ type IImageService interface {
 	Create(io.ReadCloser, string, uuid.UUID) *model.Error
 	GetById(uuid.UUID) (*model.Image, *model.Error)
 	GetAllByGalleryId(uuid.UUID) ([]*model.Image, *model.Error)
+	Delete(image *model.Image) *model.Error
 }
 
 type imageService struct {
@@ -88,4 +89,8 @@ func (s *imageService) GetAllByGalleryId(galleryId uuid.UUID) ([]*model.Image, *
 		return nil, err
 	}
 	return images, nil
+}
+
+func (s *imageService) Delete(image *model.Image) *model.Error {
+	return s.repository.Delete(image)
 }

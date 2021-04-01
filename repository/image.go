@@ -10,6 +10,7 @@ type IImageRepository interface {
 	Create(*model.Image) *model.Error
 	Read(string, interface{}) (*model.Image, *model.Error)
 	ReadAll(field string, value interface{}) ([]*model.Image, *model.Error)
+	Delete(image *model.Image) *model.Error
 }
 
 type imageRepository struct {
@@ -67,4 +68,13 @@ func (r *imageRepository) ReadAll(field string, value interface{}) ([]*model.Ima
 		return nil, model.NewInternalServerApiError(err.Error())
 	}
 	return images, nil
+}
+
+func (r *imageRepository) Delete(image *model.Image) *model.Error {
+	err := r.database.Delete(image).Error
+
+	if err != nil {
+		return model.NewInternalServerApiError(err.Error())
+	}
+	return nil
 }
