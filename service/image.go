@@ -26,7 +26,7 @@ type imageService struct {
 	repository repository.IImageRepository
 }
 
-func NewImageService(ir repository.IImageRepository) *imageService {
+func newImageService(ir repository.IImageRepository) *imageService {
 	return &imageService{
 		ir,
 	}

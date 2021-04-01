@@ -19,9 +19,9 @@ type galleryService struct {
 	repository repository.IGalleryRepository
 }
 
-func NewGalleryService(ur repository.IGalleryRepository) *galleryService {
+func newGalleryService(gr repository.IGalleryRepository) *galleryService {
 	return &galleryService{
-		ur,
+		gr,
 	}
 }
 

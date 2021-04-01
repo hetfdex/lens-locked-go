@@ -21,7 +21,7 @@ type userService struct {
 	hasher       *hash.Hasher
 }
 
-func NewUserService(ur repository.IUserRepository, cc *config.CryptoConfig) *userService {
+func newUserService(ur repository.IUserRepository, cc *config.CryptoConfig) *userService {
 	hs, err := hash.New(cc.HasherKey)
 
 	if err != nil {
