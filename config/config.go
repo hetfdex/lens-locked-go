@@ -10,27 +10,35 @@ import (
 )
 
 type Config struct {
-	Postgres *PostgresConfig `json:"postgres"`
-	Server   *ServerConfig   `json:"server"`
-	Crypto   *CryptoConfig   `json:"crypto"`
+	Db     *DbConfig     `json:"db"`
+	Server *ServerConfig `json:"server"`
+	Crypto *CryptoConfig `json:"crypto"`
+	OAuth  *OAuthConfig  `json:"oauth"`
 }
 
-type PostgresConfig struct {
+type DbConfig struct {
 	Host     string `json:"host"`
 	Port     int    `json:"port"`
 	User     string `json:"user"`
 	Password string `json:"password"`
-	Dbname   string `json:"db_name"`
+	Name     string `json:"name"`
 }
 
 type ServerConfig struct {
 	Address string `json:"address"`
-	IsDebug bool   `json:"is_debug"`
+	Debug   bool   `json:"debug"`
 }
 
 type CryptoConfig struct {
 	Pepper    string `json:"pepper"`
 	HasherKey string `json:"hasher_key"`
+}
+
+type OAuthConfig struct {
+	Id       string `json:"id"`
+	Secret   string `json:"secret"`
+	AuthUrl  string `json:"auth_url"`
+	TokenUrl string `json:"token_url"`
 }
 
 func LoadConfig(requireFile bool) *Config {
@@ -40,7 +48,7 @@ func LoadConfig(requireFile bool) *Config {
 		if requireFile {
 			panic(err)
 		}
-		log.Println("no config.json present")
+		log.Println("no config file present")
 		log.Println("using default config")
 
 		return DefaultConfig()
@@ -54,39 +62,40 @@ func LoadConfig(requireFile bool) *Config {
 	err = dec.Decode(config)
 
 	if err != nil {
-		log.Println("failed to unmarshal config.json")
+		log.Println("failed to decode config file")
 		log.Println("using default config")
 
 		return DefaultConfig()
 	}
-	log.Println("loaded config.json")
+	log.Println("loaded config from file")
 
 	return config
 }
 
 func DefaultConfig() *Config {
 	return &Config{
-		Postgres: DefaultPostgresConfig(),
-		Server:   DefaultServerConfig(),
-		Crypto:   DefaultCryptoConfig(),
+		Db:     DefaultDbConfig(),
+		Server: DefaultServerConfig(),
+		Crypto: DefaultCryptoConfig(),
+		OAuth:  DefaultOAuthConfig(),
 	}
 
 }
 
-func DefaultPostgresConfig() *PostgresConfig {
-	return &PostgresConfig{
-		Host:     "localhost",
-		Port:     5432,
-		User:     "postgres",
-		Password: "Abcde12345!",
-		Dbname:   "lenslocked_dev",
+func DefaultDbConfig() *DbConfig {
+	return &DbConfig{
+		Host:     "host",
+		Port:     0,
+		User:     "user",
+		Password: "password",
+		Name:     "name",
 	}
 }
 
 func DefaultServerConfig() *ServerConfig {
 	return &ServerConfig{
-		Address: "localhost:8080",
-		IsDebug: true,
+		Address: "address",
+		Debug:   true,
 	}
 }
 
@@ -97,13 +106,22 @@ func DefaultCryptoConfig() *CryptoConfig {
 	}
 }
 
-func (c *PostgresConfig) Dialector() gorm.Dialector {
+func DefaultOAuthConfig() *OAuthConfig {
+	return &OAuthConfig{
+		Id:       "id",
+		Secret:   "secret",
+		AuthUrl:  "auth_url",
+		TokenUrl: "token_url",
+	}
+}
+
+func (c *DbConfig) Dialector() gorm.Dialector {
 	var dsn string
 
 	if c.Password == "" {
-		dsn = fmt.Sprintf("host=%s port=%d user=%s dbname=%s sslmode=disable", c.Host, c.Port, c.User, c.Dbname)
+		dsn = fmt.Sprintf("host=%s port=%d user=%s dbname=%s sslmode=disable", c.Host, c.Port, c.User, c.Name)
 	}
-	dsn = fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", c.Host, c.Port, c.User, c.Password, c.Dbname)
+	dsn = fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", c.Host, c.Port, c.User, c.Password, c.Name)
 
 	return postgres.Open(dsn)
 }
