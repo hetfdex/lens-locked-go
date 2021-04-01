@@ -4,6 +4,7 @@ go 1.16
 
 require (
 	github.com/gofrs/uuid v4.0.0+incompatible
+	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/gorilla/csrf v1.7.0
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/schema v1.2.0
@@ -11,8 +12,11 @@ require (
 	github.com/jinzhu/now v1.1.2 // indirect
 	github.com/lib/pq v1.10.0 // indirect
 	golang.org/x/crypto v0.0.0-20210322153248-0c34fe9e7dc2
+	golang.org/x/net v0.0.0-20210331212208-0fccb6fa2b5c // indirect
+	golang.org/x/oauth2 v0.0.0-20210323180902-22b0adad7558 // indirect
 	golang.org/x/text v0.3.5 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
+	google.golang.org/appengine v1.6.7 // indirect
 	gorm.io/driver/postgres v1.0.8
 	gorm.io/gorm v1.21.4
 )
