@@ -10,14 +10,6 @@ import (
 	"time"
 )
 
-const registerUserRoute = "/register"
-const registerUserFilename = "view/user_register.gohtml"
-
-const loginUserRoute = "/login"
-const loginUserFilename = "view/user_login.gohtml"
-
-const logoutUserRoute = "/logout"
-
 type userController struct {
 	registerView *view.View
 	loginView    *view.View

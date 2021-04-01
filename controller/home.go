@@ -6,9 +6,6 @@ import (
 	"net/http"
 )
 
-const homeRoute = "/"
-const homeFilename = "view/home.gohtml"
-
 type homeController struct {
 	homeView *view.View
 }

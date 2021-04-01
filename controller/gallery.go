@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"github.com/gofrs/uuid"
 	"github.com/gorilla/mux"
 	"lens-locked-go/context"
@@ -11,31 +12,8 @@ import (
 	"net/http"
 )
 
-const indexGalleryRoute = "/gallery"
-const indexGalleryFilename = "view/gallery_index.gohtml"
-
-const createGalleryRoute = "/gallery/create"
-const createGalleryFilename = "view/gallery_create.gohtml"
-
-const editGalleryRoute = "/gallery/{gallery_id}/edit"
-const editGalleryFilename = "view/gallery_edit.gohtml"
-
-const uploadGalleryRoute = "/gallery/{gallery_id}/upload"
-const uploadGalleryFilename = "view/gallery_upload.gohtml"
-
-const deleteGalleryRoute = "/gallery/{gallery_id}/delete"
-
-const galleryRoute = "/gallery/{gallery_id}"
-const galleryFilename = "view/gallery.gohtml"
-
-const galleryIdKey = "gallery_id"
-
 const invalidIdErrorMessage = "invalid gallery id"
 const userNotOwnerErrorMessage = "galleries can only be edited by their owners"
-
-const multipartFileKey = "images"
-
-const maxMultipartMemory = 1 << 20 //1 megabyte
 
 type galleryController struct {
 	indexGalleryView  *view.View
@@ -52,10 +30,10 @@ func NewGalleryController(gs service.IGalleryService, is service.IImageService) 
 	return &galleryController{
 		indexGalleryView:  view.New(indexGalleryRoute, indexGalleryFilename),
 		createGalleryView: view.New(createGalleryRoute, createGalleryFilename),
-		editGalleryView:   view.New(editGalleryRoute, editGalleryFilename),
-		uploadGalleryView: view.New(uploadGalleryRoute, uploadGalleryFilename),
-		deleteGalleryView: view.New(deleteGalleryRoute, galleryFilename),
-		galleryView:       view.New(galleryRoute, galleryFilename),
+		editGalleryView:   view.New(fmt.Sprintf(editGalleryRoute, galleryIdKey), editGalleryFilename),
+		uploadGalleryView: view.New(fmt.Sprintf(uploadGalleryRoute, galleryIdKey), uploadGalleryFilename),
+		deleteGalleryView: view.New(fmt.Sprintf(deleteGalleryRoute, galleryIdKey), galleryFilename),
+		galleryView:       view.New(fmt.Sprintf(galleryRoute, galleryIdKey), galleryFilename),
 		galleryService:    gs,
 		imageService:      is,
 	}
@@ -205,14 +183,14 @@ func (c *galleryController) UploadPost(w http.ResponseWriter, req *http.Request)
 
 		return
 	}
-	er := req.ParseMultipartForm(maxMultipartMemory)
+	er := req.ParseMultipartForm(1 << 20) //1 megabyte
 
 	if er != nil {
 		handleError(w, req, data, model.NewInternalServerApiError(er.Error()), c.uploadGalleryView)
 
 		return
 	}
-	fhs := req.MultipartForm.File[multipartFileKey]
+	fhs := req.MultipartForm.File["images"]
 
 	for _, fh := range fhs {
 		file, e := fh.Open()
