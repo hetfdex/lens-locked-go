@@ -246,6 +246,23 @@ func (c *galleryController) DeleteGet(w http.ResponseWriter, req *http.Request) 
 
 		return
 	}
+	images, err := c.imageService.GetAllByGalleryId(gallery.ID)
+
+	if err != nil {
+		handleError(w, req, data, err, c.deleteGalleryView)
+
+		return
+	}
+
+	for _, image := range images {
+		err = c.imageService.Delete(image)
+
+		if err != nil {
+			handleError(w, req, data, err, c.deleteGalleryView)
+
+			return
+		}
+	}
 	err = c.galleryService.Delete(gallery)
 
 	if err != nil {
