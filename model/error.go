@@ -1,7 +1,6 @@
 package model
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -73,10 +72,4 @@ func NewConflictApiError(message string) *Error {
 		StatusCode: http.StatusConflict,
 		Message:    message,
 	}
-}
-
-func MustNotBeEmptyErrorMessage(value string) string {
-	message := fmt.Sprintf("%s must not be empty", value)
-
-	return message
 }

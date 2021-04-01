@@ -6,17 +6,9 @@ import (
 	"html/template"
 	"lens-locked-go/context"
 	"lens-locked-go/model"
+	"lens-locked-go/util"
 	"net/http"
 )
-
-const baseTag = "base"
-
-const baseFilename = "view/base.gohtml"
-const navbarFilename = "view/navbar.gohtml"
-const alertFilename = "view/alert.gohtml"
-
-const contentTypeKey = "Content-Type"
-const contentTypeValue = "text/html"
 
 type View struct {
 	route    string
@@ -25,16 +17,16 @@ type View struct {
 
 func New(route string, filename string) *View {
 	if route == "" {
-		panic(errors.New(model.MustNotBeEmptyErrorMessage("route")))
+		panic(errors.New(util.MustNotBeEmptyErrorMessage("route")))
 	}
 	if filename == "" {
-		panic(errors.New(model.MustNotBeEmptyErrorMessage("filename")))
+		panic(errors.New(util.MustNotBeEmptyErrorMessage("filename")))
 	}
 	t, err := template.New("").Funcs(template.FuncMap{
 		"csrfField": func() template.HTML {
 			return "<h1>csrfField</h1>"
 		},
-	}).ParseFiles(baseFilename, navbarFilename, alertFilename, filename)
+	}).ParseFiles("view/base.gohtml", "view/navbar.gohtml", "view/alert.gohtml", filename)
 
 	if err != nil {
 		panic(err)
@@ -46,7 +38,7 @@ func New(route string, filename string) *View {
 }
 
 func (v *View) Render(w http.ResponseWriter, req *http.Request, data *model.Data) {
-	w.Header().Set(contentTypeKey, contentTypeValue)
+	w.Header().Set("Content-Type", "text/html")
 
 	user, _ := context.User(req.Context())
 
@@ -61,7 +53,7 @@ func (v *View) Render(w http.ResponseWriter, req *http.Request, data *model.Data
 		},
 	})
 
-	err := tpl.ExecuteTemplate(w, baseTag, data)
+	err := tpl.ExecuteTemplate(w, "base", data)
 
 	if err != nil {
 		er := model.NewInternalServerApiError(err.Error())

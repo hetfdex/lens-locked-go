@@ -5,9 +5,8 @@ import (
 	"lens-locked-go/hash"
 	"lens-locked-go/model"
 	"lens-locked-go/repository"
+	"lens-locked-go/util"
 )
-
-const emailInUseErrorMessage = "email address is already in use"
 
 type IUserService interface {
 	Register(*model.RegisterUser) (*model.User, string, *model.Error)
@@ -46,7 +45,7 @@ func (s *userService) Register(form *model.RegisterUser) (*model.User, string, *
 	userByEmail, _ := s.getByEmail(form.Email)
 
 	if userByEmail != nil {
-		return nil, "", model.NewConflictApiError(emailInUseErrorMessage)
+		return nil, "", model.NewConflictApiError(util.InUseErrorMessage("email address"))
 	}
 	err = validPassword(form.Password)
 
@@ -154,7 +153,7 @@ func (s *userService) Logout(user *model.User) *model.Error {
 
 func (s *userService) getByEmail(email string) (*model.User, *model.Error) {
 	if email == "" {
-		return nil, model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("email"))
+		return nil, model.NewInternalServerApiError(util.MustNotBeEmptyErrorMessage("email"))
 	}
 	user, err := s.repository.Read("email", email)
 

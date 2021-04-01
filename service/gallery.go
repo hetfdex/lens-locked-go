@@ -4,9 +4,8 @@ import (
 	"github.com/gofrs/uuid"
 	"lens-locked-go/model"
 	"lens-locked-go/repository"
+	"lens-locked-go/util"
 )
-
-const nameInUseErrorMessage = "name is already in use"
 
 type IGalleryService interface {
 	Create(*model.CreateGallery, uuid.UUID) (*model.Gallery, *model.Error)
@@ -37,7 +36,7 @@ func (s *galleryService) Create(form *model.CreateGallery, userId uuid.UUID) (*m
 
 	for _, g := range galleriesByName {
 		if g.UserId == userId {
-			return nil, model.NewConflictApiError(nameInUseErrorMessage)
+			return nil, model.NewConflictApiError(util.InUseErrorMessage("name"))
 		}
 	}
 
@@ -56,7 +55,7 @@ func (s *galleryService) Create(form *model.CreateGallery, userId uuid.UUID) (*m
 
 func (s *galleryService) GetById(id uuid.UUID) (*model.Gallery, *model.Error) {
 	if id == uuid.Nil {
-		return nil, model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("id"))
+		return nil, model.NewInternalServerApiError(util.MustNotBeEmptyErrorMessage("id"))
 	}
 	gallery, err := s.repository.Read("id", id)
 
@@ -68,7 +67,7 @@ func (s *galleryService) GetById(id uuid.UUID) (*model.Gallery, *model.Error) {
 
 func (s *galleryService) GetAllByUserId(userId uuid.UUID) ([]*model.Gallery, *model.Error) {
 	if userId == uuid.Nil {
-		return nil, model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("userId"))
+		return nil, model.NewInternalServerApiError(util.MustNotBeEmptyErrorMessage("userId"))
 	}
 	galleries, err := s.repository.ReadAll("user_id", userId)
 
@@ -89,7 +88,7 @@ func (s *galleryService) Update(gallery *model.Gallery, form *model.EditGallery)
 
 	for _, g := range galleriesByName {
 		if g.UserId == gallery.UserId {
-			return model.NewConflictApiError(nameInUseErrorMessage)
+			return model.NewConflictApiError(util.InUseErrorMessage("name"))
 		}
 	}
 
@@ -109,7 +108,7 @@ func (s *galleryService) Delete(gallery *model.Gallery) *model.Error {
 
 func (s *galleryService) getAllByName(name string) ([]*model.Gallery, *model.Error) {
 	if name == "" {
-		return nil, model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("name"))
+		return nil, model.NewInternalServerApiError(util.MustNotBeEmptyErrorMessage("name"))
 	}
 	gallery, err := s.repository.ReadAll("name", name)
 

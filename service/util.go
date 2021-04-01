@@ -4,12 +4,11 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"lens-locked-go/model"
 	"lens-locked-go/rand"
+	"lens-locked-go/util"
 	"regexp"
 	"strings"
 )
 
-const invalidEmailErrorMessage = "email address must have a valid format"
-const invalidPasswordErrorMessage = "invalid password"
 const invalidPasswordLengthErrorMessage = "password must be at least 8 characters"
 
 var emailRegex = regexp.MustCompile(`^[a-z0-9_.+-]+@[a-z0-9-]+\.[a-z0-9-.]+$`)
@@ -24,7 +23,7 @@ func trimSpace(s string) string {
 
 func generateHashFromPassword(password string, pepper string) (string, *model.Error) {
 	if password == "" {
-		return "", model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("password"))
+		return "", model.NewInternalServerApiError(util.MustNotBeEmptyErrorMessage("password"))
 	}
 
 	hs, err := bcrypt.GenerateFromPassword([]byte(password+pepper), bcrypt.DefaultCost)
@@ -38,17 +37,17 @@ func generateHashFromPassword(password string, pepper string) (string, *model.Er
 func compareHashAndPassword(hash string, password string, pepper string) *model.Error {
 
 	if hash == "" {
-		return model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("hash"))
+		return model.NewInternalServerApiError(util.MustNotBeEmptyErrorMessage("hash"))
 	}
 
 	if password == "" {
-		return model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("password"))
+		return model.NewInternalServerApiError(util.MustNotBeEmptyErrorMessage("password"))
 	}
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password+pepper))
 
 	if err != nil {
 		if err == bcrypt.ErrMismatchedHashAndPassword {
-			return model.NewForbiddenApiError(invalidPasswordErrorMessage)
+			return model.NewForbiddenApiError(util.InvalidErrorMessage("password"))
 		}
 		return model.NewInternalServerApiError(err.Error())
 	}
@@ -66,11 +65,11 @@ func generateToken() (string, *model.Error) {
 
 func validEmail(email string) *model.Error {
 	if len(email) < 3 && len(email) > 254 {
-		return model.NewBadRequestApiError(invalidEmailErrorMessage)
+		return model.NewBadRequestApiError(util.InvalidErrorMessage("email address"))
 	}
 
 	if !emailRegex.MatchString(email) {
-		return model.NewBadRequestApiError(invalidEmailErrorMessage)
+		return model.NewBadRequestApiError(util.InvalidErrorMessage("email address"))
 	}
 	return nil
 }

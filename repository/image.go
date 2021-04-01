@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gorm.io/gorm"
 	"lens-locked-go/model"
+	"lens-locked-go/util"
 )
 
 type IImageRepository interface {
@@ -34,7 +35,7 @@ func (r *imageRepository) Create(image *model.Image) *model.Error {
 
 func (r *imageRepository) Read(field string, value interface{}) (*model.Image, *model.Error) {
 	if field == "" {
-		return nil, model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("field"))
+		return nil, model.NewInternalServerApiError(util.MustNotBeEmptyErrorMessage("field"))
 	}
 	image := &model.Image{}
 
@@ -53,7 +54,7 @@ func (r *imageRepository) Read(field string, value interface{}) (*model.Image, *
 
 func (r *imageRepository) ReadAll(field string, value interface{}) ([]*model.Image, *model.Error) {
 	if field == "" {
-		return nil, model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("field"))
+		return nil, model.NewInternalServerApiError(util.MustNotBeEmptyErrorMessage("field"))
 	}
 	var images []*model.Image
 

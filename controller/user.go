@@ -165,7 +165,7 @@ func (c *userController) LogoutRoute() string {
 
 func makeValidCookie(value string) (*http.Cookie, *model.Error) {
 	if value == "" {
-		return nil, model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("value"))
+		return nil, model.NewInternalServerApiError(util.MustNotBeEmptyErrorMessage("value"))
 	}
 	return &http.Cookie{
 		Name:     util.CookieName,

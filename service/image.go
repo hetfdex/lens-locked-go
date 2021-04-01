@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"lens-locked-go/model"
 	"lens-locked-go/repository"
+	"lens-locked-go/util"
 	"path/filepath"
 	"strings"
 )
@@ -69,7 +70,7 @@ func (s *imageService) Create(file io.ReadCloser, filename string, galleryId uui
 
 func (s *imageService) GetById(id uuid.UUID) (*model.Image, *model.Error) {
 	if id == uuid.Nil {
-		return nil, model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("id"))
+		return nil, model.NewInternalServerApiError(util.MustNotBeEmptyErrorMessage("id"))
 	}
 	image, err := s.repository.Read("id", id)
 
@@ -81,7 +82,7 @@ func (s *imageService) GetById(id uuid.UUID) (*model.Image, *model.Error) {
 
 func (s *imageService) GetAllByGalleryId(galleryId uuid.UUID) ([]*model.Image, *model.Error) {
 	if galleryId == uuid.Nil {
-		return nil, model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("galleryId"))
+		return nil, model.NewInternalServerApiError(util.MustNotBeEmptyErrorMessage("galleryId"))
 	}
 	images, err := s.repository.ReadAll("gallery_id", galleryId)
 

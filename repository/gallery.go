@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gorm.io/gorm"
 	"lens-locked-go/model"
+	"lens-locked-go/util"
 )
 
 type IGalleryRepository interface {
@@ -35,7 +36,7 @@ func (r *galleryRepository) Create(gallery *model.Gallery) *model.Error {
 
 func (r *galleryRepository) Read(field string, value interface{}) (*model.Gallery, *model.Error) {
 	if field == "" {
-		return nil, model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("field"))
+		return nil, model.NewInternalServerApiError(util.MustNotBeEmptyErrorMessage("field"))
 	}
 	gallery := &model.Gallery{}
 
@@ -54,7 +55,7 @@ func (r *galleryRepository) Read(field string, value interface{}) (*model.Galler
 
 func (r *galleryRepository) ReadAll(field string, value interface{}) ([]*model.Gallery, *model.Error) {
 	if field == "" {
-		return nil, model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("field"))
+		return nil, model.NewInternalServerApiError(util.MustNotBeEmptyErrorMessage("field"))
 	}
 	var galleries []*model.Gallery
 
