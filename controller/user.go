@@ -7,6 +7,7 @@ import (
 	"lens-locked-go/util"
 	"lens-locked-go/view"
 	"net/http"
+	"time"
 )
 
 const registerUserRoute = "/register"
@@ -16,8 +17,6 @@ const loginUserRoute = "/login"
 const loginUserFilename = "view/user_login.gohtml"
 
 const logoutUserRoute = "/logout"
-
-const invalidTokenValue = "invalidTokenValue"
 
 type userController struct {
 	registerView *view.View
@@ -68,7 +67,7 @@ func (c *userController) RegisterPost(w http.ResponseWriter, req *http.Request) 
 
 		return
 	}
-	cookie, err := makeCookie(token)
+	cookie, err := makeValidCookie(token)
 
 	if err != nil {
 		handleError(w, req, data, err, c.registerView)
@@ -115,7 +114,7 @@ func (c *userController) LoginPost(w http.ResponseWriter, req *http.Request) {
 
 		return
 	}
-	cookie, err := makeCookie(token)
+	cookie, err := makeValidCookie(token)
 
 	if err != nil {
 		handleError(w, req, data, err, c.loginView)
@@ -146,7 +145,7 @@ func (c *userController) LogoutGet(w http.ResponseWriter, req *http.Request) {
 
 		return
 	}
-	cookie, err := makeCookie(invalidTokenValue)
+	cookie, err := makeInvalidCookie()
 
 	if err != nil {
 		handleError(w, req, data, err, c.logoutView)
@@ -172,13 +171,23 @@ func (c *userController) LogoutRoute() string {
 	return c.logoutView.Route()
 }
 
-func makeCookie(value string) (*http.Cookie, *model.Error) {
+func makeValidCookie(value string) (*http.Cookie, *model.Error) {
 	if value == "" {
 		return nil, model.NewInternalServerApiError(model.MustNotBeEmptyErrorMessage("value"))
 	}
 	return &http.Cookie{
 		Name:     util.CookieName,
 		Value:    value,
+		Expires:  time.Now().Add(time.Hour * 24 * 7),
+		HttpOnly: true,
+	}, nil
+}
+
+func makeInvalidCookie() (*http.Cookie, *model.Error) {
+	return &http.Cookie{
+		Name:     util.CookieName,
+		Value:    "",
+		Expires:  time.Now().Add(-time.Hour),
 		HttpOnly: true,
 	}, nil
 }
