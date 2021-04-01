@@ -18,7 +18,7 @@ import (
 func main() {
 	cfg := config.LoadConfig(false)
 
-	db := openDb(cfg.Server, cfg.Postgres)
+	db := openDb(cfg.Server, cfg.Db)
 
 	//resetDatabase(db)
 
@@ -37,10 +37,10 @@ func main() {
 	listenAndServe(r, cfg.Server)
 }
 
-func openDb(sc *config.ServerConfig, dbc *config.PostgresConfig) *gorm.DB {
+func openDb(sc *config.ServerConfig, dbc *config.DbConfig) *gorm.DB {
 	logLevel := logger.Warn
 
-	if sc.IsDebug {
+	if sc.Debug {
 		logLevel = logger.Info
 	}
 	db, err := gorm.Open(dbc.Dialector(), &gorm.Config{
@@ -72,7 +72,7 @@ func configureRouter(r *mux.Router, sc *config.ServerConfig, us service.IUserSer
 	if err != nil {
 		panic(err.Message)
 	}
-	csrfMdw := csrf.Protect(authKey, csrf.Secure(sc.IsDebug))
+	csrfMdw := csrf.Protect(authKey, csrf.Secure(sc.Debug))
 
 	mdw := middleware.NewMiddleware(us, userController.LoginRoute())
 
