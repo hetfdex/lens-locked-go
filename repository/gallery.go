@@ -19,7 +19,7 @@ type galleryRepository struct {
 	database *gorm.DB
 }
 
-func NewGalleryRepository(db *gorm.DB) *galleryRepository {
+func newGalleryRepository(db *gorm.DB) *galleryRepository {
 	return &galleryRepository{
 		database: db,
 	}

@@ -18,7 +18,7 @@ type imageRepository struct {
 	database *gorm.DB
 }
 
-func NewImageRepository(db *gorm.DB) *imageRepository {
+func newImageRepository(db *gorm.DB) *imageRepository {
 	return &imageRepository{
 		database: db,
 	}

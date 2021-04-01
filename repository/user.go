@@ -17,7 +17,7 @@ type userRepository struct {
 	database *gorm.DB
 }
 
-func NewUserRepository(db *gorm.DB) *userRepository {
+func newUserRepository(db *gorm.DB) *userRepository {
 	return &userRepository{
 		database: db,
 	}
