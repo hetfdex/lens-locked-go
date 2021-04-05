@@ -35,10 +35,11 @@ type CryptoConfig struct {
 }
 
 type OAuthConfig struct {
-	Id       string `json:"id"`
-	Secret   string `json:"secret"`
-	AuthUrl  string `json:"auth_url"`
-	TokenUrl string `json:"token_url"`
+	Id          string `json:"id"`
+	Secret      string `json:"secret"`
+	AuthUrl     string `json:"auth_url"`
+	TokenUrl    string `json:"token_url"`
+	RedirectUrl string `json:"redirect_url"`
 }
 
 func LoadConfig(requireFile bool) *Config {
@@ -108,10 +109,11 @@ func DefaultCryptoConfig() *CryptoConfig {
 
 func DefaultOAuthConfig() *OAuthConfig {
 	return &OAuthConfig{
-		Id:       "id",
-		Secret:   "secret",
-		AuthUrl:  "auth_url",
-		TokenUrl: "token_url",
+		Id:          "id",
+		Secret:      "secret",
+		AuthUrl:     "auth_url",
+		TokenUrl:    "token_url",
+		RedirectUrl: "redirect_url",
 	}
 }
 
