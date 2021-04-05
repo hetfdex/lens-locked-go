@@ -1,8 +1,11 @@
 package main
 
 import (
+	"context"
+	"fmt"
 	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
+	"golang.org/x/oauth2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"lens-locked-go/config"
@@ -13,37 +16,149 @@ import (
 	"lens-locked-go/repository"
 	"lens-locked-go/service"
 	"net/http"
+	"time"
 )
 
 func main() {
 	cfg := config.LoadConfig(false)
 
-	db := openDb(cfg.Server, cfg.Db)
+	db := openDb(cfg)
 
-	//resetDatabase(db)
+	resetDatabase(db)
 
-	ur := repository.NewUserRepository(db)
-	ir := repository.NewImageRepository(db)
-	gr := repository.NewGalleryRepository(db)
+	rp := repository.NewRepositories(db)
 
-	us := service.NewUserService(ur, cfg.Crypto)
-	is := service.NewImageService(ir)
-	gs := service.NewGalleryService(gr)
+	sv := service.NewServices(rp, cfg)
 
-	r := mux.NewRouter()
+	rt := mux.NewRouter()
 
-	configureRouter(r, cfg.Server, us, gs, is)
+	configureRouter(rt, cfg, sv)
 
-	listenAndServe(r, cfg.Server)
+	listenAndServe(rt, cfg.Server)
 }
 
-func openDb(sc *config.ServerConfig, dbc *config.DbConfig) *gorm.DB {
+func configureRouter(rt *mux.Router, cfg *config.Config, sv *service.Services) {
+	homeController := controller.NewHomeController()
+	userController := controller.NewUserController(sv.User)
+	galleryController := controller.NewGalleryController(sv.Gallery, sv.Image)
+	//oAuthController := controller.NewOAuthController(sv.User, sv.OAuth)
+
+	authKey, err := rand.GenerateAuthKey()
+
+	if err != nil {
+		panic(err.Message)
+	}
+	csrfMdw := csrf.Protect(authKey, csrf.Secure(!cfg.Server.Debug))
+
+	mdw := middleware.NewMiddleware(sv.User, userController.LoginRoute())
+
+	rt.Use(csrfMdw)
+	rt.Use(mdw.SetUser)
+
+	dbxOauth := &oauth2.Config{
+		ClientID:     cfg.OAuth.Id,
+		ClientSecret: cfg.OAuth.Secret,
+		Endpoint: oauth2.Endpoint{
+			AuthURL:  cfg.OAuth.AuthUrl,
+			TokenURL: cfg.OAuth.TokenUrl,
+		},
+		RedirectURL: cfg.OAuth.RedirectUrl,
+	}
+
+	dbxConnect := func(w http.ResponseWriter, req *http.Request) {
+		state := csrf.Token(req)
+
+		cookie := &http.Cookie{
+			Name:     "oauth_token",
+			Value:    state,
+			Expires:  time.Now().Add(time.Minute * 5),
+			HttpOnly: true,
+		}
+
+		url := dbxOauth.AuthCodeURL(state)
+
+		http.SetCookie(w, cookie)
+
+		http.Redirect(w, req, url, http.StatusFound)
+	}
+
+	dbxCallback := func(w http.ResponseWriter, req *http.Request) {
+		errr := req.ParseForm()
+
+		if errr != nil {
+			http.Error(w, errr.Error(), http.StatusFailedDependency)
+
+			return
+		}
+		state := req.FormValue("state")
+
+		cookie, errr := req.Cookie("oauth_token")
+
+		if errr != nil {
+			http.Error(w, errr.Error(), http.StatusFailedDependency)
+
+			return
+		}
+
+		if state != cookie.Value {
+			http.Error(w, "invalid state", http.StatusFailedDependency)
+
+			return
+		}
+		cookie.Value = ""
+		cookie.Expires = time.Now().Add(-time.Hour)
+
+		http.SetCookie(w, cookie)
+
+		code := req.FormValue("code")
+
+		token, errr := dbxOauth.Exchange(context.TODO(), code)
+
+		if errr != nil {
+			http.Error(w, errr.Error(), http.StatusFailedDependency)
+		}
+		fmt.Printf("%+v", token)
+	}
+
+	connectPath := "/oauth/dropbox/connect"
+	callbackPath := "/oauth/dropbox/callback"
+
+	rt.HandleFunc(connectPath, mdw.RequireUser(dbxConnect)).Methods(http.MethodGet)
+	rt.HandleFunc(callbackPath, mdw.RequireUser(dbxCallback)).Methods(http.MethodGet)
+
+	rt.HandleFunc(homeController.HomeRoute(), homeController.HomeGet).Methods(http.MethodGet)
+
+	rt.HandleFunc(userController.RegisterRoute(), userController.RegisterGet).Methods(http.MethodGet)
+	rt.HandleFunc(userController.RegisterRoute(), userController.RegisterPost).Methods(http.MethodPost)
+
+	rt.HandleFunc(userController.LoginRoute(), userController.LoginGet).Methods(http.MethodGet)
+	rt.HandleFunc(userController.LoginRoute(), userController.LoginPost).Methods(http.MethodPost)
+
+	rt.HandleFunc(userController.LogoutRoute(), userController.LogoutGet).Methods(http.MethodGet)
+
+	rt.HandleFunc(galleryController.IndexRoute(), mdw.RequireUser(galleryController.IndexGet)).Methods(http.MethodGet)
+
+	rt.HandleFunc(galleryController.CreateRoute(), mdw.RequireUser(galleryController.CreateGet)).Methods(http.MethodGet)
+	rt.HandleFunc(galleryController.CreateRoute(), mdw.RequireUser(galleryController.CreatePost)).Methods(http.MethodPost)
+
+	rt.HandleFunc(galleryController.EditRoute(), mdw.RequireUser(galleryController.EditGet)).Methods(http.MethodGet)
+	rt.HandleFunc(galleryController.EditRoute(), mdw.RequireUser(galleryController.EditPost)).Methods(http.MethodPost)
+
+	rt.HandleFunc(galleryController.UploadRoute(), mdw.RequireUser(galleryController.UploadGet)).Methods(http.MethodGet)
+	rt.HandleFunc(galleryController.UploadRoute(), mdw.RequireUser(galleryController.UploadPost)).Methods(http.MethodPost)
+
+	rt.HandleFunc(galleryController.DeleteRoute(), mdw.RequireUser(galleryController.DeleteGet)).Methods(http.MethodGet)
+
+	rt.HandleFunc(galleryController.GalleryRoute(), galleryController.GalleryGet).Methods(http.MethodGet)
+}
+
+func openDb(cfg *config.Config) *gorm.DB {
 	logLevel := logger.Warn
 
-	if sc.Debug {
+	if cfg.Server.Debug {
 		logLevel = logger.Info
 	}
-	db, err := gorm.Open(dbc.Dialector(), &gorm.Config{
+	db, err := gorm.Open(cfg.Db.Dialector(), &gorm.Config{
 		Logger: logger.Default.LogMode(logLevel),
 	})
 
@@ -57,47 +172,16 @@ func resetDatabase(db *gorm.DB) {
 	_ = db.Migrator().DropTable(&model.User{})
 	_ = db.Migrator().DropTable(&model.Gallery{})
 	_ = db.Migrator().DropTable(&model.Image{})
+	_ = db.Migrator().DropTable(&model.OAuth{})
+
 	_ = db.Migrator().CreateTable(&model.User{})
 	_ = db.Migrator().CreateTable(&model.Gallery{})
 	_ = db.Migrator().CreateTable(&model.Image{})
+	_ = db.Migrator().CreateTable(&model.OAuth{})
 }
 
-func configureRouter(r *mux.Router, sc *config.ServerConfig, us service.IUserService, gs service.IGalleryService, is service.IImageService) {
-	homeController := controller.NewHomeController()
-	userController := controller.NewUserController(us)
-	galleryController := controller.NewGalleryController(gs, is)
-
-	authKey, err := rand.GenerateAuthKey()
-
-	if err != nil {
-		panic(err.Message)
-	}
-	csrfMdw := csrf.Protect(authKey, csrf.Secure(sc.Debug))
-
-	mdw := middleware.NewMiddleware(us, userController.LoginRoute())
-
-	r.Use(csrfMdw)
-	r.Use(mdw.SetUser)
-
-	r.HandleFunc(homeController.HomeRoute(), homeController.HomeGet).Methods(http.MethodGet)
-	r.HandleFunc(userController.RegisterRoute(), userController.RegisterGet).Methods(http.MethodGet)
-	r.HandleFunc(userController.RegisterRoute(), userController.RegisterPost).Methods(http.MethodPost)
-	r.HandleFunc(userController.LoginRoute(), userController.LoginGet).Methods(http.MethodGet)
-	r.HandleFunc(userController.LoginRoute(), userController.LoginPost).Methods(http.MethodPost)
-	r.HandleFunc(userController.LogoutRoute(), userController.LogoutGet).Methods(http.MethodGet)
-	r.HandleFunc(galleryController.IndexRoute(), mdw.RequireUser(galleryController.IndexGet)).Methods(http.MethodGet)
-	r.HandleFunc(galleryController.CreateRoute(), mdw.RequireUser(galleryController.CreateGet)).Methods(http.MethodGet)
-	r.HandleFunc(galleryController.CreateRoute(), mdw.RequireUser(galleryController.CreatePost)).Methods(http.MethodPost)
-	r.HandleFunc(galleryController.EditRoute(), mdw.RequireUser(galleryController.EditGet)).Methods(http.MethodGet)
-	r.HandleFunc(galleryController.EditRoute(), mdw.RequireUser(galleryController.EditPost)).Methods(http.MethodPost)
-	r.HandleFunc(galleryController.UploadRoute(), mdw.RequireUser(galleryController.UploadGet)).Methods(http.MethodGet)
-	r.HandleFunc(galleryController.UploadRoute(), mdw.RequireUser(galleryController.UploadPost)).Methods(http.MethodPost)
-	r.HandleFunc(galleryController.DeleteRoute(), mdw.RequireUser(galleryController.DeleteGet)).Methods(http.MethodGet)
-	r.HandleFunc(galleryController.GalleryRoute(), galleryController.GalleryGet).Methods(http.MethodGet)
-}
-
-func listenAndServe(r *mux.Router, sc *config.ServerConfig) {
-	err := http.ListenAndServe(sc.Address, r)
+func listenAndServe(rt *mux.Router, sc *config.ServerConfig) {
+	err := http.ListenAndServe(sc.Address, rt)
 
 	if err != nil {
 		panic(err)
