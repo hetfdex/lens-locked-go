@@ -20,7 +20,7 @@ func main() {
 
 	db := openDb(cfg)
 
-	resetDatabase(db)
+	//resetDatabase(db)
 
 	rp := repository.NewRepositories(db)
 
@@ -51,9 +51,6 @@ func configureRouter(rt *mux.Router, cfg *config.Config, sv *service.Services) {
 	rt.Use(csrfMdw)
 	rt.Use(mdw.SetUser)
 
-	rt.HandleFunc(dropboxController.DropboxConnectRoute(), mdw.RequireUser(dropboxController.ConnectGet)).Methods(http.MethodGet)
-	rt.HandleFunc(dropboxController.DropboxConnectRoute(), mdw.RequireUser(dropboxController.CallbackGet)).Methods(http.MethodGet)
-
 	rt.HandleFunc(homeController.HomeRoute(), homeController.HomeGet).Methods(http.MethodGet)
 
 	rt.HandleFunc(userController.RegisterRoute(), userController.RegisterGet).Methods(http.MethodGet)
@@ -78,6 +75,9 @@ func configureRouter(rt *mux.Router, cfg *config.Config, sv *service.Services) {
 	rt.HandleFunc(galleryController.DeleteRoute(), mdw.RequireUser(galleryController.DeleteGet)).Methods(http.MethodGet)
 
 	rt.HandleFunc(galleryController.GalleryRoute(), galleryController.GalleryGet).Methods(http.MethodGet)
+
+	rt.HandleFunc(dropboxController.ConnectRoute(), mdw.RequireUser(dropboxController.ConnectGet)).Methods(http.MethodGet)
+	rt.HandleFunc(dropboxController.CallbackRoute(), mdw.RequireUser(dropboxController.CallbackGet)).Methods(http.MethodGet)
 }
 
 func openDb(cfg *config.Config) *gorm.DB {

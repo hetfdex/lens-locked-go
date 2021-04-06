@@ -132,10 +132,10 @@ func (c *dropboxController) CallbackGet(w http.ResponseWriter, req *http.Request
 	fmt.Printf("%+v", token)
 }
 
-func (c *dropboxController) DropboxConnectRoute() string {
+func (c *dropboxController) ConnectRoute() string {
 	return dropboxConnectRoute
 }
 
-func (c *dropboxController) DropboxCallbackRoute() string {
+func (c *dropboxController) CallbackRoute() string {
 	return dropboxCallbackRoute
 }
