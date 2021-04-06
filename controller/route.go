@@ -29,3 +29,7 @@ const deleteGalleryRoute = "/gallery/%s/delete"
 
 const galleryRoute = "/gallery/%s"
 const galleryFilename = "view/gallery.gohtml"
+
+const dropboxConnectRoute = "/oauth/dropbox/connect"
+
+const dropboxCallbackRoute = "/oauth/dropbox/callback"
