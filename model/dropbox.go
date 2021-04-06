@@ -5,7 +5,7 @@ import (
 	"golang.org/x/oauth2"
 )
 
-type OAuth struct {
+type Dropbox struct {
 	Base
 	UserId uuid.UUID `gorm:"not null;unique_index"`
 	oauth2.Token
