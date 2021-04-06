@@ -19,15 +19,16 @@ const indexGalleryFilename = "view/gallery_index.gohtml"
 const createGalleryRoute = "/gallery/create"
 const createGalleryFilename = "view/gallery_create.gohtml"
 
-const editGalleryRoute = "/gallery/{%s}/edit"
+const editGalleryRoute = "/gallery/{gallery_id}/edit"
 const editGalleryFilename = "view/gallery_edit.gohtml"
 
-const uploadGalleryRoute = "/gallery/{%s}/upload"
+const uploadGalleryRoute = "/gallery/{gallery_id}/upload"
+const uploadDropboxGalleryRoute = "/gallery/{gallery_id}/upload/dropbox"
 const uploadGalleryFilename = "view/gallery_upload.gohtml"
 
-const deleteGalleryRoute = "/gallery/{%s}/delete"
+const deleteGalleryRoute = "/gallery/{gallery_id}/delete"
 
-const galleryRoute = "/gallery/{%s}"
+const galleryRoute = "/gallery/{gallery_id}"
 const galleryFilename = "view/gallery.gohtml"
 
 const dropboxConnectRoute = "/oauth/dropbox/connect"
