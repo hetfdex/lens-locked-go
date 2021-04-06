@@ -20,7 +20,7 @@ func main() {
 
 	db := openDb(cfg)
 
-	//resetDatabase(db)
+	resetDatabase(db)
 
 	rp := repository.NewRepositories(db)
 

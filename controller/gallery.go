@@ -8,8 +8,10 @@ import (
 	"lens-locked-go/service"
 	"lens-locked-go/util"
 	"lens-locked-go/view"
+	"log"
 	"net/http"
 	"path/filepath"
+	"sync"
 )
 
 const invalidIdErrorMessage = "invalid gallery id"
@@ -231,27 +233,16 @@ func (c *galleryController) UploadDropboxPost(w http.ResponseWriter, req *http.R
 
 		return
 	}
-	images := req.PostForm["images"]
+	urls := req.PostForm["urls"]
 
-	for _, image := range images {
-		res, e := http.Get(image)
+	var wg sync.WaitGroup
 
-		if e != nil {
-			handleError(w, req, data, model.NewFailedDependencyApiError(e.Error()), c.uploadGalleryView)
+	for _, url := range urls {
+		wg.Add(1)
 
-			return
-		}
-		_, filename := filepath.Split(image)
-
-		err = c.imageService.Create(res.Body, filename, gallery.ID)
-
-		if err != nil {
-			handleError(w, req, data, err, c.uploadGalleryView)
-
-			return
-		}
-		_ = res.Body.Close()
+		go downloadAndCreateDropboxImages(url, gallery.ID, &wg, c.imageService)
 	}
+	wg.Wait()
 	route := addSuccessToRoute(indexGalleryRoute+"/"+gallery.ID.String(), uploadGalleryValue)
 
 	util.Redirect(w, req, route)
@@ -386,4 +377,27 @@ func getGalleryWithPermission(req *http.Request, gs service.IGalleryService) (*m
 		return nil, err
 	}
 	return gallery, nil
+}
+
+func downloadAndCreateDropboxImages(url string, galleryId uuid.UUID, wg *sync.WaitGroup, imageService service.IImageService) {
+	defer wg.Done()
+
+	res, e := http.Get(url)
+
+	if e != nil {
+		log.Println(url, e.Error())
+
+		return
+	}
+	defer res.Body.Close()
+
+	_, filename := filepath.Split(url)
+
+	err := imageService.Create(res.Body, filename, galleryId)
+
+	if err != nil {
+		log.Println(url, err.Message)
+
+		return
+	}
 }
