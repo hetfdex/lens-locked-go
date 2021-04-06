@@ -1,13 +1,17 @@
 package controller
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"github.com/gorilla/csrf"
 	"golang.org/x/oauth2"
+	"io"
 	"lens-locked-go/config"
 	"lens-locked-go/context"
 	"lens-locked-go/model"
 	"lens-locked-go/service"
+	"log"
 	"net/http"
 	"time"
 )
@@ -34,6 +38,8 @@ func NewDropboxController(cfg *config.Config, ds service.IDropboxService) *dropb
 	}
 }
 
+//FIX ERROR HANDLING FOR ALL
+
 func (c *dropboxController) ConnectGet(w http.ResponseWriter, req *http.Request) {
 	state := csrf.Token(req)
 
@@ -55,7 +61,6 @@ func (c *dropboxController) CallbackGet(w http.ResponseWriter, req *http.Request
 	err := req.ParseForm()
 
 	if err != nil {
-		//Change status code
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 
 		return
@@ -65,14 +70,12 @@ func (c *dropboxController) CallbackGet(w http.ResponseWriter, req *http.Request
 	cookie, err := req.Cookie("dropbox_token")
 
 	if err != nil {
-		//Change status code
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 
 		return
 	}
 
 	if state != cookie.Value {
-		//Change status code
 		http.Error(w, "invalid state", http.StatusInternalServerError)
 
 		return
@@ -87,7 +90,6 @@ func (c *dropboxController) CallbackGet(w http.ResponseWriter, req *http.Request
 	token, err := c.dropboxCfg.Exchange(req.Context(), code)
 
 	if err != nil {
-		//Change status code
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 
 		return
@@ -132,10 +134,83 @@ func (c *dropboxController) CallbackGet(w http.ResponseWriter, req *http.Request
 	fmt.Printf("%+v", token)
 }
 
+func (c *dropboxController) QueryGet(w http.ResponseWriter, req *http.Request) {
+	er := req.ParseForm()
+
+	if er != nil {
+		http.Error(w, er.Error(), http.StatusInternalServerError)
+
+		return
+	}
+	path := req.FormValue("path")
+
+	user, err := context.User(req.Context())
+
+	if err != nil {
+		http.Error(w, err.Message, err.StatusCode)
+
+		return
+	}
+	dropbox, err := c.dropboxService.GetByUserId(user.ID)
+
+	if err != nil {
+		http.Error(w, err.Message, err.StatusCode)
+
+		return
+	}
+	token := dropbox.Token
+
+	client := c.dropboxCfg.Client(req.Context(), &token)
+
+	data := struct {
+		Path string `json:"path"`
+	}{
+		Path: path,
+	}
+
+	dataBytes, er := json.Marshal(&data)
+
+	if er != nil {
+		http.Error(w, er.Error(), http.StatusInternalServerError)
+
+		return
+	}
+	r, er := http.NewRequest(http.MethodPost, "https://api.dropboxapi.com/2/files/list_folder", bytes.NewReader(dataBytes))
+
+	if er != nil {
+		http.Error(w, er.Error(), http.StatusInternalServerError)
+
+		return
+	}
+	r.Header.Add("Content-Type", "application/json")
+
+	res, er := client.Do(r)
+
+	if er != nil {
+		http.Error(w, er.Error(), http.StatusInternalServerError)
+
+		return
+	}
+	defer res.Body.Close()
+
+	_, er = io.Copy(w, res.Body)
+
+	if er != nil {
+		http.Error(w, er.Error(), http.StatusInternalServerError)
+
+		return
+	}
+	log.Println(res.StatusCode)
+}
+
 func (c *dropboxController) ConnectRoute() string {
 	return dropboxConnectRoute
 }
 
 func (c *dropboxController) CallbackRoute() string {
 	return dropboxCallbackRoute
+}
+
+func (c *dropboxController) QueryRoute() string {
+	return queryRoute
 }

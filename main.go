@@ -78,6 +78,8 @@ func configureRouter(rt *mux.Router, cfg *config.Config, sv *service.Services) {
 
 	rt.HandleFunc(dropboxController.ConnectRoute(), mdw.RequireUser(dropboxController.ConnectGet)).Methods(http.MethodGet)
 	rt.HandleFunc(dropboxController.CallbackRoute(), mdw.RequireUser(dropboxController.CallbackGet)).Methods(http.MethodGet)
+	rt.HandleFunc(dropboxController.QueryRoute(), mdw.RequireUser(dropboxController.QueryGet)).Methods(http.MethodGet)
+
 }
 
 func openDb(cfg *config.Config) *gorm.DB {

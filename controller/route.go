@@ -33,3 +33,5 @@ const galleryFilename = "view/gallery.gohtml"
 const dropboxConnectRoute = "/oauth/dropbox/connect"
 
 const dropboxCallbackRoute = "/oauth/dropbox/callback"
+
+const queryRoute = "/oauth/dropbox/query"
