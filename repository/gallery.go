@@ -82,7 +82,7 @@ func (r *galleryRepository) Update(gallery *model.Gallery) *model.Error {
 }
 
 func (r *galleryRepository) Delete(gallery *model.Gallery) *model.Error {
-	err := r.database.Delete(gallery).Error
+	err := r.database.Unscoped().Delete(gallery).Error
 
 	if err != nil {
 		return model.NewInternalServerApiError(err.Error())

@@ -72,7 +72,7 @@ func (r *imageRepository) ReadAll(field string, value interface{}) ([]*model.Ima
 }
 
 func (r *imageRepository) Delete(image *model.Image) *model.Error {
-	err := r.database.Delete(image).Error
+	err := r.database.Unscoped().Delete(image).Error
 
 	if err != nil {
 		return model.NewInternalServerApiError(err.Error())
