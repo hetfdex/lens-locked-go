@@ -36,7 +36,7 @@ func (r *galleryRepository) Create(gallery *model.Gallery) *model.Error {
 
 func (r *galleryRepository) Read(field string, value interface{}) (*model.Gallery, *model.Error) {
 	if field == "" {
-		return nil, model.NewInternalServerApiError(util.MustNotBeEmptyErrorMessage("field"))
+		return nil, model.NewInternalServerApiError(noFieldToQueryErrorMessage)
 	}
 	gallery := &model.Gallery{}
 

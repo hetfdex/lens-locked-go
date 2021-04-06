@@ -35,7 +35,7 @@ func (r *imageRepository) Create(image *model.Image) *model.Error {
 
 func (r *imageRepository) Read(field string, value interface{}) (*model.Image, *model.Error) {
 	if field == "" {
-		return nil, model.NewInternalServerApiError(util.MustNotBeEmptyErrorMessage("field"))
+		return nil, model.NewInternalServerApiError(noFieldToQueryErrorMessage)
 	}
 	image := &model.Image{}
 

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"gorm.io/gorm"
 	"lens-locked-go/model"
-	"lens-locked-go/util"
 )
 
 type IDropboxRepository interface {
@@ -34,7 +33,7 @@ func (r *dropboxRepository) Create(dropbox *model.Dropbox) *model.Error {
 
 func (r *dropboxRepository) Read(field string, value interface{}) (*model.Dropbox, *model.Error) {
 	if field == "" {
-		return nil, model.NewInternalServerApiError(util.MustNotBeEmptyErrorMessage("field"))
+		return nil, model.NewInternalServerApiError(noFieldToQueryErrorMessage)
 	}
 	dropbox := &model.Dropbox{}
 
