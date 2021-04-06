@@ -1,11 +1,10 @@
 package controller
 
 import (
-	"bytes"
-	"encoding/json"
+	"github.com/dropbox/dropbox-sdk-go-unofficial/dropbox"
+	"github.com/dropbox/dropbox-sdk-go-unofficial/dropbox/files"
 	"github.com/gorilla/csrf"
 	"golang.org/x/oauth2"
-	"io"
 	"lens-locked-go/config"
 	"lens-locked-go/context"
 	"lens-locked-go/model"
@@ -119,32 +118,22 @@ func (c *dropboxController) CallbackGet(w http.ResponseWriter, req *http.Request
 			return
 		}
 	}
-	dropbox := &model.Dropbox{
+	dbx := &model.Dropbox{
 		Base:   model.Base{},
 		UserId: user.ID,
 		Token:  *token,
 	}
 
-	er = c.dropboxService.Create(dropbox)
+	er = c.dropboxService.Create(dbx)
 
 	if er != nil {
 		http.Error(w, er.Message, er.StatusCode)
 
 		return
 	}
-	log.Printf("%+v", token)
 }
 
 func (c *dropboxController) QueryGet(w http.ResponseWriter, req *http.Request) {
-	er := req.ParseForm()
-
-	if er != nil {
-		http.Error(w, er.Error(), http.StatusInternalServerError)
-
-		return
-	}
-	path := req.FormValue("path")
-
 	user, err := context.User(req.Context())
 
 	if err != nil {
@@ -152,56 +141,40 @@ func (c *dropboxController) QueryGet(w http.ResponseWriter, req *http.Request) {
 
 		return
 	}
-	dropbox, err := c.dropboxService.GetByUserId(user.ID)
+	dbx, err := c.dropboxService.GetByUserId(user.ID)
 
 	if err != nil {
 		http.Error(w, err.Message, err.StatusCode)
 
 		return
 	}
-	token := dropbox.Token
+	token := dbx.Token
 
-	client := c.cfg.Client(req.Context(), &token)
+	dbxCfg := dropbox.Config{
+		Token: token.AccessToken,
+	}
+	client := files.New(dbxCfg)
 
-	data := struct {
-		Path string `json:"path"`
-	}{
-		Path: path,
+	arg := &files.ListFolderArg{
+		Path: "",
 	}
 
-	dataBytes, er := json.Marshal(&data)
-
-	if er != nil {
-		http.Error(w, er.Error(), http.StatusInternalServerError)
-
-		return
-	}
-	r, er := http.NewRequest(http.MethodPost, "https://api.dropboxapi.com/2/files/list_folder", bytes.NewReader(dataBytes))
-
-	if er != nil {
-		http.Error(w, er.Error(), http.StatusInternalServerError)
-
-		return
-	}
-	r.Header.Add("Content-Type", "application/json")
-
-	res, er := client.Do(r)
+	results, er := client.ListFolder(arg)
 
 	if er != nil {
 		http.Error(w, er.Error(), http.StatusFailedDependency)
 
 		return
 	}
-	defer res.Body.Close()
 
-	_, er = io.Copy(w, res.Body)
-
-	if er != nil {
-		http.Error(w, er.Error(), http.StatusInternalServerError)
-
-		return
+	for _, entry := range results.Entries {
+		switch meta := entry.(type) {
+		case *files.FolderMetadata:
+			log.Println("folder", meta)
+		case *files.FileMetadata:
+			log.Println("file", meta)
+		}
 	}
-	log.Println(res.StatusCode)
 }
 
 func (c *dropboxController) ConnectRoute() string {
