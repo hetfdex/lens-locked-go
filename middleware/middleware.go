@@ -21,7 +21,7 @@ func NewMiddleware(us service.IUserService, lr string) *Middleware {
 
 func (m *Middleware) SetUser(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		cookie, err := req.Cookie(util.CookieName)
+		cookie, err := req.Cookie(util.LoginCookieName)
 
 		if err != nil {
 			next.ServeHTTP(w, req)

@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-const CookieName = "login_token"
+const LoginCookieName = "login_token"
 
 func Redirect(w http.ResponseWriter, req *http.Request, route string) {
 	if route == "" {

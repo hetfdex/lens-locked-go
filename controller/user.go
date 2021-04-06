@@ -168,7 +168,7 @@ func makeValidCookie(value string) (*http.Cookie, *model.Error) {
 		return nil, model.NewInternalServerApiError(util.MustNotBeEmptyErrorMessage("value"))
 	}
 	return &http.Cookie{
-		Name:     util.CookieName,
+		Name:     util.LoginCookieName,
 		Value:    value,
 		Expires:  time.Now().Add(time.Hour * 24 * 7),
 		HttpOnly: true,
@@ -177,7 +177,7 @@ func makeValidCookie(value string) (*http.Cookie, *model.Error) {
 
 func makeInvalidCookie() (*http.Cookie, *model.Error) {
 	return &http.Cookie{
-		Name:     util.CookieName,
+		Name:     util.LoginCookieName,
 		Value:    "",
 		Expires:  time.Now().Add(-time.Hour),
 		HttpOnly: true,
