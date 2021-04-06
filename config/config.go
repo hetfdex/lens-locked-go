@@ -10,10 +10,10 @@ import (
 )
 
 type Config struct {
-	Db     *DbConfig     `json:"db"`
-	Server *ServerConfig `json:"server"`
-	Crypto *CryptoConfig `json:"crypto"`
-	OAuth  *OAuthConfig  `json:"oauth"`
+	Db      *DbConfig      `json:"db"`
+	Server  *ServerConfig  `json:"server"`
+	Crypto  *CryptoConfig  `json:"crypto"`
+	Dropbox *DropboxConfig `json:"dropbox"`
 }
 
 type DbConfig struct {
@@ -34,7 +34,7 @@ type CryptoConfig struct {
 	HasherKey string `json:"hasher_key"`
 }
 
-type OAuthConfig struct {
+type DropboxConfig struct {
 	Id          string `json:"id"`
 	Secret      string `json:"secret"`
 	AuthUrl     string `json:"auth_url"`
@@ -75,10 +75,10 @@ func LoadConfig(requireFile bool) *Config {
 
 func DefaultConfig() *Config {
 	return &Config{
-		Db:     DefaultDbConfig(),
-		Server: DefaultServerConfig(),
-		Crypto: DefaultCryptoConfig(),
-		OAuth:  DefaultOAuthConfig(),
+		Db:      DefaultDbConfig(),
+		Server:  DefaultServerConfig(),
+		Crypto:  DefaultCryptoConfig(),
+		Dropbox: DefaultDropboxConfig(),
 	}
 
 }
@@ -107,8 +107,8 @@ func DefaultCryptoConfig() *CryptoConfig {
 	}
 }
 
-func DefaultOAuthConfig() *OAuthConfig {
-	return &OAuthConfig{
+func DefaultDropboxConfig() *DropboxConfig {
+	return &DropboxConfig{
 		Id:          "id",
 		Secret:      "secret",
 		AuthUrl:     "auth_url",
