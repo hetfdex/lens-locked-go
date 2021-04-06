@@ -3,7 +3,6 @@ package controller
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"github.com/gorilla/csrf"
 	"golang.org/x/oauth2"
 	"io"
@@ -16,41 +15,43 @@ import (
 	"time"
 )
 
+const dropboxCookieName = "dropbox_token"
+
+const invalidAuthenticationErrorMessage = "invalid authentication"
+
 type dropboxController struct {
-	dropboxCfg     *oauth2.Config
+	cfg            *oauth2.Config
 	dropboxService service.IDropboxService
 }
 
-func NewDropboxController(cfg *config.Config, ds service.IDropboxService) *dropboxController {
-	dropboxCfg := &oauth2.Config{
-		ClientID:     cfg.Dropbox.Id,
-		ClientSecret: cfg.Dropbox.Secret,
+func NewDropboxController(dropboxCfg *config.DropboxConfig, ds service.IDropboxService) *dropboxController {
+	cfg := &oauth2.Config{
+		ClientID:     dropboxCfg.Id,
+		ClientSecret: dropboxCfg.Secret,
 		Endpoint: oauth2.Endpoint{
-			AuthURL:  cfg.Dropbox.AuthUrl,
-			TokenURL: cfg.Dropbox.TokenUrl,
+			AuthURL:  dropboxCfg.AuthUrl,
+			TokenURL: dropboxCfg.TokenUrl,
 		},
-		RedirectURL: cfg.Dropbox.RedirectUrl,
+		RedirectURL: dropboxCfg.RedirectUrl,
 	}
 
 	return &dropboxController{
-		dropboxCfg:     dropboxCfg,
+		cfg:            cfg,
 		dropboxService: ds,
 	}
 }
-
-//FIX ERROR HANDLING FOR ALL
 
 func (c *dropboxController) ConnectGet(w http.ResponseWriter, req *http.Request) {
 	state := csrf.Token(req)
 
 	cookie := &http.Cookie{
-		Name:     "dropbox_token",
+		Name:     dropboxCookieName,
 		Value:    state,
 		Expires:  time.Now().Add(time.Minute * 5),
 		HttpOnly: true,
 	}
 
-	url := c.dropboxCfg.AuthCodeURL(state)
+	url := c.cfg.AuthCodeURL(state)
 
 	http.SetCookie(w, cookie)
 
@@ -67,16 +68,16 @@ func (c *dropboxController) CallbackGet(w http.ResponseWriter, req *http.Request
 	}
 	state := req.FormValue("state")
 
-	cookie, err := req.Cookie("dropbox_token")
+	cookie, err := req.Cookie(dropboxCookieName)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusNotFound)
 
 		return
 	}
 
 	if state != cookie.Value {
-		http.Error(w, "invalid state", http.StatusInternalServerError)
+		http.Error(w, invalidAuthenticationErrorMessage, http.StatusUnauthorized)
 
 		return
 	}
@@ -87,7 +88,7 @@ func (c *dropboxController) CallbackGet(w http.ResponseWriter, req *http.Request
 
 	code := req.FormValue("code")
 
-	token, err := c.dropboxCfg.Exchange(req.Context(), code)
+	token, err := c.cfg.Exchange(req.Context(), code)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -131,7 +132,7 @@ func (c *dropboxController) CallbackGet(w http.ResponseWriter, req *http.Request
 
 		return
 	}
-	fmt.Printf("%+v", token)
+	log.Printf("%+v", token)
 }
 
 func (c *dropboxController) QueryGet(w http.ResponseWriter, req *http.Request) {
@@ -160,7 +161,7 @@ func (c *dropboxController) QueryGet(w http.ResponseWriter, req *http.Request) {
 	}
 	token := dropbox.Token
 
-	client := c.dropboxCfg.Client(req.Context(), &token)
+	client := c.cfg.Client(req.Context(), &token)
 
 	data := struct {
 		Path string `json:"path"`
@@ -187,7 +188,7 @@ func (c *dropboxController) QueryGet(w http.ResponseWriter, req *http.Request) {
 	res, er := client.Do(r)
 
 	if er != nil {
-		http.Error(w, er.Error(), http.StatusInternalServerError)
+		http.Error(w, er.Error(), http.StatusFailedDependency)
 
 		return
 	}

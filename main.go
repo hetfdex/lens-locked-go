@@ -37,7 +37,7 @@ func configureRouter(rt *mux.Router, cfg *config.Config, sv *service.Services) {
 	homeController := controller.NewHomeController()
 	userController := controller.NewUserController(sv.User)
 	galleryController := controller.NewGalleryController(sv.Gallery, sv.Image)
-	dropboxController := controller.NewDropboxController(cfg, sv.Dropbox)
+	dropboxController := controller.NewDropboxController(cfg.Dropbox, sv.Dropbox)
 
 	authKey, err := rand.GenerateAuthKey()
 

@@ -7,6 +7,6 @@ import (
 
 type Dropbox struct {
 	Base
-	UserId uuid.UUID `gorm:"not null;unique_index"`
 	oauth2.Token
+	UserId uuid.UUID `gorm:"not null;unique_index"`
 }
