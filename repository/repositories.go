@@ -6,7 +6,7 @@ type Repositories struct {
 	User    IUserRepository
 	Gallery IGalleryRepository
 	Image   IImageRepository
-	OAuth   IOAuthRepository
+	Dropbox IDropboxRepository
 }
 
 func NewRepositories(db *gorm.DB) *Repositories {
@@ -14,6 +14,6 @@ func NewRepositories(db *gorm.DB) *Repositories {
 		User:    newUserRepository(db),
 		Gallery: newGalleryRepository(db),
 		Image:   newImageRepository(db),
-		OAuth:   newOAuthRepository(db),
+		Dropbox: newDropboxRepository(db),
 	}
 }

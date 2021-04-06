@@ -9,7 +9,7 @@ type Services struct {
 	User    IUserService
 	Gallery IGalleryService
 	Image   IImageService
-	OAuth   IOAuthService
+	Dropbox IDropboxService
 }
 
 func NewServices(rp *repository.Repositories, cfg *config.Config) *Services {
@@ -17,6 +17,6 @@ func NewServices(rp *repository.Repositories, cfg *config.Config) *Services {
 		User:    newUserService(rp.User, cfg.Crypto),
 		Gallery: newGalleryService(rp.Gallery),
 		Image:   newImageService(rp.Image),
-		OAuth:   newOAuthService(rp.OAuth),
+		Dropbox: newDropboxService(rp.Dropbox),
 	}
 }
