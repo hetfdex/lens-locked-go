@@ -73,3 +73,10 @@ func NewConflictApiError(message string) *Error {
 		Message:    message,
 	}
 }
+
+func NewFailedDependencyApiError(message string) *Error {
+	return &Error{
+		StatusCode: http.StatusFailedDependency,
+		Message:    message,
+	}
+}
