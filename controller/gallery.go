@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"github.com/gofrs/uuid"
 	"github.com/gorilla/mux"
 	"lens-locked-go/context"
@@ -10,6 +9,7 @@ import (
 	"lens-locked-go/util"
 	"lens-locked-go/view"
 	"net/http"
+	"path/filepath"
 )
 
 const invalidIdErrorMessage = "invalid gallery id"
@@ -30,10 +30,10 @@ func NewGalleryController(gs service.IGalleryService, is service.IImageService) 
 	return &galleryController{
 		indexGalleryView:  view.New(indexGalleryRoute, indexGalleryFilename),
 		createGalleryView: view.New(createGalleryRoute, createGalleryFilename),
-		editGalleryView:   view.New(fmt.Sprintf(editGalleryRoute, galleryIdKey), editGalleryFilename),
-		uploadGalleryView: view.New(fmt.Sprintf(uploadGalleryRoute, galleryIdKey), uploadGalleryFilename),
-		deleteGalleryView: view.New(fmt.Sprintf(deleteGalleryRoute, galleryIdKey), galleryFilename),
-		galleryView:       view.New(fmt.Sprintf(galleryRoute, galleryIdKey), galleryFilename),
+		editGalleryView:   view.New(editGalleryRoute, editGalleryFilename),
+		uploadGalleryView: view.New(uploadGalleryRoute, uploadGalleryFilename),
+		deleteGalleryView: view.New(deleteGalleryRoute, galleryFilename),
+		galleryView:       view.New(galleryRoute, galleryFilename),
 		galleryService:    gs,
 		imageService:      is,
 	}
@@ -214,6 +214,49 @@ func (c *galleryController) UploadPost(w http.ResponseWriter, req *http.Request)
 	util.Redirect(w, req, route)
 }
 
+func (c *galleryController) UploadDropboxPost(w http.ResponseWriter, req *http.Request) {
+	data := &model.Data{}
+
+	gallery, err := getGalleryWithPermission(req, c.galleryService)
+
+	if err != nil {
+		handleError(w, req, data, err, c.uploadGalleryView)
+
+		return
+	}
+	er := req.ParseForm()
+
+	if er != nil {
+		handleError(w, req, data, model.NewInternalServerApiError(er.Error()), c.uploadGalleryView)
+
+		return
+	}
+	images := req.PostForm["images"]
+
+	for _, image := range images {
+		res, e := http.Get(image)
+
+		if e != nil {
+			handleError(w, req, data, model.NewFailedDependencyApiError(e.Error()), c.uploadGalleryView)
+
+			return
+		}
+		_, filename := filepath.Split(image)
+
+		err = c.imageService.Create(res.Body, filename, gallery.ID)
+
+		if err != nil {
+			handleError(w, req, data, err, c.uploadGalleryView)
+
+			return
+		}
+		_ = res.Body.Close()
+	}
+	route := addSuccessToRoute(indexGalleryRoute+"/"+gallery.ID.String(), uploadGalleryValue)
+
+	util.Redirect(w, req, route)
+}
+
 func (c *galleryController) DeleteGet(w http.ResponseWriter, req *http.Request) {
 	data := &model.Data{}
 
@@ -293,6 +336,10 @@ func (c *galleryController) EditRoute() string {
 
 func (c *galleryController) UploadRoute() string {
 	return c.uploadGalleryView.Route()
+}
+
+func (c *galleryController) UploadDropboxRoute() string {
+	return uploadDropboxGalleryRoute
 }
 
 func (c *galleryController) DeleteRoute() string {

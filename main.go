@@ -71,6 +71,7 @@ func configureRouter(rt *mux.Router, cfg *config.Config, sv *service.Services) {
 
 	rt.HandleFunc(galleryController.UploadRoute(), mdw.RequireUser(galleryController.UploadGet)).Methods(http.MethodGet)
 	rt.HandleFunc(galleryController.UploadRoute(), mdw.RequireUser(galleryController.UploadPost)).Methods(http.MethodPost)
+	rt.HandleFunc(galleryController.UploadDropboxRoute(), mdw.RequireUser(galleryController.UploadDropboxPost)).Methods(http.MethodPost)
 
 	rt.HandleFunc(galleryController.DeleteRoute(), mdw.RequireUser(galleryController.DeleteGet)).Methods(http.MethodGet)
 
